@@ -1,5 +1,5 @@
 @extends('admin.layouts.app')
-@section('title', 'Category Edit')
+@section('title', 'Crud Edit')
 @section('content')
     <!-- Page header -->
     <div class="page-header d-print-none">

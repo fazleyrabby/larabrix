@@ -1,5 +1,5 @@
 @extends('admin.layouts.app')
-@section('title', 'Category List')
+@section('title', 'Crud List')
 @section('content')
     <!-- Page header -->
     <div class="page-header d-print-none">
@@ -78,22 +78,25 @@
                       </tr>
                     </thead>
                     <tbody>
-                    @foreach ($cruds as $category)
+                    @foreach ($cruds as $crud)
                     <tr>
-                        <td><input class="form-check-input m-0 align-middle selected-item" type="checkbox" value="{{ $category->id }}" aria-label="Select invoice"></td>
-                        <td><span class="text-secondary">{{ $category->id }}</span></td>
-                        <td><a href="{{ route('admin.cruds.show', $category->id) }}" class="text-reset" tabindex="-1">{{ $category->title }}</a></td>
+                        <td><input class="form-check-input m-0 align-middle selected-item" type="checkbox" value="{{ $crud->id }}" aria-label="Select invoice"></td>
+                        <td><span class="text-secondary">{{ $crud->id }}</span></td>
+                        <td><a href="{{ route('admin.cruds.show', $crud->id) }}" class="text-reset" tabindex="-1">{{ $crud->title }}</a></td>
 
-                        <td>{{ $category->created_at->diffForHumans() }}</td>
+                        <td>{{ $crud->created_at->diffForHumans() }}</td>
                         <td class="text-end">
                           <span class="dropdown">
                             <button class="btn dropdown-toggle align-text-top" data-bs-boundary="viewport" data-bs-toggle="dropdown">Actions</button>
                             <div class="dropdown-menu dropdown-menu-end">
-                              <a class="dropdown-item" href="{{ route('admin.cruds.edit', $category->id) }}">
+                              <a class="dropdown-item" href="{{ route('admin.cruds.show', $crud->id) }}">
+                                View
+                              </a>
+                              <a class="dropdown-item" href="{{ route('admin.cruds.edit', $crud->id) }}">
                                 Edit
                               </a>
                               <form onsubmit="return confirmDelete(event, this)"
-                                  action="{{ route('admin.cruds.destroy', $category->id) }}"
+                                  action="{{ route('admin.cruds.destroy', $crud->id) }}"
                                   method="post">
                                   @csrf
                                   @method('delete')

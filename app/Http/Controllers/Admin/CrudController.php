@@ -48,6 +48,12 @@ class CrudController extends Controller
 
     public function show(Crud $crud)
     {
+        $crud->custom_select = $crud->custom_select ? [
+            1 => 'Chuck Tesla',
+            2 => 'Elon Musk',
+            3 => 'Pawel Kuna',
+            4 => 'Nikola Tesla',
+        ][$crud->custom_select] : "";
         return view('admin.cruds.show', compact('crud'));
     }
 
