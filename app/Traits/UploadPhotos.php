@@ -65,6 +65,22 @@ trait UploadPhotos
         return $directory . $prefix . time() . hexdec(uniqid()) . '.' . $extension;
     }
 
+    public function processFilepondTempFile($tmpPath){
+        $processedFile = null;
+        $tmpFullPath = storage_path("app/public/{$tmpPath}");
+        if (file_exists($tmpFullPath)) {
+            // Convert temp file to UploadedFile instance
+            $processedFile = new \Illuminate\Http\UploadedFile(
+                $tmpFullPath,
+                basename($tmpPath),
+                mime_content_type($tmpFullPath),
+                null,
+                true // Mark as test mode (no real HTTP request)
+            );
+        }
+        return $processedFile;
+    }
+
 
     public function generatePhotoFromText($text){
         $image = Image::create(640, 480)->fill('#ff0000'); // Create a red image

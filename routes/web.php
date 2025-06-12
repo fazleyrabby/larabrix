@@ -18,6 +18,8 @@ Route::post('logout', [LoginController::class, 'logout'])->name('logout');
 Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
     Route::resource('/cruds', CrudController::class)->names('cruds');
+    Route::post('filepond/upload', [CrudController::class, 'upload'])->name('filepond.upload');
+    Route::delete('filepond/revert', [CrudController::class, 'revert'])->name('filepond.revert');
 });
 
 Route::get('/', function () {

@@ -73,7 +73,7 @@
                                     @endif
                                     <input type="file" class="form-control" name="default_file_input">
                                     <small class="form-hint">
-                                        @error('textarea')
+                                        @error('default_file_input')
                                             <div class="text-danger mt-2">{{ $message }}</div>
                                         @enderror
                                     </small>
@@ -96,7 +96,7 @@
                                     <select type="text" class="form-select" name="custom_select" id="select-users" value="">
                                         <option value="1" @selected($crud->custom_select == 1)>Chuck Tesla</option>
                                         <option value="2" @selected($crud->custom_select == 2)>Elon Musk</option>
-                                        <option value="3" @selected($crud->custom_select == 3)>Paweł Kuna</option>
+                                        <option value="3" @selected($crud->custom_select == 3)>Pawel Kuna</option>
                                         <option value="4" @selected($crud->custom_select == 4)>Nikola Tesla</option>
                                       </select>
                                     {{-- <input type="file" class="form-control" name="custom_select"> --}}
@@ -123,10 +123,36 @@
 
 @push('scripts')
 <script>
-    const pond = FilePond.create(document.querySelector('.filepond'));
-
-    // @formatter:off
+    FilePond.registerPlugin(FilePondPluginImagePreview);
+    FilePond.registerPlugin(FilePondPluginFileValidateType);
     document.addEventListener("DOMContentLoaded", function () {
+        console.log("{{ Storage::disk('public')->url($crud->filepond_input) }}");
+        const inputElement = document.querySelector('.filepond');
+        const pond = FilePond.create(inputElement, {
+        acceptedFileTypes: ['image/*'],
+        server: {
+            load: (source, load, error, progress, abort, headers) => {
+                const myRequest = new Request(source);
+                fetch(myRequest).then((res) => {
+                    return res.blob();
+                }).then(load);
+            },
+            process: @json(route('admin.filepond.upload')),
+            revert: @json(route('admin.filepond.revert')),
+            headers: {
+                'X-CSRF-TOKEN': '{{ csrf_token() }}'
+            }
+        },
+        files: [
+            {
+                source: "{{ Storage::disk('public')->url($crud->filepond_input) }}",
+                options: {
+                    type: 'local',
+                },
+            }
+        ],
+    });
+
     	var el;
     	window.TomSelect && (new TomSelect(el = document.getElementById('select-users'), {
     		copyClassesToDropdown: false,

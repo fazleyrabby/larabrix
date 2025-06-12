@@ -13,20 +13,6 @@ class CrudSeeder extends Seeder
      */
     public function run(): void
     {
-        Crud::create([
-            'title' => 'Test data',
-            'textarea' => fake()->sentence(30),
-            'default_file_input' => "",
-            'filepond_input' => "",
-            'select2' => "",
-        ]);
-
-        Crud::create([
-            'title' => 'Test data 2',
-            'textarea' => fake()->sentence(30),
-            'default_file_input' => "",
-            'filepond_input' => "",
-            'select2' => "",
-        ]);
+        Crud::factory()->count(100)->create();
     }
 }

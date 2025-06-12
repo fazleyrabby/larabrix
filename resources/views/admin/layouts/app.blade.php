@@ -9,7 +9,8 @@
     <link rel="stylesheet" href="{{ asset('admin/dist/css/tabler-payments.min.css') }}">
     <link rel="stylesheet" href="{{ asset('admin/dist/css/tabler-vendors.min.css') }}">
     <link rel="stylesheet" href="{{ asset('admin/dist/css/demo.min.css') }}">
-    <link href="https://unpkg.com/filepond/dist/filepond.css" rel="stylesheet" />
+    <link href="https://unpkg.com/filepond@^4/dist/filepond.css" rel="stylesheet" />
+    <link href="https://unpkg.com/filepond-plugin-image-preview/dist/filepond-plugin-image-preview.css" rel="stylesheet" />
     <style>
         @import url('https://rsms.me/inter/inter.css');
         :root {
@@ -55,7 +56,9 @@
     <!-- Tabler Core -->
     <script src="{{ asset('admin/dist/js/tabler.min.js') }}"></script>
     <script src="{{ asset('admin/dist/js/demo.min.js') }}"></script>
-    <script src="https://unpkg.com/filepond/dist/filepond.js"></script>
+    <script src="https://unpkg.com/filepond-plugin-file-validate-type/dist/filepond-plugin-file-validate-type.js"></script>
+    <script src="https://unpkg.com/filepond-plugin-image-preview/dist/filepond-plugin-image-preview.js"></script>
+    <script src="https://unpkg.com/filepond@^4/dist/filepond.js"></script>
 
     @include('admin.components.alerts')
     @include('admin.components.scripts')

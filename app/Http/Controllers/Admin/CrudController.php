@@ -8,6 +8,8 @@ use App\Http\Requests\CrudRequest;
 use App\Services\CrudService;
 use Illuminate\Http\Request;
 use App\Traits\UploadPhotos;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 
 class CrudController extends Controller
 {
@@ -37,6 +39,10 @@ class CrudController extends Controller
         if ($request->hasFile('default_file_input')) {
             $data['default_file_input'] = $this->uploadPhoto($request->file('default_file_input'));
         }
+        if($request->filled('filepond_input')){
+            $file = $this->processFilepondTempFile($request->input('filepond_input'));
+            $data['filepond_input'] = $this->uploadPhoto($file, $crud->filepond_input ?? '');
+        }
         Crud::create($data);
         return redirect()->route('admin.cruds.create')->with(['success' => 'Successfully created!']);
     }
@@ -54,11 +60,15 @@ class CrudController extends Controller
 
     public function update(CrudRequest $request, $id)
     {
-        // $this->authorize('update', Supplier::class);
         $crud = Crud::findOrFail($id);
         $data = $request->validated();
         if ($request->hasFile('default_file_input')) {
             $data['default_file_input'] = $this->uploadPhoto($request->file('default_file_input'), $crud->default_file_input);
+        }
+        $data['filepond_input'] = $crud->filepond_input;
+        if($request->filled('filepond_input') && Str::startsWith($request->input('filepond_input'), 'tmp/')){
+            $file = $this->processFilepondTempFile($request->input('filepond_input'));
+            $data['filepond_input'] = $this->uploadPhoto($file, $crud->filepond_input ?? '');
         }
         $crud->update($data);
         return redirect()->route('admin.cruds.index')->with(['success' => 'Successfully updated!']);
@@ -70,5 +80,17 @@ class CrudController extends Controller
         $crud = Crud::findOrFail($id);
         $crud->delete();
         return redirect()->route('admin.cruds.index')->with(['success' => 'Successfully deleted!']);
+    }
+
+    public function upload(Request $request)
+    {
+        if ($request->file('filepond_input')) {
+            $path = $request->file('filepond_input')->store('tmp', 'public');
+        }
+        return $path;
+    }
+    public function revert(Request $request)
+    {
+        Storage::disk('public')->delete($request->getContent());
     }
 }
