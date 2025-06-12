@@ -4,11 +4,13 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>@yield('title', 'Admin Dashboard')</title>
+    <link rel="stylesheet" href="{{ asset('admin/dist/libs/tom-select/dist/css/tom-select.bootstrap5.min.css') }}">
     <link rel="stylesheet" href="{{ asset('admin/dist/css/tabler.min.css') }}">
     <link rel="stylesheet" href="{{ asset('admin/dist/css/tabler-flags.min.css') }}">
     <link rel="stylesheet" href="{{ asset('admin/dist/css/tabler-payments.min.css') }}">
     <link rel="stylesheet" href="{{ asset('admin/dist/css/tabler-vendors.min.css') }}">
-    <link rel="stylesheet" href="{{ asset('admin/dist/css/demo.min.css') }}">
+    <link rel="stylesheet" href="{{ asset('admin/dist/css/tabler-themes.css') }}">
+    <link rel="stylesheet" href="{{ asset('admin/preview/css/demo.css') }}">
     <link href="https://unpkg.com/filepond@^4/dist/filepond.css" rel="stylesheet" />
     <link href="https://unpkg.com/filepond-plugin-image-preview/dist/filepond-plugin-image-preview.css" rel="stylesheet" />
     <style>
@@ -45,17 +47,19 @@
         @include('admin.partials.footer')
     </div>
 
-    <script src="{{ asset('admin/dist/js/demo-theme.js') }}"></script>
+    <script src="{{ asset('admin/dist/js/tabler-theme.min.js') }}"></script>
     <!-- Libs JS -->
     <script src="{{ asset('admin/dist/libs/apexcharts/dist/apexcharts.min.js') }}"></script>
-    <script src="{{ asset('admin/dist/libs/jsvectormap/dist/js/jsvectormap.js') }}"></script>
+    <script src="{{ asset('admin/dist/libs/jsvectormap/dist/jsvectormap.min.js') }}"></script>
     <script src="{{ asset('admin/dist/libs/jsvectormap/dist/maps/world.js') }}"></script>
+    <script src="{{ asset('admin/dist/libs/jsvectormap/dist/maps/world-merc.js') }}"></script>
     {{-- <script src="{{ asset('admin/dist/libs/sweetalert.js') }}"></script> --}}
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    <script src="{{ asset('admin/dist/libs/tom-select/dist/js/tom-select.base.min.js') }}" defer></script>
+    <script src="{{ asset('admin/dist/libs/tom-select/dist/js/tom-select.base.min.js') }}"></script>
+    
     <!-- Tabler Core -->
     <script src="{{ asset('admin/dist/js/tabler.min.js') }}"></script>
-    <script src="{{ asset('admin/dist/js/demo.min.js') }}"></script>
+    <script src="{{ asset('admin/preview/js/demo.min.js') }}"></script>
     <script src="https://unpkg.com/filepond-plugin-file-validate-type/dist/filepond-plugin-file-validate-type.js"></script>
     <script src="https://unpkg.com/filepond-plugin-image-preview/dist/filepond-plugin-image-preview.js"></script>
     <script src="https://unpkg.com/filepond@^4/dist/filepond.js"></script>
