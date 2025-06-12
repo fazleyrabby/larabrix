@@ -24,7 +24,7 @@ class CrudFactory extends Factory
             'textarea' => $this->faker->sentence(30),
             'default_file_input' => '', // or maybe a fake path?
             'filepond_input' => '',     // same here
-            'select2' => '',            // or fake()->word() if needed
+            'custom_select' => '',            // or fake()->word() if needed
         ];
     }
 }

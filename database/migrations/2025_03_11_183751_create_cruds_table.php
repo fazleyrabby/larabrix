@@ -17,7 +17,7 @@ return new class extends Migration
             $table->text('textarea')->nullable();
             $table->string('default_file_input')->nullable();
             $table->string('filepond_input')->nullable();
-            $table->string('select2')->nullable();
+            $table->string('custom_select')->nullable();
             $table->timestamps();
         });
     }
