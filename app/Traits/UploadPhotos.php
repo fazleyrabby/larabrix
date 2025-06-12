@@ -65,6 +65,11 @@ trait UploadPhotos
         return $directory . $prefix . time() . hexdec(uniqid()) . '.' . $extension;
     }
 
+    /**
+     * Summary of processFilepondTempFile
+     * @param string $tmpPath
+     * @return \Illuminate\Http\UploadedFile|null
+    */
     public function processFilepondTempFile($tmpPath){
         $processedFile = null;
         $tmpFullPath = storage_path("app/public/{$tmpPath}");
@@ -81,7 +86,11 @@ trait UploadPhotos
         return $processedFile;
     }
 
-
+    /**
+     * Summary of generatePhotoFromText
+     * @param mixed $text
+     * @return \Intervention\Image\Interfaces\ImageInterface
+     */
     public function generatePhotoFromText($text){
         $image = Image::create(640, 480)->fill('#ff0000'); // Create a red image
         $image->text($text, 320, 240, function($font) {
