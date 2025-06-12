@@ -126,8 +126,8 @@
     FilePond.registerPlugin(FilePondPluginImagePreview);
     FilePond.registerPlugin(FilePondPluginFileValidateType);
     document.addEventListener("DOMContentLoaded", function () {
-        console.log("{{ Storage::disk('public')->url($crud->filepond_input) }}");
         const inputElement = document.querySelector('.filepond');
+        const existingFile = @json($crud->filepond_input);
         const pond = FilePond.create(inputElement, {
         acceptedFileTypes: ['image/*'],
         server: {
@@ -143,14 +143,12 @@
                 'X-CSRF-TOKEN': '{{ csrf_token() }}'
             }
         },
-        files: [
-            {
-                source: "{{ Storage::disk('public')->url($crud->filepond_input) }}",
-                options: {
-                    type: 'local',
-                },
-            }
-        ],
+        files: existingFile ? [{
+            source: `{{ Storage::disk('public')->url('') }}/${existingFile}`,
+            options: {
+                type: 'local',
+            },
+        }] : []
     });
 
     	var el;

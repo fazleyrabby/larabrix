@@ -114,46 +114,42 @@
 
 @push('scripts')
 <script>
-document.addEventListener("DOMContentLoaded", function () {
-    FilePond.registerPlugin(
-        FilePondPluginImagePreview,
-        FilePondPluginImageExifOrientation,
-        FilePondPluginFileValidateSize,
-        FilePondPluginImageEdit
-    );
-    // Initialize FilePond
-    const inputElement = document.querySelector('.filepond');
-    const pond = FilePond.create(inputElement, {
-        acceptedFileTypes: ['image/*'],
-        server: {
-            process: @json(route('admin.filepond.upload')),
-            revert: @json(route('admin.filepond.revert')),
-            headers: {
-                'X-CSRF-TOKEN': '{{ csrf_token() }}'
+    FilePond.registerPlugin(FilePondPluginImagePreview);
+    FilePond.registerPlugin(FilePondPluginFileValidateType);
+    document.addEventListener("DOMContentLoaded", function () {
+        // Initialize FilePond
+        const inputElement = document.querySelector('.filepond');
+        const pond = FilePond.create(inputElement, {
+            acceptedFileTypes: ['image/*'],
+            server: {
+                process: @json(route('admin.filepond.upload')),
+                revert: @json(route('admin.filepond.revert')),
+                headers: {
+                    'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                }
             }
-        }
-    });
+        });
 
-    var el;
-    window.TomSelect && (new TomSelect(el = document.getElementById('select-users'), {
-        copyClassesToDropdown: false,
-        dropdownParent: 'body',
-        controlInput: '<input>',
-        render: {
-            item: function(data, escape) {
-                if (data.customProperties) {
-                    return '<div><span class="dropdown-item-indicator">' + data.customProperties + '</span>' + escape(data.text) + '</div>';
-                }
-                return '<div>' + escape(data.text) + '</div>';
+        var el;
+        window.TomSelect && (new TomSelect(el = document.getElementById('select-users'), {
+            copyClassesToDropdown: false,
+            dropdownParent: 'body',
+            controlInput: '<input>',
+            render: {
+                item: function(data, escape) {
+                    if (data.customProperties) {
+                        return '<div><span class="dropdown-item-indicator">' + data.customProperties + '</span>' + escape(data.text) + '</div>';
+                    }
+                    return '<div>' + escape(data.text) + '</div>';
+                },
+                option: function(data, escape) {
+                    if (data.customProperties) {
+                        return '<div><span class="dropdown-item-indicator">' + data.customProperties + '</span>' + escape(data.text) + '</div>';
+                    }
+                    return '<div>' + escape(data.text) + '</div>';
+                },
             },
-            option: function(data, escape) {
-                if (data.customProperties) {
-                    return '<div><span class="dropdown-item-indicator">' + data.customProperties + '</span>' + escape(data.text) + '</div>';
-                }
-                return '<div>' + escape(data.text) + '</div>';
-            },
-        },
-    }));
-});
+        }));
+    });
 </script>
 @endpush

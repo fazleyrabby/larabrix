@@ -34,14 +34,13 @@ class CrudController extends Controller
     public function store(CrudRequest $request)
     {
         // $this->authorize('create', Crud::class);
-        // Crud::create($request->validated());
-        $data = $request->validated(); // Get validated data
+        $data = $request->validated();
         if ($request->hasFile('default_file_input')) {
             $data['default_file_input'] = $this->uploadPhoto($request->file('default_file_input'));
         }
         if($request->filled('filepond_input')){
             $file = $this->processFilepondTempFile($request->input('filepond_input'));
-            $data['filepond_input'] = $this->uploadPhoto($file, $crud->filepond_input ?? '');
+            $data['filepond_input'] = $this->uploadPhoto($file);
         }
         Crud::create($data);
         return redirect()->route('admin.cruds.create')->with(['success' => 'Successfully created!']);

@@ -10,15 +10,10 @@ class CrudService
         $query = Crud::query();
         $searchQuery = $params['q'] ?? null;
         $limit = $params['limit'] ?? config('app.pagination.limit');
-        $query->when($searchQuery, function ($q) use ($searchQuery) {
-            return $q->where(function ($subQuery) use ($searchQuery) {
-                return $subQuery->where('title', 'like', '%'.$searchQuery.'%')
-                                ->orWhere('id', 'like', '%'.$searchQuery.'%');
-            });
-        });
-        $cruds = $query->orderBy('id', 'desc')->paginate($limit)->through(function($category) {
-            $category->created_at = $category->created_at->diffForHumans();
-            return $category;
+        $query->when($searchQuery, fn($q) => $q->search($searchQuery));
+        $cruds = $query->orderBy('id', 'desc')->paginate($limit)->through(function($crud) {
+            $crud->created_at = $crud->created_at->diffForHumans();
+            return $crud;
         });
         $cruds->appends($params);
         return $cruds;
