@@ -12,7 +12,7 @@ class LoginController extends Controller
     public function loginForm()
     {
         $user = (object)[];
-        if(env('APP_ENV') == 'local'){
+        if(config('app.env') === 'local'){
             $user->email = 'test@gmail.com';
             $user->password = '123456';
         }
@@ -31,7 +31,7 @@ class LoginController extends Controller
 
         if (Auth::attempt($credentials)) {
             $request->session()->regenerate();
-            
+
             return redirect()->intended('admin/dashboard');
         }
 

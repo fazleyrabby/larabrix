@@ -89,6 +89,7 @@ class CrudController extends Controller
 
     public function upload(Request $request)
     {
+        $path = "";
         if ($request->file('filepond_input')) {
             $path = $request->file('filepond_input')->store('tmp', 'public');
         }

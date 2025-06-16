@@ -17,13 +17,11 @@ trait UploadPhotos
      * @param string $existingPhoto The path of an existing photo to delete.
      * @param string $directory The directory to store the uploaded photo.
      * @param string $prefix The prefix for the filename.
-     * @param string $format The image format (e.g., 'png', 'jpg', 'webp').
-     * @param int $quality The quality of the image (1 to 100).
      * @return string|null The path to the uploaded photo or null on failure.
      */
     public function uploadPhoto($photo, $existingPhoto = '', $directory = 'uploads/', $prefix = '')
     {
-        if (!$photo || !$photo->isValid()) {
+        if (! $photo->isValid()) {
             return null;
         }
         // Generate a unique filename
