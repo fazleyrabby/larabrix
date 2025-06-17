@@ -31,17 +31,18 @@
           <div class="row row-deck row-cards">
             <div class="col-12">
               <div class="card">
-                <form action="{{ route('admin.menus.store') }}" method="post" enctype="multipart/form-data">
+                <form action="{{ route('admin.menus.update', $menu->id) }}" method="post" enctype="multipart/form-data">
                     @csrf
+                    @method('put')
                     <div class="card-header">
-                        <h3 class="card-title">Create new menu</h3>
+                        <h3 class="card-title">Update menu</h3>
                     </div>
                     <div class="card-body">
                         <div class="mb-3 row">
                             <label class="col-3 col-form-label required">Title</label>
                             <div class="col">
                                 <input type="text" class="form-control" aria-describedby="emailHelp"
-                                    placeholder="Title" name="title" value="{{ old('title') }}">
+                                    placeholder="Title" name="title" value="{{ $menu->title }}">
                                 <small class="form-hint">
                                     @error('title')
                                         <div class="text-danger mt-2">{{ $message }}</div>
@@ -53,7 +54,7 @@
                             <label class="col-3 col-form-label required">Text</label>
                             <div class="col">
                                 <input type="text" class="form-control" aria-describedby="emailHelp"
-                                    placeholder="Text" name="text" value="{{ old('text') }}">
+                                    placeholder="Text" name="text" value="{{ $menu->text }}">
                                 <small class="form-hint">
                                     @error('text')
                                         <div class="text-danger mt-2">{{ $message }}</div>
@@ -65,7 +66,7 @@
                             <label class="col-3 col-form-label required">Href</label>
                             <div class="col">
                                 <input type="href" class="form-control" aria-describedby="emailHelp"
-                                    placeholder="Href" name="href" value="{{ old('href') }}">
+                                    placeholder="Href" name="href" value="{{ $menu->href }}">
                                 <small class="form-hint">
                                     @error('href')
                                         <div class="text-danger mt-2">{{ $message }}</div>
@@ -77,7 +78,7 @@
                             <label class="col-3 col-form-label required">Slug</label>
                             <div class="col">
                                 <input type="slug" class="form-control" aria-describedby="emailHelp"
-                                    placeholder="Slug" name="slug" value="{{ old('slug') }}">
+                                    placeholder="Slug" name="slug" value="{{ $menu->slug }}">
                                 <small class="form-hint">
                                     @error('slug')
                                         <div class="text-danger mt-2">{{ $message }}</div>
@@ -90,8 +91,8 @@
                             <div class="col">
                                 <select type="text" class="form-select" name="parent_id" id="select-users" value="">
                                     <option selected value="0">-</option>
-                                    @foreach ($menus as $index => $menu)
-                                        <option value="{{ $index }}">{{ $menu }}</option>
+                                    @foreach ($menus as $index => $title)
+                                        <option value="{{ $index }}" @selected($index == $menu->parent_id)>{{ $title }}</option>
                                     @endforeach
                                   </select>
                                 <small class="form-hint">

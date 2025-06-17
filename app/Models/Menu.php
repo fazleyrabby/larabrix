@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class Menu extends Model
 {
+    public $guarded = [];
     public function children()
     {
         return $this->hasMany(self::class, 'parent_id', 'id');
