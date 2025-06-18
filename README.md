@@ -7,17 +7,19 @@
 
 ## 🚀 Upcoming Features
 
-- 🔧 Product & Category CRUD modules  
-- 🖼️ Media Library (upload & manage assets)  
-- 📑 Dynamic Menu Management  
-- 📋 Kanban Task Manager  
-- 🧱 Modular architecture for easy reuse  
-- 🔌 Clean and extendable codebase  
+✅ Authentication
+✅ Common CRUD module
+🔄 Dynamic Menu Management 
+❌ Product and Category Management
+❌ Media Library (upload & manage assets)  
+❌ Kanban Task Manager
+❌ Cart Management for E-commerce
 
 ---
 
 Stay tuned — more modules are cooking. 🍳  
 
 Some Dummy Screenshots below:
+
 ![alt text](<CleanShot 2025-06-17 at 01.53.53@2x.png>)
 ![alt text](<CleanShot 2025-06-17 at 01.55.23@2x.png>)
