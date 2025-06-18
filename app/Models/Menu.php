@@ -19,7 +19,7 @@ class Menu extends Model
 
     public function childrenRecursive()
     {
-        return $this->children()->with('childrenRecursive')->select('title', 'id', 'parent_id', 'status')->orderBy('position');
+        return $this->children()->with('childrenRecursive')->select('title', 'id', 'parent_id', 'status','position')->orderBy('position');
     }
     public function scopeSearch($query, $term)
     {

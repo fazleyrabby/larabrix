@@ -7,12 +7,17 @@ use App\Http\Requests\MenuRequest;
 use App\Models\Menu;
 use App\Services\MenuService;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class MenuController extends Controller
 {
-    public function index(Request $request, MenuService $menuService)
+    protected MenuService $service;
+    public function __construct(){
+        $this->service = new MenuService;
+    }
+    public function index(Request $request)
     {
-        $menus = $menuService->getPaginatedItems($request->all());
+        $menus = $this->service->getPaginatedItems($request->all());
         return view('admin.menus.index', compact('menus'));
     }
 
@@ -54,11 +59,21 @@ class MenuController extends Controller
 
     public function sort()
     {
+        $menuWithoutChildren = Menu::toBase()->select('id','parent_id','position')->get();
         $menus = Menu::with('childrenRecursive')->where([
             ['status', 1],
             ['parent_id', 0],
-        ])->get();
-        return view('admin.menus.sort', compact('menus'));
+        ])->orderBy('position')->get();
+        return view('admin.menus.sort', compact('menus','menuWithoutChildren'));
+    }
+
+    public function saveSortedMenu(Request $request)
+    {
+        $data = $request->input('menu_structure');
+        $menuItems = json_decode($data, true);
+        $query = $this->service->generalBulkUpdateQuery($menuItems);
+        DB::statement($query);
+        return redirect()->back()->with('success', 'Menu order updated successfully.');
     }
 
 }

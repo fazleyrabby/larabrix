@@ -20,6 +20,7 @@ Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () 
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
     Route::resource('/cruds', CrudController::class)->names('cruds');
     Route::get('/menus/sort', [MenuController::class, 'sort'])->name('menus.sort');
+    Route::post('/menus/save', [MenuController::class, 'saveSortedMenu'])->name('menus.save');
     Route::resource('/menus', MenuController::class)->names('menus');
     Route::post('filepond/upload', [CrudController::class, 'upload'])->name('filepond.upload');
     Route::delete('filepond/revert', [CrudController::class, 'revert'])->name('filepond.revert');

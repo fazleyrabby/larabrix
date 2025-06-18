@@ -1,5 +1,27 @@
 @extends('admin.layouts.app')
 @section('title', 'Crud Sort')
+@push('styles')
+    <style>
+    .nested-sortable {
+        /* padding-left: 25px; */
+        /* min-height: 40px; */
+        border-left: 2px dashed transparent;
+        /* margin-bottom: 5px; */
+        background-color: #fafafa;
+        transition: background 0.2s ease;
+    }
+
+    .nested-sortable.drop-target {
+        border-left-color: #1890ff;
+        background-color: #e6f7ff;
+    }
+
+    .drop-target {
+        background-color: #e6f7ff !important;
+        border-left-color: #1890ff !important;
+    }
+    </style>
+@endpush
 @section('content')
     <!-- Page header -->
     <div class="page-header d-print-none">
@@ -27,29 +49,19 @@
           <div class="row row-deck row-cards">
             <div class="col-12">
               <div class="card">
-                    <div class="card-header">
-                        <h3 class="card-title">Menu Sorting</h3>
-                    </div>
-                    <div class="card-body">
-                        @php
-                        function renderNestedMenu($menus, $level = 1)
-                        {
-                            echo '<div class="list-group nested-sortable">';
-                            foreach ($menus as $menu) {
-                                echo '<div class="list-group-item">' . e($menu->title);
-                                if ($menu->childrenRecursive->isNotEmpty()) {
-                                    renderNestedMenu($menu->childrenRecursive);
-                                }
-                                echo '</div>';
-                            }
-
-                            echo '</div>';
-                        }
-                        @endphp
-                        <div id="nestedDemo" class="list-group col nested-sortable">
-                            {!! renderNestedMenu($menus) !!}
-                        </div>
-                    </div>
+                <div class="card-header">
+                    <h3 class="card-title">Menu Sorting</h3>
+                </div>
+                <div class="card-body" id="menu">
+                    @include('admin.menus.menu-item', ['menus' => $menus, 'parentId' => 0])
+                </div>
+                <div class="card-footer">
+                    <form id="menuForm" action="{{ route('admin.menus.save') }}" method="POST">
+                        @csrf
+                        <input type="" class="form-control" value="{{ json_encode($menuWithoutChildren) }}" name="menu_structure" id="menuStructureInput">
+                        <button type="submit" class="btn btn-primary" id="save">Save</button>
+                    </form>
+                </div>
               </div>
             </div>
           </div>
@@ -62,14 +74,65 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.15.6/Sortable.min.js" integrity="sha512-csIng5zcB+XpulRUa+ev1zKo7zRNGpEaVfNB9On1no9KYTEY/rLGAEEpvgdw6nim1WdTuihZY1eqZ31K7/fZjw==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 
 <script>
-    document.addEventListener("DOMContentLoaded", function () {
+    function getNestedMenuStructure(container) {
+        const items = [];
+        const children = Array.from(container.children).filter(el => el.classList.contains('list-group-item'));
+
+        children.forEach((child, index) => {
+            const id = parseInt(child.dataset.id);
+            const parentId = parseInt(container.dataset.parentId || 0);
+
+            items.push({
+                id: id,
+                parent_id: parentId,
+                position: index,
+            });
+
+            // Find direct nested sortable container
+            const nestedContainer = child.querySelector(':scope > .nested-sortable');
+            if (nestedContainer) {
+                items.push(...getNestedMenuStructure(nestedContainer));
+            }
+        });
+
+        return items;
+    }
+    document.addEventListener("DOMContentLoaded", () => {
         const nestedSortables = document.querySelectorAll('.nested-sortable');
         nestedSortables.forEach(el => {
             new Sortable(el, {
                 group: 'nested',
                 animation: 150,
                 fallbackOnBody: true,
-                swapThreshold: 0.5
+                swapThreshold: 0.5,
+                fallbackTolerance: 10,
+                ghostClass: 'sortable-ghost',
+                chosenClass: 'sortable-chosen',
+
+                onStart: () => {
+                    document.querySelectorAll('.drop-target').forEach(el => el.classList.remove('drop-target'));
+                },
+
+                onMove: evt => {
+                    document.querySelectorAll('.drop-target').forEach(el => el.classList.remove('drop-target'));
+
+                    const hoveredSortable = evt.to;
+                    if (hoveredSortable && hoveredSortable.classList.contains('nested-sortable')) {
+                        hoveredSortable.classList.add('drop-target');
+                    }
+                },
+
+                onEnd: () => {
+                    document.querySelectorAll('.drop-target').forEach(el => el.classList.remove('drop-target'));
+                    const rootContainer = document.querySelector('[data-parent-id]');
+                    const structure = getNestedMenuStructure(rootContainer);
+                    structure.map((item, idx) => {
+                        item.position = idx
+                        return item
+                    })
+                    console.table(structure)
+                    document.getElementById('menuStructureInput').value = JSON.stringify(structure);
+                }
             });
         });
     });
