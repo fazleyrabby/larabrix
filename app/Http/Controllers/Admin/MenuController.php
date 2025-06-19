@@ -31,7 +31,7 @@ class MenuController extends Controller
     {
         $data = $request->validated();
         $data['slug'] = $request->has('slug') ? str_replace('-', '', $request->slug) : str()->slug($request->title);
-        $data['parent_id'] = $request->has('parent_id') ?? 0;
+        $data['parent_id'] = $request->input('parent_id', 0);
         Menu::create($data);
         return redirect()->route('admin.menus.create')->with(['success' => 'Successfully created!']);
     }
@@ -47,12 +47,11 @@ class MenuController extends Controller
         return view('admin.menus.edit', compact('menus','menu'));
     }
 
-    public function update($id, MenuRequest $request)
+    public function update(Menu $menu, MenuRequest $request)
     {
         $data = $request->validated();
-        $menu = Menu::findOrFail($id);
         $data['slug'] = $request->has('slug') ? str_replace('-', '', $request->slug) : str()->slug($request->title);
-        $data['parent_id'] = $request->parent_id ?? 0;
+        $data['parent_id'] = $request->input('parent_id', 0);
         $menu->update($data);
         return redirect()->route('admin.menus.index')->with(['success' => 'Successfully updated!']);
     }
@@ -71,7 +70,7 @@ class MenuController extends Controller
     {
         $data = $request->input('menu_structure');
         $menuItems = json_decode($data, true);
-        $query = $this->service->generalBulkUpdateQuery($menuItems);
+        $query = $this->service->generateBulkUpdateQuery($menuItems);
         DB::statement($query);
         return redirect()->back()->with('success', 'Menu order updated successfully.');
     }

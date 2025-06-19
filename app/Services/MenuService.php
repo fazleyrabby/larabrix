@@ -20,7 +20,7 @@ class MenuService
         return $cruds;
     }
 
-    public function generalBulkUpdateQuery(array $items)
+    public function generateBulkUpdateQuery(array $items)
     {
         if (empty($items)) {
             return;
