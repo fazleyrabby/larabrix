@@ -7,13 +7,13 @@
 
 ## 🚀 Upcoming Features
 
-✅ Authentication
-✅ Common CRUD module
-🔄 Dynamic Menu Management 
-❌ Product and Category Management
-❌ Media Library (upload & manage assets)  
-❌ Kanban Task Manager
-❌ Cart Management for E-commerce
+✅ Authentication <br>
+✅ Common CRUD module <br>
+🔄 Dynamic Menu Management <br>
+❌ Product and Category Management <br>
+❌ Media Library (upload & manage assets) <br>
+❌ Kanban Task Manager <br>
+❌ Cart Management for E-commerce <br>
 
 ---
 
