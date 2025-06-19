@@ -115,29 +115,22 @@
             fallbackTolerance: 10,
             ghostClass: 'sortable-ghost',
             chosenClass: 'sortable-chosen',
-
-            onStart: () => {
-                document.querySelectorAll('.drop-target').forEach(el => el.classList.remove('drop-target'));
-            },
-
+            onStart: clearDropTargets(),
             onMove: evt => {
-                document.querySelectorAll('.drop-target').forEach(el => el.classList.remove('drop-target'));
-
+                clearDropTargets()
                 const hoveredSortable = evt.to;
                 if (hoveredSortable && hoveredSortable.classList.contains('nested-sortable')) {
                     hoveredSortable.classList.add('drop-target');
                 }
             },
-
             onEnd: () => {
-                document.querySelectorAll('.drop-target').forEach(el => el.classList.remove('drop-target'));
+                clearDropTargets();
                 const rootContainer = document.querySelector('[data-parent-id]');
                 const structure = getNestedMenuStructure(rootContainer);
                 structure.map((item, idx) => {
                     item.position = idx
                     return item
                 })
-                console.table(structure)
                 document.getElementById('menuStructureInput').value = JSON.stringify(structure);
             }
         });
