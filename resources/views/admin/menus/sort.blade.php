@@ -52,13 +52,15 @@
                 <div class="card-header">
                     <h3 class="card-title">Menu Sorting</h3>
                 </div>
-                <div class="card-body" id="menu">
-                    @include('admin.menus.menu-item', ['menus' => $menus, 'parentId' => 0])
+                <div class="card-body">
+                    <div class="list-group nested-sortable" data-parent-id="0">
+                        @include('admin.menus.menu-item', ['menus' => $menus, 'parentId' => 0])
+                    </div>
                 </div>
                 <div class="card-footer">
                     <form id="menuForm" action="{{ route('admin.menus.save') }}" method="POST">
                         @csrf
-                        <input type="" class="form-control" value="{{ json_encode($menuWithoutChildren) }}" name="menu_structure" id="menuStructureInput">
+                        <input type="hidden" value="{{ json_encode($menuWithoutChildren) }}" name="menu_structure" id="menuStructureInput">
                         <button type="submit" class="btn btn-primary" id="save">Save</button>
                     </form>
                 </div>
@@ -66,8 +68,7 @@
             </div>
           </div>
         </div>
-      </div>
-
+    </div>
 @endsection
 
 @push('scripts')
@@ -76,9 +77,9 @@
 <script>
     function getNestedMenuStructure(container) {
         const items = [];
-        const children = Array.from(container.children).filter(el => el.classList.contains('list-group-item'));
-
-        children.forEach((child, index) => {
+        // const children = Array.from(container.children).filter(el => el.classList.contains('list-group-item'));
+        Array.from(container.children).forEach((child, index) => {
+            if (!child.classList.contains('list-group-item')) return;
             const id = parseInt(child.dataset.id);
             const parentId = parseInt(container.dataset.parentId || 0);
 
@@ -94,47 +95,52 @@
                 items.push(...getNestedMenuStructure(nestedContainer));
             }
         });
-
         return items;
     }
+
+    function clearDropTargets() {
+        document.querySelectorAll('.drop-target').forEach(el => el.classList.remove('drop-target'));
+    }
+
     document.addEventListener("DOMContentLoaded", () => {
-        const nestedSortables = document.querySelectorAll('.nested-sortable');
-        nestedSortables.forEach(el => {
-            new Sortable(el, {
-                group: 'nested',
-                animation: 150,
-                fallbackOnBody: true,
-                swapThreshold: 0.5,
-                fallbackTolerance: 10,
-                ghostClass: 'sortable-ghost',
-                chosenClass: 'sortable-chosen',
-
-                onStart: () => {
-                    document.querySelectorAll('.drop-target').forEach(el => el.classList.remove('drop-target'));
-                },
-
-                onMove: evt => {
-                    document.querySelectorAll('.drop-target').forEach(el => el.classList.remove('drop-target'));
-
-                    const hoveredSortable = evt.to;
-                    if (hoveredSortable && hoveredSortable.classList.contains('nested-sortable')) {
-                        hoveredSortable.classList.add('drop-target');
-                    }
-                },
-
-                onEnd: () => {
-                    document.querySelectorAll('.drop-target').forEach(el => el.classList.remove('drop-target'));
-                    const rootContainer = document.querySelector('[data-parent-id]');
-                    const structure = getNestedMenuStructure(rootContainer);
-                    structure.map((item, idx) => {
-                        item.position = idx
-                        return item
-                    })
-                    console.table(structure)
-                    document.getElementById('menuStructureInput').value = JSON.stringify(structure);
-                }
-            });
-        });
+        document.querySelectorAll('.nested-sortable').forEach(initSortable);
     });
+
+    function initSortable(container){
+        new Sortable(container, {
+            group: 'nested',
+            animation: 150,
+            fallbackOnBody: true,
+            swapThreshold: 0.5,
+            fallbackTolerance: 10,
+            ghostClass: 'sortable-ghost',
+            chosenClass: 'sortable-chosen',
+
+            onStart: () => {
+                document.querySelectorAll('.drop-target').forEach(el => el.classList.remove('drop-target'));
+            },
+
+            onMove: evt => {
+                document.querySelectorAll('.drop-target').forEach(el => el.classList.remove('drop-target'));
+
+                const hoveredSortable = evt.to;
+                if (hoveredSortable && hoveredSortable.classList.contains('nested-sortable')) {
+                    hoveredSortable.classList.add('drop-target');
+                }
+            },
+
+            onEnd: () => {
+                document.querySelectorAll('.drop-target').forEach(el => el.classList.remove('drop-target'));
+                const rootContainer = document.querySelector('[data-parent-id]');
+                const structure = getNestedMenuStructure(rootContainer);
+                structure.map((item, idx) => {
+                    item.position = idx
+                    return item
+                })
+                console.table(structure)
+                document.getElementById('menuStructureInput').value = JSON.stringify(structure);
+            }
+        });
+    }
 </script>
 @endpush
