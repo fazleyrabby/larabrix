@@ -9,10 +9,10 @@
 
 ✅ Authentication <br>
 ✅ Common CRUD module <br>
-🔄 Dynamic Menu Management <br>
+✅ Dynamic Menu Management <br>
+✅ Kanban Task Manager <br>
 ❌ Product and Category Management <br>
 ❌ Media Library (upload & manage assets) <br>
-❌ Kanban Task Manager <br>
 ❌ Cart Management for E-commerce <br>
 
 ---
