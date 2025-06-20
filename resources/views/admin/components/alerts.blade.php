@@ -38,5 +38,16 @@ function confirmDelete(event, form) {
 
         return false; // Prevent default form submission until confirmation
     }
+
+    function toast(type, message){
+        Swal.fire({
+            position: "top-end",
+            text: `${message}`,
+            icon: `${type ? 'success' : 'error'}`,
+            showConfirmButton: false,
+            toast: true,
+            timer: 2500
+        })
+    }
 </script>
 @endpush

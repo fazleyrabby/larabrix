@@ -102,8 +102,7 @@
                                         <option value="2" @selected($crud->custom_select == 2)>Elon Musk</option>
                                         <option value="3" @selected($crud->custom_select == 3)>Pawel Kuna</option>
                                         <option value="4" @selected($crud->custom_select == 4)>Nikola Tesla</option>
-                                      </select>
-                                    {{-- <input type="file" class="form-control" name="custom_select"> --}}
+                                    </select>
                                     <small class="form-hint">
                                         @error('custom_select')
                                             <div class="text-danger mt-2">{{ $message }}</div>

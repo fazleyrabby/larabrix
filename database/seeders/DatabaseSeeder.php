@@ -25,6 +25,7 @@ class DatabaseSeeder extends Seeder
         $this->call([
             CrudSeeder::class,
             MenuSeeder::class,
+            TaskSeeder::class,
         ]);
     }
 }

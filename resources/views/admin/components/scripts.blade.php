@@ -7,7 +7,7 @@
         const newUrl = `${route}?limit=${limit}&q=${encodeURIComponent(searchInput)}`;
         const limitInput = document.getElementById('limitInput');
         limitInput.value = limit;
-        window.location.href = newUrl; 
+        window.location.href = newUrl;
     }
 </script>
 
@@ -61,7 +61,7 @@
             }
         });
     }
-   
+
 
     function submitBulkDeleteForm(productIds, actionUrl) {
         // Create a form element
@@ -95,6 +95,19 @@
         // Append the form to the body and submit it
         document.body.appendChild(form);
         form.submit();
+  }
+
+  function swal(title, text, type){
+    Swal.fire({
+        title: 'Are you sure?',
+        text: '',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#d33',
+        cancelButtonColor: '#3085d6',
+        confirmButtonText: 'Yes!',
+        cancelButtonText: 'Cancel'
+    })
   }
 </script>
 @endpush

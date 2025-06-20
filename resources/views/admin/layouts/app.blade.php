@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="csrf-token" content="{{ csrf_token() }}"/>
     <title>@yield('title', 'Admin Dashboard')</title>
     <link rel="stylesheet" href="{{ asset('admin/dist/libs/tom-select/dist/css/tom-select.bootstrap5.min.css') }}">
     <link rel="stylesheet" href="{{ asset('admin/dist/css/tabler.min.css') }}">
@@ -11,6 +12,8 @@
     <link rel="stylesheet" href="{{ asset('admin/dist/css/tabler-vendors.min.css') }}">
     <link rel="stylesheet" href="{{ asset('admin/dist/css/tabler-themes.css') }}">
     <link rel="stylesheet" href="{{ asset('admin/preview/css/demo.css') }}">
+
+    @vite(['resources/css/app.css','resources/js/app.js'])
     <style>
         /* @import url('https://rsms.me/inter/inter.css'); */
         /* :root {
@@ -31,7 +34,7 @@
       </style>
     @stack('styles')
 </head>
-<body>
+<body class="@yield('container-class')">
     <!-- Sidebar -->
     @include('admin.partials.sidebar')
 
@@ -45,7 +48,10 @@
             @yield('content')
         </div>
 
-        @include('admin.partials.footer')
+        @if (trim($__env->yieldContent('title')) !== 'Kanban Board')
+            @include('admin.partials.footer')
+        @endif
+
     </div>
 
     <script src="{{ asset('admin/dist/js/tabler-theme.min.js') }}"></script>
