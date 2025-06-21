@@ -23,10 +23,10 @@ class CrudRequest extends FormRequest
     public function rules(): array
     {
         // Retrieve product from route parameter or request attribute (depending on how your routes are set up)
-        $crud = $this->route('crud') ?? $this->crud;
+        // $crud = $this->route('crud') ?? $this->crud;
 
         // Ensure product is an object before accessing 'id'
-        $id = $crud instanceof Crud ? $crud->id : (is_string($crud) ? $crud : null);
+        $id = optional($this->route('crud'))->id ?? null;
 
         return [
             'title' => 'required|string|max:50|unique:cruds,title,' . $id,

@@ -22,6 +22,7 @@ class TaskSeeder extends Seeder
         ];
 
         foreach ($statuses as $index => $title) {
+            /** @var \App\Models\TaskStatus $taskStatus */
             $taskStatus = TaskStatus::factory()->create([
                 'title' => $title,
                 'position' => $index,

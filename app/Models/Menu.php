@@ -4,6 +4,17 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
+/**
+ * App\Models\Menu
+ *
+ * @property int $id
+ * @property string $title
+ * @property string $slug
+ * @property string|null $href
+ * @property int $parent_id
+ * @property int $status
+ * @property int $position
+ */
 class Menu extends Model
 {
     public $guarded = [];

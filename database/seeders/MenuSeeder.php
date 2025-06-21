@@ -17,9 +17,8 @@ class MenuSeeder extends Seeder
         $menu->title = 'Home';
         $menu->slug = 'home';
         $menu->parent_id = 0;
-        $menu->status = 'active';
+        $menu->status = 1;
         $menu->href = '/';
-        $menu->status = true;
         $menu->position = 0;
         $menu->save();
 
@@ -27,9 +26,8 @@ class MenuSeeder extends Seeder
         $menu->title = 'Test Parent';
         $menu->slug = 'test-parent';
         $menu->parent_id = 0;
-        $menu->status = 'active';
+        $menu->status = 1;
         $menu->href = '/';
-        $menu->status = true;
         $menu->position = 1;
         $menu->save();
 
@@ -37,9 +35,8 @@ class MenuSeeder extends Seeder
         $menu->title = 'Test Child';
         $menu->slug = 'test-child';
         $menu->parent_id = 2;
-        $menu->status = 'active';
         $menu->href = '/';
-        $menu->status = true;
+        $menu->status = 1;
         $menu->position = 2;
         $menu->save();
 
@@ -47,9 +44,8 @@ class MenuSeeder extends Seeder
         $menu->title = 'Products';
         $menu->slug = 'products';
         $menu->parent_id = 0;
-        $menu->status = 'active';
         $menu->href = '/products';
-        $menu->status = true;
+        $menu->status = 1;
         $menu->position = 3;
         $menu->save();
     }
