@@ -21,5 +21,11 @@ Stay tuned — more modules are cooking. 🍳
 
 Some Dummy Screenshots below:
 
-![alt text](<CleanShot 2025-06-17 at 01.53.53@2x.png>)
-![alt text](<CleanShot 2025-06-17 at 01.55.23@2x.png>)
+![crud](<docs/crud.png>)
+![crud update](<docs/crud-update.png>)
+
+Sorting Menu 
+![menu](<docs/menu.gif>)
+
+Kanban Task Manager 
+![tasks](<docs/kanban.gif>)

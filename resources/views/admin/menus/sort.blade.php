@@ -29,7 +29,7 @@
             <div class="row g-2 align-items-center">
                 <div class="col">
                     <h2 class="page-title">
-                        Crud
+                        Menu Tree
                     </h2>
                 </div>
                 <!-- Page title actions -->
@@ -50,7 +50,7 @@
             <div class="col-12">
               <div class="card">
                 <div class="card-header">
-                    <h3 class="card-title">Menu Sorting</h3>
+                    <h3 class="card-title">Re-order Menu</h3>
                 </div>
                 <div class="card-body">
                     <div class="list-group nested-sortable" data-parent-id="0">
