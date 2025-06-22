@@ -41,6 +41,8 @@ class CrudController extends Controller
         if($request->filled('filepond_input')){
             $file = $this->processFilepondTempFile($request->input('filepond_input'));
             $data['filepond_input'] = $this->uploadPhoto($file);
+            // To delete temp file
+            $this->deleteImage($request->input('filepond_input'));
         }
         Crud::create($data);
         return redirect()->route('admin.cruds.create')->with(['success' => 'Successfully created!']);
@@ -67,13 +69,16 @@ class CrudController extends Controller
     {
         $crud = Crud::findOrFail($id);
         $data = $request->validated();
+        $filepondInput = $request->input('filepond_input');
         if ($request->hasFile('default_file_input')) {
             $data['default_file_input'] = $this->uploadPhoto($request->file('default_file_input'), $crud->default_file_input);
         }
-        $data['filepond_input'] = $input = $request->input('filepond_input');
-        if($request->filled('filepond_input') && Str::startsWith($request->input('filepond_input'), 'tmp/')){
-            $file = $this->processFilepondTempFile($request->input('filepond_input'));
+        $data['filepond_input'] = !$filepondInput ? null : $crud->filepond_input;
+        if($request->filled('filepond_input') && Str::startsWith($filepondInput, 'tmp/')){
+            $file = $this->processFilepondTempFile($filepondInput);
             $data['filepond_input'] = $this->uploadPhoto($file, $crud->filepond_input ?? '');
+            // To delete temp file
+            $this->deleteImage($filepondInput);
         }
         $crud->update($data);
         return redirect()->route('admin.cruds.index')->with(['success' => 'Successfully updated!']);
