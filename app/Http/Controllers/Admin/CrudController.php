@@ -70,7 +70,7 @@ class CrudController extends Controller
         if ($request->hasFile('default_file_input')) {
             $data['default_file_input'] = $this->uploadPhoto($request->file('default_file_input'), $crud->default_file_input);
         }
-        $data['filepond_input'] = $crud->filepond_input;
+        $data['filepond_input'] = $input = $request->input('filepond_input');
         if($request->filled('filepond_input') && Str::startsWith($request->input('filepond_input'), 'tmp/')){
             $file = $this->processFilepondTempFile($request->input('filepond_input'));
             $data['filepond_input'] = $this->uploadPhoto($file, $crud->filepond_input ?? '');
