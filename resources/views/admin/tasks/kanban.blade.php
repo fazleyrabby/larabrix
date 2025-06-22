@@ -49,7 +49,7 @@
           <div class="kanban-scroll-wrapper overflow-auto">
             <div class="task-container d-flex flex-nowrap gap-3" data-sortable-type="container">
                 @foreach ($taskStatuses as $taskStatus)
-                    <div class="card" style="min-width: 350px; max-height: calc(100vh - 200px);">
+                    <div class="card" data-task-status-id="{{ $taskStatus->id }}" style="min-width: 350px; max-height: calc(100vh - 200px);">
                     <div class="card-header">
                         <h3 class="card-title">{{ $taskStatus->title }}</h3>
                     </div>
@@ -89,21 +89,35 @@
         const movedToList = evt.to
         const taskId = movedItem.dataset.taskId
         const movedToListParentId = movedToList.dataset.taskStatusId
+        let route = "/admin/tasks/sort";
+        if(movedToList.classList.contains('task-container')){
+            route = '/admin/tasks/status/sort'
+            Array.from(movedToList.children).forEach((child, index) => {
+                const id = parseInt(child.dataset.taskStatusId);
+                items.push({
+                    id: id,
+                    position: index,
+                });
+            })
 
-        Array.from(movedToList.children).forEach((child, index) => {
-            const id = parseInt(child.dataset.taskId);
-            items.push({
-                id: id,
-                task_status_id: movedToListParentId,
-                position: index,
-            });
-        })
-        return updateTasks(items);
+        }else{
+            Array.from(movedToList.children).forEach((child, index) => {
+                const id = parseInt(child.dataset.taskId);
+                items.push({
+                    id: id,
+                    task_status_id: movedToListParentId,
+                    position: index,
+                });
+            })
+        }
+
+        return sort(route, items);
     }
-    function updateTasks(items){
+
+    function sort(route, items){
         axios.defaults.headers.common['X-CSRF-TOKEN'] = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
 
-        axios.post('/admin/tasks/sort', {data: items})
+        axios.post(route, {data: items})
         .then(({data}) => {
             if(data) toast(data.success, data.message)
         })

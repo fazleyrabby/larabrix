@@ -27,7 +27,8 @@ Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () 
     Route::delete('filepond/revert', [CrudController::class, 'revert'])->name('filepond.revert');
 
     Route::get('/tasks/kanban', [TaskController::class, 'kanban'])->name('tasks.kanban');
-    Route::post('/tasks/sort', [TaskController::class, 'sort'])->name('tasks.sort');
+    Route::post('/tasks/sort', [TaskController::class, 'sortTasks'])->name('tasks.sort');
+    Route::post('/tasks/status/sort', [TaskController::class, 'sortStatus'])->name('tasks.sort.status');
     Route::resource('/tasks', TaskController::class)->names('tasks');
 });
 

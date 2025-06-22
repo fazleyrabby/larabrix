@@ -13,8 +13,8 @@ use Illuminate\Support\Facades\DB;
 class TaskController extends Controller
 {
     protected TaskService $service;
-    public function __construct(){
-        $this->service = new TaskService;
+    public function __construct(TaskService $service){
+        $this->service = $service;
     }
     /**
      * Display a listing of the resource.
@@ -50,24 +50,22 @@ class TaskController extends Controller
     {
     }
 
-    public function sort(Request $request){
-        $taskIds = collect($request->data)->pluck('id');
-        $taskStatusId = isset($request->data[0]['task_status_id']) ? $request->data[0]['task_status_id'] : null;
-        $tasks = Task::toBase()->select('id', 'position')
-                    ->where('task_status_id', $taskStatusId)
-                    ->whereIn('id', $taskIds)
-                    ->get()->keyBy('id');
-        $positionsMatch = collect($request->data)->every(function ($item) use ($tasks) {
-            $task = $tasks[$item['id']] ?? (object)[];
-            return isset($task->position) && $task->position === (int) $item['position'];
-        });
-        if($taskIds->count() === count($tasks) && $positionsMatch){
-            return;
-        }
+    public function sortTasks(Request $request){
+        if(!$this->service->isValid($request)) return;
         try {
-            $query = $this->service->generateBulkUpdateQuery($request->data);
+            $query = $this->service->generateBulkUpdateQueryForTaskSort($request->data);
             DB::statement($query);
             return response()->json(['success' => true, 'message' => 'Successfully updated task list!']);
+        } catch (\Throwable $th) {
+            return response()->json(['success' => false, 'message' => 'Error occurred: '. $th]);
+        }
+    }
+
+    public function sortStatus(Request $request){
+        try {
+            $query = $this->service->generateBulkUpdateQueryForTaskStatusSort($request->data);
+            DB::statement($query);
+            return response()->json(['success' => true, 'message' => 'Successfully updated task status!']);
         } catch (\Throwable $th) {
             return response()->json(['success' => false, 'message' => 'Error occurred: '. $th]);
         }
