@@ -47,7 +47,7 @@
                             <label class="col-3 col-form-label">Default File</label>
                             <div class="col">
                                 @if($crud->default_file_input)
-                                    <img width="100" src="{{ asset($crud->default_file_input)  }}"/>
+                                    <img width="100" src="{{ asset('storage/' . $crud->default_file_input) }}" />
                                 @endif
                             </div>
                         </div>
@@ -55,7 +55,7 @@
                             <label class="col-3 col-form-label">Filepond File</label>
                             <div class="col">
                                 @if($crud->filepond_input)
-                                    <img width="100" src="{{ asset($crud->filepond_input)  }}"/>
+                                    <img width="100" src="{{ asset('storage/' . $crud->filepond_input) }}" />
                                 @endif
                             </div>
                         </div>

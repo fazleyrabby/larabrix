@@ -71,7 +71,7 @@
                                     @if(isset($crud->default_file_input) && filled($crud->default_file_input))
                                     <div class="mb-3 row">
                                         <div class="col">
-                                            <img width="100" src="{{ asset($crud->default_file_input) }}" alt="" class="border">
+                                            <img width="100" src="{{ asset('storage/' . $crud->default_file_input) }}" />
                                         </div>
                                     </div>
                                     @endif

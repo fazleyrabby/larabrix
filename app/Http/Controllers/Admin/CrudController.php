@@ -89,11 +89,11 @@ class CrudController extends Controller
 
     public function upload(Request $request)
     {
-        $path = "";
         if ($request->file('filepond_input')) {
             $path = $request->file('filepond_input')->store('tmp', 'public');
+            return response($path, 200)->header('Content-Type', 'text/plain');
         }
-        return $path;
+        return response('No file', 400);
     }
     public function revert(Request $request)
     {
