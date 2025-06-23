@@ -62,7 +62,7 @@
                         <div class="mb-3 row">
                             <label class="col-3 col-form-label">Select Input</label>
                             <div class="col">
-                                {{ $crud->custom_select }}
+                                {{ $crud->custom_select ?? '' }}
                             </div>
                         </div>
                     </div>
