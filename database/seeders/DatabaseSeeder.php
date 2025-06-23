@@ -26,6 +26,8 @@ class DatabaseSeeder extends Seeder
             CrudSeeder::class,
             MenuSeeder::class,
             TaskSeeder::class,
+            CategorySeeder::class,
+            ProductSeeder::class,
         ]);
     }
 }

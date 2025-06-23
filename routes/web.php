@@ -1,12 +1,14 @@
 <?php
 
+use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Admin\CrudController;
-use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\MenuController;
 use App\Http\Controllers\Admin\TaskController;
-use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Auth\LoginController;
+use App\Http\Controllers\Admin\ProductController;
 use App\Http\Controllers\Auth\RegisterController;
+use App\Http\Controllers\Admin\CategoryController;
+use App\Http\Controllers\Admin\DashboardController;
 // use App\Http\Controllers\Admin\CrudController;
 
 // Route::get('/', [LoginController::class, 'loginForm'])->name('login');
@@ -30,6 +32,10 @@ Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () 
     Route::post('/tasks/sort', [TaskController::class, 'sortTasks'])->name('tasks.sort');
     Route::post('/tasks/status/sort', [TaskController::class, 'sortStatus'])->name('tasks.sort.status');
     Route::resource('/tasks', TaskController::class)->names('tasks');
+
+
+    Route::resource('categories', CategoryController::class)->names('categories');
+    Route::resource('products', ProductController::class)->names('products');
 });
 
 Route::get('/', function () {
