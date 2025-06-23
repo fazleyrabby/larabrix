@@ -1,8 +1,12 @@
 FROM php:8.2.0-fpm
 
-# Arguments defined in docker-compose.yml
-ARG user
-ARG uid
+# Accept build arguments (for Docker Compose or CodeBuild)
+ARG user=sammy
+ARG uid=1000
+
+# Create a group and user with the given UID
+RUN addgroup --gid ${uid} ${user} \
+    && adduser --disabled-password --gecos "" --uid ${uid} --ingroup ${user} ${user}
 
 # Install system dependencies
 RUN apt-get update && apt-get install -y \
@@ -15,24 +19,22 @@ RUN apt-get update && apt-get install -y \
     zip \
     unzip \
     libmagickwand-dev \
-    && docker-php-ext-install pdo_mysql mbstring exif pcntl bcmath gd \
     && docker-php-ext-configure gd --with-freetype --with-jpeg \
+    && docker-php-ext-install pdo_mysql mbstring exif pcntl bcmath gd \
     && pecl install imagick \
     && docker-php-ext-enable imagick \
     && apt-get clean \
-    && rm -rf /var/lib/apt/lists/*  # Clean up to save space
+    && rm -rf /var/lib/apt/lists/*
 
-RUN docker-php-ext-install -j$(nproc) gd
-# Get latest Composer
+# Get Composer from official image
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
-# Create system user to run Composer and Artisan commands
-RUN useradd -G www-data,root -u $uid -d /home/$user $user \
-    && mkdir -p /home/$user/.composer \
-    && chown -R $user:$user /home/$user
+# Setup composer home directory for the user
+RUN mkdir -p /home/${user}/.composer \
+    && chown -R ${user}:${user} /home/${user}
 
-# Set the working directory
+# Set working directory
 WORKDIR /var/www
 
-# Switch to the user created
-USER $user
+# Switch to the non-root user
+USER ${user}
