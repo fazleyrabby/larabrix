@@ -1,13 +1,11 @@
 #!/bin/bash
-cd /var/www/larabrix
+cd /var/www/larabrix  # or wherever your repo is deployed on EC2
 
-# Stop old container (optional)
-docker stop larabrix || true
-docker rm larabrix || true
+# Stop and remove containers/services (if running)
+docker-compose down || true
 
-# Build and run the container
-docker build -t larabrix .
+# Build images (especially app, with build args)
+docker-compose build
 
-docker run -d --name larabrix \
-  -p 80:80 \
-  larabrix
+# Start containers in detached mode
+docker-compose up -d
