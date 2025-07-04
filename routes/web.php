@@ -41,11 +41,9 @@ Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () 
         'prefix' => '/products',
         'as' => 'products.',
     ], function () {
-
         Route::resource('attributes', AttributeController::class)->names('attributes');
         Route::resource('attributes.values', AttributeValueController::class)->shallow()->names('attributes.values');
         Route::resource('categories', CategoryController::class)->names('categories');
-
         Route::resource('/', ProductController::class)->parameters(['' => 'product']);
         Route::resource('{product}/variants', ProductVariantController::class)->names('variants');
     });

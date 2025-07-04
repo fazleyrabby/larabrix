@@ -36,7 +36,7 @@ class CategoryController extends Controller
             'title' => 'required|string|max:191|unique:categories,title',
         ]);
         Category::create($validated);
-        return redirect()->route('admin.categories.create')->with(['success' => 'Successfully created!']);
+        return redirect()->route('admin.products.categories.create')->with(['success' => 'Successfully created!']);
     }
 
     /**
@@ -66,7 +66,7 @@ class CategoryController extends Controller
         ]);
         $category = Category::findOrFail($id);
         $category->update($validated);
-        return redirect()->route('admin.categories.store')->with(['success' => 'Successfully updated!']);
+        return redirect()->route('admin.products.categories.store')->with(['success' => 'Successfully updated!']);
     }
 
     /**
@@ -76,6 +76,6 @@ class CategoryController extends Controller
     {
         $category = Category::findOrFail($id);
         $category->delete();
-        return redirect()->route('admin.categories.index')->with(['success' => 'Successfully deleted!']);
+        return redirect()->route('admin.products.categories.index')->with(['success' => 'Successfully deleted!']);
     }
 }
