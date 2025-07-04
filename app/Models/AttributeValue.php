@@ -1,0 +1,20 @@
+<?php
+
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Model;
+
+class AttributeValue extends Model
+{
+    // Each value belongs to one attribute (e.g., "Red" belongs to "Color")
+    public function attribute()
+    {
+        return $this->belongsTo(Attribute::class);
+    }
+
+    // Many variants can have this attribute value
+    public function variants()
+    {
+        return $this->belongsToMany(ProductVariant::class, 'product_variant_values', 'attribute_value_id', 'variant_id');
+    }
+}

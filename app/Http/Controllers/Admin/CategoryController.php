@@ -13,7 +13,7 @@ class CategoryController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index(Request $request,CategoryService $categoryService)
+    public function index(Request $request, CategoryService $categoryService)
     {
         $categories = $categoryService->getPaginatedItems($request->all());
         return view('admin.categories.index', compact('categories'));
