@@ -220,7 +220,7 @@
               <div class="dropdown-menu-columns">
                 <div class="dropdown-menu-column">
                   <a @class(['active' => request()->is('admin/products/categories*'), 'dropdown-item']) href="{{ route('admin.products.categories.index') }}">Category</a>
-                  <a @class(['active' => request()->is('admin/products*'), 'dropdown-item'])  href="{{ route('admin.products.index') }}">Products</a>
+                  <a @class(['active' => request()->is('admin/products*') && !request()->is('admin/products/attributes*'), 'dropdown-item'])  href="{{ route('admin.products.index') }}">Products</a>
                   <a @class(['active' => request()->is('admin/products/attributes*'), 'dropdown-item']) href="{{ route('admin.products.attributes.index') }}">Attributes</a>
                   {{-- <a @class(['active' => request()->is('admin/products/variations*'), 'dropdown-item'])  href="{{ route('admin.products.variants.index') }}">Variation</a> --}}
                 </div>

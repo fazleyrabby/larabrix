@@ -20,4 +20,9 @@ class Attribute extends Model
     {
         return $this->belongsToMany(Product::class, 'product_attributes');
     }
+
+    public function getCreatedAtHumanAttribute()
+    {
+        return $this->created_at->diffForHumans();
+    }
 }

@@ -1,5 +1,5 @@
 @extends('admin.layouts.app')
-@section('title', 'Attribute List')
+@section('title', 'Attribute Values List')
 @section('content')
     <!-- Page header -->
     <div class="page-header d-print-none">
@@ -7,7 +7,7 @@
             <div class="row g-2 align-items-center">
                 <div class="col">
                     <h2 class="page-title">
-                        Attributes
+                        Attribute Values
                     </h2>
                 </div>
                 <!-- Page title actions -->
@@ -21,7 +21,7 @@
                                 <path d="M12 5l0 14" />
                                 <path d="M5 12l14 0" />
                             </svg>
-                            Create new attribute
+                            Create new attribute value
                         </a>
                     </div>
                 </div>
@@ -38,7 +38,7 @@
                     <div class="text-secondary">
                       Show
                       <div class="mx-2 d-inline-block">
-                        <select name="limit" onchange="updateData(this)" data-route="{{ route('admin.products.attributes.index') }}">
+                        <select name="limit" onchange="updateData(this)" data-route="{{ route('admin.products.attributes.values.index') }}">
                           <option value="5" @selected((request()->limit ?? 10) == 5)>5</option>
                           <option value="10" @selected((request()->limit ?? 10) == 10)>10</option>
                           <option value="20" @selected((request()->limit ?? 10) == 20)>20</option>
@@ -65,8 +65,7 @@
                         <th class="w-1">ID
                           <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-sm icon-thick" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M6 15l6 -6l6 6" /></svg>
                         </th>
-                        <th>Title</th>
-                        <th>Slug</th>
+                        <th>Attribute</th>
                         <th>Values</th>
                         <th>Created at</th>
                         <th></th>
@@ -75,15 +74,10 @@
                     <tbody>
                     @foreach ($attributes as $attribute)
                     <tr>
-                        <td><input class="form-check-input m-0 align-middle selected-item" type="checkbox" value="{{ $attribute->id }}" aria-label="Select invoice"></td>
+                        {{-- <td><input class="form-check-input m-0 align-middle selected-item" type="checkbox" value="{{ $attribute->id }}" aria-label="Select invoice"></td>
                         <td><span class="text-secondary">{{ $attribute->id }}</span></td>
                         <td><a href="{{ route('admin.products.categories.show', $attribute->id) }}" class="text-reset" tabindex="-1">{{ $attribute->title }}</a></td>
                         <td><span class="text-secondary">{{ $attribute->slug }}</span></td>
-                        <td>
-                            @foreach ($attribute->values as $value)
-                                <span class="badge bg-blue text-blue-fg">{{ $value->title }}</span>
-                            @endforeach
-                        </td>
                         <td>{{ $attribute->created_at->diffForHumans() }}</td>
                         <td class="text-end">
                           <span class="dropdown">
@@ -101,14 +95,14 @@
                               </form>
                             </div>
                           </span>
-                        </td>
+                        </td> --}}
                       </tr>
                     @endforeach
                     </tbody>
                   </table>
                 </div>
                 <div class="card-footer">
-                  {{ $attributes->links('pagination::bootstrap-5') }}
+                  {{ $attributeValues->links('pagination::bootstrap-5') }}
                 </div>
               </div>
             </div>

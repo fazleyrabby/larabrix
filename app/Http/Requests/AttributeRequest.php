@@ -25,9 +25,16 @@ class AttributeRequest extends FormRequest
         $attribute = $this->route('attribute') ?? $this->attribute;
         $id = $attribute instanceof Attribute ? $attribute->id : (is_string($attribute) ? $attribute : null);
 
-        return [
+        $rules = [
             'title' => 'required|string|max:255|unique:attributes,title,' . $id,
             'slug' => 'nullable|string|max:255|unique:attributes,slug,' . $id
         ];
+
+        foreach ($this->input('values', []) as $key => $value) {
+            $rules["values.$key.title"] = 'required|string|max:255';
+            $rules["values.$key.slug"]  = 'nullable|string|max:255';
+        }
+
+        return $rules;
     }
 }

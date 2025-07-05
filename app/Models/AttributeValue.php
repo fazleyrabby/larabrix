@@ -2,10 +2,14 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class AttributeValue extends Model
 {
+    use HasFactory;
+
+    protected $fillable = ['title', 'slug', 'attribute_id'];
     // Each value belongs to one attribute (e.g., "Red" belongs to "Color")
     public function attribute()
     {

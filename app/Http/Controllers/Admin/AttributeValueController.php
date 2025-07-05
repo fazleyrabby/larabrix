@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\AttributeValue;
 use Illuminate\Http\Request;
 
 class AttributeValueController extends Controller
@@ -12,7 +13,8 @@ class AttributeValueController extends Controller
      */
     public function index()
     {
-        //
+        $attributeValues = AttributeValue::paginate(10);
+        return view('admin.products.attributes.values.index', compact('attributeValues'));
     }
 
     /**

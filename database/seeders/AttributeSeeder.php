@@ -3,8 +3,10 @@
 namespace Database\Seeders;
 
 use App\Models\Attribute;
+use Database\Factories\AttributeFactory;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Str;
 
 class AttributeSeeder extends Seeder
 {
@@ -13,6 +15,11 @@ class AttributeSeeder extends Seeder
      */
     public function run(): void
     {
-        Attribute::factory()->count(10)->create();
+        foreach (AttributeFactory::$attributeNames as $title) {
+            Attribute::factory()->create([
+                'title' => $title,
+                'slug'  => Str::slug($title),
+            ]);
+        }
     }
 }
