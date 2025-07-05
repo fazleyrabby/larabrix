@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\ProductRequest;
+use App\Models\Attribute;
 use App\Models\Category;
 use App\Models\Product;
 use App\Services\CommonBusinessService;
@@ -25,22 +26,25 @@ class ProductController extends Controller
     public function create()
     {
         $categories = Category::pluck('title', 'id');
-        return view('admin.products.create', compact('categories'));
+        $attributes = Attribute::with('values')->get();
+        return view('admin.products.create', compact('categories','attributes'));
     }
 
     public function edit(Product $product)
     {
         // $this->authorize('create', Product::class);
         $categories = Category::pluck('title', 'id');
+        $attributes = Attribute::with('values')->get();
         $product->load([
-            'variants.attributeValues.attribute', // nested eager loading
+            'variants.attributeValues.attribute',
         ]);
 
-        return view('admin.products.edit', compact('product', 'categories'));
+        return view('admin.products.edit', compact('product', 'categories','attributes'));
     }
 
     public function store(ProductRequest $request)
     {;
+        dd($request->all());
         // $this->authorize('create', Product::class);
         $data = $request->validated(); // Get validated data
         // Check if there's an image file and upload it

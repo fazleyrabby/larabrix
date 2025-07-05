@@ -1,6 +1,9 @@
 @extends('admin.layouts.app')
 @section('title', 'Product Create')
 @section('content')
+@push('styles')
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/choices.js/public/assets/styles/choices.min.css" />
+@endpush
     <!-- Page header -->
     <div class="page-header d-print-none">
         <div class="container-xl">
@@ -27,12 +30,12 @@
         </div>
     </div>
     <div class="page-body">
+        <form action="{{ route('admin.products.store') }}" method="post" enctype="multipart/form-data">
+                    @csrf
         <div class="container-xl">
           <div class="row row-deck row-cards">
             <div class="col-12">
               <div class="card">
-                <form action="{{ route('admin.products.store') }}" method="post" enctype="multipart/form-data">
-                    @csrf
                     <div class="card-header">
                         <h3 class="card-title">Create new product</h3>
                     </div>
@@ -109,30 +112,290 @@
                                 </small>
                             </div>
                         </div>
+                        <div class="mb-3 row">
+                            <label class="col-3 col-form-label required">Type</label>
+                            <div class="col">
+                                <select type="text" class="form-select" id="type" name="type">
+                                    <option value="simple">Simple</option>
+                                    <option value="variable">Variable</option>
+                                </select>
+                            </div>
+                        </div>
                     </div>
-                    <div class="card-footer text-end">
-                        <button type="submit" class="btn btn-primary">Submit</button>
-                    </div>
-                </form>
               </div>
+            </div>
+            <div class="col-12 variants">
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">Variation</h3>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-5">
+                                <div class="mb-3">
+                                    <label class="form-label">Attribute Option</label>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label">Attribute Value</label>
+                                </div>
+                            </div>
+                        </div>
+                        <div id="attribute-values-wrapper">
+                            <div class="row attribute-value-row">
+                                <div class="col-md-5 mb-3">
+                                    <select name="variant[0][option]" class="form-control variant-select" id="variant-0">
+                                        <option value="" selected>Select</option>
+                                        @foreach ($attributes as $attribute)
+                                            <option value="{{ $attribute->id }}"
+                                                data-values='@json($attribute->values->pluck("title", "id"))'>{{ $attribute->title }}</option>
+                                        @endforeach
+                                    </select>
+                                </div>
+                                <div class="col-md-5 mb-3">
+                                    <select class="form-select variant-values" name="variant[0][value]" placeholder="Select values" id="variant-0-values" value="" multiple>
+                                    </select>
+                                </div>
+                                <div class="col-md-2 mb-3">
+                                    <button type="button" class="btn btn-danger remove-row">Remove</button>
+                                </div>
+                            </div>
+                        </div>
+                        <button type="button" class="btn btn-dark" id="add-new">Add New</button>
+                    </div>
+                </div>
+            </div>
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-body">
+                        <div class="row">
+                            <div id="variant-combinations-wrapper"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+             <div class="text-end">
+                <button type="submit" class="btn btn-primary">Submit</button>
             </div>
           </div>
         </div>
+
+        </form>
       </div>
 
 @endsection
 
 
 @push('scripts')
-
+<script src="https://cdn.jsdelivr.net/npm/choices.js/public/assets/scripts/choices.min.js"></script>
 <script>
+    // Global: define setupVariantSelects
+    function setupVariantSelects() {
+        const valueChoicesMap = {};
+
+        document.querySelectorAll('.variant-values').forEach((el) => {
+            if (!el.dataset.initialized) {
+                const instance = new Choices(el, {
+                    removeItemButton: true,
+                    placeholder: true,
+                    searchEnabled: true,
+                });
+                el.dataset.initialized = true;
+                valueChoicesMap[el.id] = instance;
+            }
+        });
+
+        document.querySelectorAll('.variant-select').forEach((selectEl) => {
+            if (!selectEl.dataset.initialized) {
+                const instance = new Choices(selectEl, {
+                    allowHTML: false,
+                    searchEnabled: true,
+                    placeholder: true,
+                });
+                selectEl.dataset.initialized = true;
+
+                selectEl.addEventListener('change', function () {
+                    const selected = this.selectedOptions[0];
+                    const valueSelectId = this.id + '-values';
+                    const valueSelect = document.getElementById(valueSelectId);
+                    const choicesInstance = valueChoicesMap[valueSelectId];
+
+                    if (!choicesInstance || !selected || !selected.dataset.values) return;
+
+                    try {
+                        const values = JSON.parse(selected.dataset.values);
+
+                        // Remove all existing options and values
+                        choicesInstance.clearStore();
+                        choicesInstance.clearChoices();
+
+                        const newOptions = Object.entries(values).map(([value, label]) => ({
+                            value,
+                            label,
+                            selected: false,
+                            disabled: false,
+                        }));
+
+                        choicesInstance.setChoices(newOptions, 'value', 'label', true);
+                    } catch (err) {
+                        console.warn("Invalid data-values JSON", selected.dataset.values);
+                    }
+                });
+            }
+        });
+    }
+
+    function setupVariantChangeListeners() {
+        document.querySelectorAll('.variant-select, .variant-values').forEach((el) => {
+            el.addEventListener('change', () => {
+                generateVariantCombinations();
+            });
+        });
+    }
+
+    function generateVariantCombinations() {
+        const attributeValuePairs = [];
+
+        document.querySelectorAll('.attribute-value-row').forEach((row) => {
+            const select = row.querySelector('.variant-select');
+            const values = row.querySelector('.variant-values');
+
+            const attributeName = select?.selectedOptions[0]?.textContent?.trim();
+            const selectedValueIds = [...values?.selectedOptions || []].map(o => o.value);
+            const selectedValueNames = [...values?.selectedOptions || []].map(o => o.textContent.trim());
+
+            if (attributeName && selectedValueIds.length) {
+                attributeValuePairs.push({
+                    attribute: attributeName,
+                    valueIds: selectedValueIds,
+                    valueNames: selectedValueNames
+                });
+            }
+        });
+
+        const combinationsIds = getCombinations(attributeValuePairs.map(p => p.valueIds));
+        const combinationsNames = getCombinations(attributeValuePairs.map(p => p.valueNames));
+        const wrapper = document.getElementById('variant-combinations-wrapper');
+        wrapper.innerHTML = '';
+
+        combinationsIds.forEach((comboIds, index) => {
+            const comboNames = combinationsNames[index];
+            const label = comboNames.join(' / ');
+            const comboIdStr = comboIds.join('-');
+            const formGroup = document.createElement('div');
+            formGroup.classList.add('row', 'g-3', 'align-items-end', 'mb-3');
+
+            formGroup.innerHTML = `
+                <div class="col-md-4">
+                    <label class="form-label">Variant: <strong>${label}</strong></label>
+                    <input type="hidden" name="combinations[${index}][label]" value="${label}">
+                    <input type="hidden" name="combinations[${index}][ids]" value="${comboIdStr}">
+                </div>
+                <div class="col-md-2">
+                    <label>Price</label>
+                    <input type="number" name="combinations[${index}][price]" class="form-control" required>
+                </div>
+                <div class="col-md-2">
+                    <label>SKU</label>
+                    <input type="text" name="combinations[${index}][sku]" class="form-control" required>
+                </div>
+                <div class="col-md-4">
+                    <label>Image</label>
+                    <input type="file" name="combinations[${index}][image]" class="form-control">
+                </div>
+            `;
+
+            wrapper.appendChild(formGroup);
+        });
+    }
+
+    function getCombinations(arrays) {
+        if (!arrays.length) return [];
+
+        // Start with an array with an empty array inside
+        let result = [[]];
+
+        arrays.forEach(array => {
+            // Defensive check: if this is not an array, skip or convert to array
+            if (!Array.isArray(array)) {
+                console.warn('Expected array but got:', array);
+                array = array ? [array] : [];
+            }
+
+            const temp = [];
+            result.forEach(r => {
+                array.forEach(value => {
+                    temp.push(r.concat(value));
+                });
+            });
+            result = temp;
+        });
+
+        return result;
+    }
     document.addEventListener("DOMContentLoaded", function () {
-    	var el;
-    	window.TomSelect && (new TomSelect(el = document.getElementById('categories'), {
-            allowEmptyOption: true,
-            create: true
-    	}));
+        let el;
+        if (window.TomSelect) {
+            new TomSelect(el = document.getElementById('categories'), {
+                allowEmptyOption: true,
+                create: true
+            });
+        }
+
+        setupVariantSelects();
+
+        const type = document.getElementById('type');
+        const variants = document.querySelector('.variants');
+        type.addEventListener('change', function () {
+            if (this.value == 'variable') {
+                variants.classList.remove('d-none');
+            } else {
+                variants.classList.add('d-none');
+            }
+        });
     });
-  </script>
+
+    let newIndex = 1;
+
+    document.getElementById('add-new').addEventListener('click', function () {
+        const wrapper = document.getElementById('attribute-values-wrapper');
+
+        const row = document.createElement('div');
+        row.classList.add('row', 'attribute-value-row');
+
+        const variantSelectId = `variant-${newIndex}`;
+        const variantValuesId = `variant-${newIndex}-values`;
+
+        row.innerHTML = `
+            <div class="col-md-5 mb-3">
+                <select name="variant[new_${newIndex}][option]" class="form-control variant-select" id="${variantSelectId}">
+                    <option value="" selected>Select</option>
+                    @foreach ($attributes as $attribute)
+                        <option value="{{ $attribute->id }}"
+                            data-values='@json($attribute->values->pluck("title", "id"))'>{{ $attribute->title }}</option>
+                    @endforeach
+                </select>
+            </div>
+            <div class="col-md-5 mb-3">
+                <select class="form-select variant-values" name="variant[new_${newIndex}][value]" placeholder="Select values" id="${variantValuesId}" value="" multiple></select>
+            </div>
+            <div class="col-md-2 mb-3">
+                <button type="button" class="btn btn-danger remove-row">Remove</button>
+            </div>
+        `;
+
+        wrapper.appendChild(row);
+        newIndex++;
+        setupVariantSelects(); // Now works globally
+        setupVariantChangeListeners();
+    });
+
+    document.addEventListener('click', function (e) {
+        if (e.target && e.target.classList.contains('remove-row')) {
+            e.target.closest('.attribute-value-row').remove();
+        }
+    });
+</script>
 
 @endpush
