@@ -52,7 +52,9 @@ class AttributeController extends Controller
     public function update(AttributeRequest $request, Attribute $attribute)
     {
         DB::transaction(function () use ($request, $attribute) {
-            $attribute->update($request->validated());
+            $data = $request->validated();
+            unset($data['values']);
+            $attribute->update($data);
             $this->updateAttributeValues($request->input('values'), $attribute);
         });
         return redirect()->route('admin.products.attributes.index')
