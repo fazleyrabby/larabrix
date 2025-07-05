@@ -32,6 +32,10 @@ class ProductController extends Controller
     {
         // $this->authorize('create', Product::class);
         $categories = Category::pluck('title', 'id');
+        $product->load([
+            'variants.attributeValues.attribute', // nested eager loading
+        ]);
+
         return view('admin.products.edit', compact('product', 'categories'));
     }
 

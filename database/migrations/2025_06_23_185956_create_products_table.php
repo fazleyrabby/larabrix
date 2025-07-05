@@ -19,6 +19,7 @@ return new class extends Migration
             $table->string('image')->nullable();
             $table->text('description')->nullable();
             $table->foreignId('category_id')->constrained('categories')->onDelete('cascade'); // Foreign key to categories
+            $table->enum('type', ['simple', 'variable'])->default('simple');
             $table->timestamps();
         });
     }

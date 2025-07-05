@@ -15,11 +15,9 @@ class AttributeSeeder extends Seeder
      */
     public function run(): void
     {
-        foreach (AttributeFactory::$attributeNames as $title) {
-            Attribute::factory()->create([
-                'title' => $title,
-                'slug'  => Str::slug($title),
-            ]);
-        }
+        $names = collect(AttributeFactory::$attributeNames)->shuffle();
+        $names->each(function ($title) {
+            Attribute::firstOrCreate(['slug' => Str::slug($title)], ['title' => $title]);
+        });
     }
 }

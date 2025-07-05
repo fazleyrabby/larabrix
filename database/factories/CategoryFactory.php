@@ -12,26 +12,26 @@ class CategoryFactory extends Factory
 {
     protected $model = Category::class;
 
-    private $categoryNames = [
-        'Fruits & Vegetables',
-        'Dairy Products',
-        'Beverages',
-        'Snacks & Confectionery',
-        'Meat & Poultry',
-        'Frozen Foods',
-        'Canned Goods',
-        'Bakery Items',
-        'Grains & Pasta',
-        'Spices & Condiments',
-        'Household Essentials',
-        'Personal Care',
-        'Pet Supplies',
-        'Health & Wellness',
-        'Online Exclusives',
-        'Electronics & Gadgets',
-        'Clothing & Accessories',
-        'Home Decor & Furnishings',
-    ];
+    // public static array $categoryNames = [
+    //     'Fruits & Vegetables',
+    //     'Dairy Products',
+    //     'Beverages',
+    //     'Snacks & Confectionery',
+    //     'Meat & Poultry',
+    //     'Frozen Foods',
+    //     'Canned Goods',
+    //     'Bakery Items',
+    //     'Grains & Pasta',
+    //     'Spices & Condiments',
+    //     'Household Essentials',
+    //     'Personal Care',
+    //     'Pet Supplies',
+    //     'Health & Wellness',
+    //     'Online Exclusives',
+    //     'Electronics & Gadgets',
+    //     'Clothing & Accessories',
+    //     'Home Decor & Furnishings',
+    // ];
     /**
      * Define the model's default state.
      *
@@ -40,7 +40,7 @@ class CategoryFactory extends Factory
     public function definition(): array
     {
         return [
-            'title' => $this->faker->unique()->randomElement($this->categoryNames),
+            'title' => $this->faker->unique()->word(),
         ];
     }
 }

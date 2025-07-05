@@ -2,10 +2,12 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class ProductVariant extends Model
 {
+    use HasFactory;
     // Each variant belongs to a single product
     public function product()
     {
@@ -15,6 +17,6 @@ class ProductVariant extends Model
     // Each variant has many attribute values (like Color=Red, Size=XL)
     public function attributeValues()
     {
-        return $this->belongsToMany(AttributeValue::class, 'product_variant_values', 'variant_id', 'attribute_value_id');
+        return $this->belongsToMany(AttributeValue::class, 'product_variant_values', 'product_variant_id', 'attribute_value_id');
     }
 }

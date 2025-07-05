@@ -73,6 +73,7 @@
                         <th>Name</th>
                         <th>Sku</th>
                         <th>Category</th>
+                        <th>Type</th>
                         {{-- <th>Description</th> --}}
                         {{-- <th>Purchase Price</th>
                         <th>Sale Price</th> --}}
@@ -89,6 +90,7 @@
                         <td><a href="{{ route('admin.products.show', $product->id) }}" class="text-reset" tabindex="-1">{{ $product->title }}</a></td>
                         <td><span class="text-secondary">{{ $product->sku }}</span></td>
                         <td><span class="text-secondary">{{ $product->category->title }}</span></td>
+                        <td><span class="text-secondary">{{ $product->type }}</span></td>
                         {{-- <td>{{ $product->description }}</td> --}}
                         {{-- <td>{{ $product->purchase_price }}</td>
                         <td>{{ $product->sale_price }}</td> --}}
