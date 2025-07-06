@@ -8,6 +8,8 @@ use Illuminate\Database\Eloquent\Model;
 class ProductVariant extends Model
 {
     use HasFactory;
+
+    public $guarded = [];
     // Each variant belongs to a single product
     public function product()
     {

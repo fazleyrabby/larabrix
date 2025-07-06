@@ -31,6 +31,7 @@ class ProductRequest extends FormRequest
             'description' => 'nullable|string|max:200',
             'sku' => 'required|string|max:200|unique:products,sku,' . $id,
             'category_id' => 'required',
+            'type' => 'required',
             'price' => 'required|numeric',
             'image' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:2048',
         ];

@@ -21,4 +21,32 @@ class ProductService
 
         return $products->appends($params);
     }
+
+    public function variantCombinations($product){
+        return $product->variants->map(function ($variant) {
+            $attrs = $variant->attributeValues;
+            return [
+                'label' => $attrs->pluck('title')->implode(' / '),
+                'ids' => $attrs->pluck('id')->all(),
+                'price' => $variant->price,
+                'sku' => $variant->sku,
+                'image' => $variant->image_path,
+                'attr_pairs' => $attrs->map(fn ($attr) => [
+                    'attr_id' => $attr->attribute_id,
+                    'attr_value_id' => $attr->id,
+                ]),
+            ];
+        });
+    }
+    public function attributeRows($combinations){
+        return $combinations
+            ->pluck('attr_pairs')
+            ->flatten(1)
+            ->groupBy('attr_id')
+            ->map(fn ($items, $attrId) => [
+                'attr_id' => $attrId,
+                'attr_value_ids' => $items->pluck('attr_value_id')->unique()->values()->all(),
+            ])
+            ->values();
+    }
 }

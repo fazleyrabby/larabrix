@@ -145,7 +145,7 @@
                         <div id="attribute-values-wrapper">
                             <div class="row attribute-value-row">
                                 <div class="col-md-5 mb-3">
-                                    <select name="variant[0][option]" class="form-control variant-select" id="variant-0">
+                                    <select class="form-control variant-select" id="variant-0">
                                         <option value="" selected>Select</option>
                                         @foreach ($attributes as $attribute)
                                             <option value="{{ $attribute->id }}"
@@ -247,11 +247,16 @@
     }
 
     function setupVariantChangeListeners() {
-        document.querySelectorAll('.variant-select, .variant-values').forEach((el) => {
-            el.addEventListener('change', () => {
-                generateVariantCombinations();
-            });
-        });
+        const run = () => generateVariantCombinations();
+
+        document.querySelectorAll('.variant-select').forEach((el) =>
+            el.addEventListener('change', run)
+        );
+
+        document.querySelectorAll('.variant-values').forEach((el) =>
+            el.addEventListener('change', run)
+        );
+        run();
     }
 
     function generateVariantCombinations() {
@@ -274,23 +279,34 @@
             }
         });
 
-        const combinationsIds = getCombinations(attributeValuePairs.map(p => p.valueIds));
-        const combinationsNames = getCombinations(attributeValuePairs.map(p => p.valueNames));
+        // 🔥 Early exit if nothing selected
+        if (attributeValuePairs.length === 0) return;
+
+        const idArrays = attributeValuePairs.map(p => p.valueIds);
+        const nameArrays = attributeValuePairs.map(p => p.valueNames);
+
+        const combinationsIds = getCombinations(idArrays);
+        const combinationsNames = getCombinations(nameArrays);
+
         const wrapper = document.getElementById('variant-combinations-wrapper');
         wrapper.innerHTML = '';
 
         combinationsIds.forEach((comboIds, index) => {
             const comboNames = combinationsNames[index];
             const label = comboNames.join(' / ');
-            const comboIdStr = comboIds.join('-');
             const formGroup = document.createElement('div');
             formGroup.classList.add('row', 'g-3', 'align-items-end', 'mb-3');
+
+            // ⛏️ Fix: generate all id inputs
+            const idHTML = comboIds.map(id =>
+                `<input type="hidden" name="combinations[${index}][ids][]" value="${id}">`
+            ).join('');
 
             formGroup.innerHTML = `
                 <div class="col-md-4">
                     <label class="form-label">Variant: <strong>${label}</strong></label>
                     <input type="hidden" name="combinations[${index}][label]" value="${label}">
-                    <input type="hidden" name="combinations[${index}][ids]" value="${comboIdStr}">
+                    ${idHTML}
                 </div>
                 <div class="col-md-2">
                     <label>Price</label>
@@ -312,17 +328,10 @@
 
     function getCombinations(arrays) {
         if (!arrays.length) return [];
-
-        // Start with an array with an empty array inside
         let result = [[]];
 
         arrays.forEach(array => {
-            // Defensive check: if this is not an array, skip or convert to array
-            if (!Array.isArray(array)) {
-                console.warn('Expected array but got:', array);
-                array = array ? [array] : [];
-            }
-
+            if (!Array.isArray(array)) array = [array];
             const temp = [];
             result.forEach(r => {
                 array.forEach(value => {
@@ -334,6 +343,7 @@
 
         return result;
     }
+
     document.addEventListener("DOMContentLoaded", function () {
         let el;
         if (window.TomSelect) {
@@ -344,6 +354,7 @@
         }
 
         setupVariantSelects();
+        setupVariantChangeListeners();
 
         const type = document.getElementById('type');
         const variants = document.querySelector('.variants');
