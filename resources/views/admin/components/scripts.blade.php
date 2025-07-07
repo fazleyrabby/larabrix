@@ -110,4 +110,69 @@
     })
   }
 </script>
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    document.addEventListener("submit", async function (e) {
+        const form = e.target;
+
+        if (form.classList.contains("ajax-form")) {
+            e.preventDefault();
+
+            const submitBtn = form.querySelector('button[type="submit"]');
+            const originalBtnHTML = submitBtn.innerHTML;
+
+            // CSRF token
+            const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
+
+            // Prepare FormData
+            const formData = new FormData(form);
+
+            try {
+                // Disable button and show loading
+                submitBtn.innerHTML = "Please Wait....";
+                submitBtn.disabled = true;
+
+                const response = await axios.post(form.action, formData, {
+                    headers: {
+                        'X-CSRF-TOKEN': csrfToken,
+                        'Content-Type': 'multipart/form-data',
+                    }
+                });
+
+                // Re-enable button
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = originalBtnHTML;
+
+                // Show toast
+
+                toast(response.data.success, response.data.message ?? response.data);
+
+                // Optional: run success callback
+                if (typeof success === "function") {
+                    success(response.data.message ?? response.data, response.data.refresh ?? "");
+                }
+
+            } catch (error) {
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = originalBtnHTML;
+
+                // Show error toasts
+                document.querySelector(".errorarea")?.classList.add("show");
+
+                if (error.response && error.response.data && error.response.data.errors) {
+                    for (let key in error.response.data.errors) {
+                        toast("error", error.response.data.errors[key]);
+                    }
+                } else {
+                    toast("error", "Something went wrong.");
+                }
+
+                // Optional: global error handler
+                // errosresponse(error.response, error.message);
+            }
+        }
+    });
+});
+</script>
 @endpush

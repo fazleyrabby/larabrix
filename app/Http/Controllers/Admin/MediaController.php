@@ -1,0 +1,86 @@
+<?php
+
+namespace App\Http\Controllers\Admin;
+
+use App\Http\Controllers\Controller;
+use App\Models\Media;
+use App\Traits\UploadPhotos;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Storage;
+
+class MediaController extends Controller
+{
+    use UploadPhotos;
+    public function index(Request $request)
+    {
+        $search_query = $request->q;
+        $status = $request->status ?? 1;
+        $media = Media::select('id', 'url', 'created_at', 'status')
+            ->where('url', 'like', '%' . $search_query . '%')
+            ->when(!request()->has('q'), function ($query) use ($status) {
+                $query->where('status', $status);
+            })->orderBy('created_at', 'desc')->paginate(15);
+
+        if ($request->ajax()) {
+            return view('admin.layouts.components.media-popup', compact('media'));
+            // return view('admin.media.ajax', compact('media'));
+        }
+        return view('admin.media.index', compact('media'));
+    }
+
+    public function store(Request $request)
+    {
+        try {
+            if ($request->hasFile('images')) {
+                foreach ($request->file('images') as $file) {
+                    $image = $this->uploadPhoto($file, '', 'media/');
+                    $data[] =  [
+                        'url' => $image,
+                        'created_at' => now(),
+                        'updated_at' => now(),
+                    ];
+                }
+            }
+            Media::insert($data);
+            $response = [
+                'success' => 'success',
+                'message' => 'Media Successfully Updated!',
+                'refresh' => 'media-container'
+            ];
+        } catch (\Throwable $th) {
+            Log::error('Error occurred while media File upload :'. $th);
+            $response = [
+                'success' => 'error',
+                'message' => 'Upload Error!',
+            ];
+        }
+
+        return response()->json($response);
+    }
+
+    public function downloadImage(Request $request){
+        return Storage::disk('public')->download($request->url);
+    }
+
+
+    public function delete(Request $request)
+    {
+        $ids = $request->ids;
+        try {
+            $media = Media::whereIn('id', $ids);
+            if ($media->exists()) {
+                foreach ($media->get() as $image) {
+                    $this->deleteImage($image->url);
+                }
+            }
+            $media->delete();
+            $status = "success";
+            $message = "Media files successfully deleted";
+        } catch (\Illuminate\Database\QueryException $ex) {
+            $status = "error";
+            $message = $ex->getMessage();
+        }
+        return redirect()->route('admin.media.index')->with($status, $message);
+    }
+}

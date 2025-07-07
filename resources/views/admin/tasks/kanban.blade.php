@@ -119,7 +119,7 @@
 
         axios.post(route, {data: items})
         .then(({data}) => {
-            if(data) toast(data.success, data.message)
+            if(data) toast(data.success ? 'success', data.message)
         })
         .catch(error => {
             if (error.response) {
