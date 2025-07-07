@@ -12,6 +12,7 @@
 ✅ Dynamic Menu Management <br>
 ✅ Kanban Task Manager <br>
 🔄 Product and Category Management <br>
+🔄 Gallery Management <br>
 ❌ Cart Management for E-commerce <br>
 ❌ Media Library (upload & manage assets) <br>
 

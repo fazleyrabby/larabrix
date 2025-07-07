@@ -305,7 +305,7 @@
                         try {
                             const values = JSON.parse(selected.dataset.values);
                             const selectedValues = JSON.parse(valueSelect.dataset.selectedValues || '[]');
-                            console.log(values)
+                            // console.log(values)
 
                             // Remove all existing options and values
                             choicesInstance.clearStore();
@@ -331,25 +331,25 @@
         }
 
         function setupVariantChangeListeners() {
-            const run = () => generateVariantCombinations();
+            const generate = () => generateVariantCombinations();
 
             document.querySelectorAll('.variant-select').forEach((el) => {
-                el.addEventListener('change', run);
+                el.addEventListener('change', generate);
             });
 
             document.querySelectorAll('.variant-values').forEach((el) => {
                 const choices = el.choices;
                 if (choices) {
                     // Ensure Choices events trigger generation
-                    choices.passedElement.element.addEventListener('addItem', run);
-                    choices.passedElement.element.addEventListener('removeItem', run);
+                    choices.passedElement.element.addEventListener('addItem', generate);
+                    choices.passedElement.element.addEventListener('removeItem', generate);
                 } else {
                     // fallback for plain select (in case Choices is not initialized yet)
-                    el.addEventListener('change', run);
+                    el.addEventListener('change', generate);
                 }
             });
 
-            run(); // trigger once initially
+            generate(); // trigger once initially
         }
 
         function generateVariantCombinations() {
@@ -385,7 +385,6 @@
             wrapper.innerHTML = '';
 
             let newIndex = 0;
-
             combinationsIds.forEach((comboIds, i) => {
                 const comboKey = comboIds.join('-');
                 if (renderedKeys.has(comboKey)) return;

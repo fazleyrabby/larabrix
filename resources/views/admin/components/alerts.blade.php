@@ -43,7 +43,7 @@ function confirmDelete(event, form) {
         Swal.fire({
             position: "top-end",
             text: `${message}`,
-            icon: `${type ? 'success' : 'error'}`,
+            icon: `${type ?? 'error'}`,
             showConfirmButton: false,
             toast: true,
             timer: 2500

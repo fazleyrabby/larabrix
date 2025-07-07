@@ -11,6 +11,7 @@ use App\Http\Controllers\Admin\CategoryController;
 use App\Http\Controllers\Admin\AttributeController;
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\AttributeValueController;
+use App\Http\Controllers\Admin\MediaController;
 use App\Http\Controllers\Admin\ProductVariantController;
 // use App\Http\Controllers\Admin\CrudController;
 
@@ -42,17 +43,22 @@ Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () 
         'as' => 'products.',
     ], function () {
         Route::resource('attributes', AttributeController::class)->names('attributes');
-        Route::resource('attributes.values', AttributeValueController::class)->shallow()->names('attributes.values');
+        // Route::resource('attributes.values', AttributeValueController::class)->shallow()->names('attributes.values');
         Route::resource('categories', CategoryController::class)->names('categories');
         Route::resource('/', ProductController::class)->parameters(['' => 'product']);
         Route::resource('{product}/variants', ProductVariantController::class)->names('variants');
     });
 
-    // Route::resource('categories', CategoryController::class)->names('categories');
-    // Route::resource('products', ProductController::class)->names('products');
-    // Route::resource('attributes', AttributeController::class)->names('attributes');
-    // Route::resource('attribute-values', AttributeValueController::class)->names('attribute-values');
-    // Route::resource('variants', VariantController::class)->names('variants');
+    Route::group([
+        'prefix' => '/media',
+        'as' => 'media.',
+    ], function () {
+        Route::get('/download', [MediaController::class, 'downloadImage'])->name('download');
+        Route::post('/delete', [MediaController::class, 'delete'])->name('delete');
+        Route::resource('/', MediaController::class);
+    });
+
+
 });
 
 Route::get('/', function () {
