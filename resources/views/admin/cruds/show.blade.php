@@ -60,6 +60,14 @@
                             </div>
                         </div>
                         <div class="mb-3 row">
+                            <label class="col-3 col-form-label">Media File</label>
+                            <div class="col">
+                                @if($crud->media_input)
+                                    <img width="100" src="{{ asset($crud->media_input) }}" />
+                                @endif
+                            </div>
+                        </div>
+                        <div class="mb-3 row">
                             <label class="col-3 col-form-label">Select Input</label>
                             <div class="col">
                                 {{ $crud->custom_select }}

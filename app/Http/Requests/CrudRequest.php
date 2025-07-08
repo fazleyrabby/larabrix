@@ -29,6 +29,7 @@ class CrudRequest extends FormRequest
             'title' => 'required|string|max:50|unique:cruds,title,' . $id,
             'textarea' => 'required|string|max:200',
             'default_file_input' => 'nullable|image',
+            'media_input' => 'nullable',
             // 'filepond_input' => 'nullable|image',
             'custom_select' => 'required',
         ];

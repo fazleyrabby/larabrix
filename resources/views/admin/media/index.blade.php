@@ -107,7 +107,7 @@
                                     </div>
                                 </div>
                                 <div class="col-md-8">
-                                    <div class="mb-3">
+                                    <div class="mb-3" id="ajax-container">
                                             @include('admin.components.media.items', ['media' => $media])
                                     </div>
                                 </div>
@@ -189,6 +189,13 @@
 
         });
     });
+
+    function success(response, refresh) {
+        let url = window.location.href;
+        const target = document.querySelector(".media-container");
+        const container = document.getElementById("ajax-container");
+        loadData(url, container, target)
+    }
 
 
 

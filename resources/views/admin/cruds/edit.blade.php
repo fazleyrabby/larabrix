@@ -95,6 +95,15 @@
                                 </div>
                             </div>
                             <div class="mb-3 row">
+                                <label class="col-3 col-form-label required">Media File Input</label>
+                                <div class="col">
+                                    <button data-modal-toggle="crud-modal" id="crud-modal-btn" class="btn btn-primary">Upload File</button>
+                                    <div id="crud-modal-wrapper">
+                                        <img width="100" src="{{ asset($crud->media_input) }}" />
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="mb-3 row">
                                 <label class="col-3 col-form-label required">Custom Select</label>
                                 <div class="col">
                                     <select type="text" class="form-select" name="custom_select" id="select-users" value="">
@@ -120,6 +129,12 @@
             </div>
         </div>
     </div>
+
+    @include('admin.components.media.popup', [
+        'modalId' => 'crud-modal',
+        'inputType' => 'single',
+        'imageInputName' => 'media_input'
+    ])
 
 @endsection
 

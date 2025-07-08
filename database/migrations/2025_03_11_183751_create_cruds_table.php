@@ -18,6 +18,7 @@ return new class extends Migration
             $table->string('default_file_input')->nullable();
             $table->string('filepond_input')->nullable();
             $table->string('custom_select')->nullable();
+            $table->string('media_input')->nullable();
             $table->timestamps();
         });
     }

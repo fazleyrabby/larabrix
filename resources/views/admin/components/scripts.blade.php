@@ -145,8 +145,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 submitBtn.innerHTML = originalBtnHTML;
 
                 // Show toast
-
-                toast(response.data.success, response.data.message ?? response.data);
+                toast(response.data.success ? 'success' : 'error', response.data.message ?? response.data);
 
                 // Optional: run success callback
                 if (typeof success === "function") {
@@ -171,6 +170,97 @@ document.addEventListener("DOMContentLoaded", function () {
                 // Optional: global error handler
                 // errosresponse(error.response, error.message);
             }
+        }
+    });
+});
+
+function loadData(url, container, target) {
+    // const table = document.getElementById("ajax-table");
+    // const container = document.getElementById("ajax-container");
+    target.classList.add("onLoading");
+
+    axios.get(url)
+        .then(response => {
+            container.innerHTML = response.data;
+        })
+        .catch(error => {
+            console.error("Failed to load data!", error);
+        })
+        .finally(() => {
+            target.classList.remove("onLoading");
+        });
+}
+</script>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    function showModal(modalId) {
+        const modal = document.getElementById(modalId);
+        if (!modal) return;
+
+        modal.classList.add('show');
+        modal.style.display = 'block';
+        document.body.classList.add('modal-open');
+
+        // Add backdrop
+        const backdrop = document.createElement('div');
+        backdrop.className = 'modal-backdrop';
+        backdrop.style.cssText = `
+            position: fixed;
+            top: 0; left: 0;
+            width: 100vw;
+            height: 100vh;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 1040;
+        `;
+        backdrop.dataset.modalBackdrop = modalId;
+        document.body.appendChild(backdrop);
+    }
+
+    function hideModal(modalId) {
+        const modal = document.getElementById(modalId);
+        if (!modal) return;
+
+        modal.classList.remove('show');
+        modal.style.display = 'none';
+        document.body.classList.remove('modal-open');
+
+        const backdrop = document.querySelector(`[data-modal-backdrop="${modalId}"]`);
+        if (backdrop) backdrop.remove();
+    }
+
+    // Open modal
+    document.querySelectorAll('[data-modal-toggle]').forEach(button => {
+        button.addEventListener('click', e => {
+            e.preventDefault();
+            const modalId = button.getAttribute('data-modal-toggle');
+            showModal(modalId);
+        });
+    });
+
+    // Close modal
+    document.addEventListener('click', e => {
+        if (e.target.matches('[data-modal-dismiss="modal"]')) {
+            const modal = e.target.closest('.modal');
+            if (modal && modal.id) hideModal(modal.id);
+        }
+    });
+
+    // Backdrop click
+    document.addEventListener('click', e => {
+        const backdrop = e.target;
+        if (backdrop.classList.contains('modal-backdrop')) {
+            const modalId = backdrop.dataset.modalBackdrop;
+            hideModal(modalId);
+        }
+    });
+
+    // ESC key
+    document.addEventListener('keydown', e => {
+        if (e.key === 'Escape') {
+            document.querySelectorAll('.modal.show').forEach(modal => {
+                hideModal(modal.id);
+            });
         }
     });
 });

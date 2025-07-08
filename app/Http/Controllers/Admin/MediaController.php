@@ -20,12 +20,14 @@ class MediaController extends Controller
             ->where('url', 'like', '%' . $search_query . '%')
             ->when(!request()->has('q'), function ($query) use ($status) {
                 $query->where('status', $status);
-            })->orderBy('created_at', 'desc')->paginate(15);
+            })->orderBy('created_at', 'desc');
 
         if ($request->ajax()) {
-            return view('admin.layouts.components.media-popup', compact('media'));
+            $media = $media->paginate(12);
+            return view('admin.components.media.items', compact('media'));
             // return view('admin.media.ajax', compact('media'));
         }
+        $media = $media->paginate(15);
         return view('admin.media.index', compact('media'));
     }
 
@@ -44,14 +46,14 @@ class MediaController extends Controller
             }
             Media::insert($data);
             $response = [
-                'success' => 'success',
+                'success' => true,
                 'message' => 'Media Successfully Updated!',
-                'refresh' => 'media-container'
+                'refresh' => true
             ];
         } catch (\Throwable $th) {
             Log::error('Error occurred while media File upload :'. $th);
             $response = [
-                'success' => 'error',
+                'success' => false,
                 'message' => 'Upload Error!',
             ];
         }

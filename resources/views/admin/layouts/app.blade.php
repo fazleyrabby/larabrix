@@ -70,6 +70,7 @@
 
     @include('admin.components.alerts')
     @include('admin.components.scripts')
+    @include('admin.components.modal-scripts')
     @stack('scripts')
 </body>
 </html>
