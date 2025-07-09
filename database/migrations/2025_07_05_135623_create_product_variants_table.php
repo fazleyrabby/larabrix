@@ -16,7 +16,7 @@ return new class extends Migration
             $table->foreignId('product_id')->constrained()->onDelete('cascade');
             $table->string('sku')->unique(); // Unique for each variant
             $table->decimal('price', 10, 2)->nullable();
-            // $table->integer('stock')->nullable();
+            $table->string('image')->nullable();
             $table->timestamps();
         });
     }

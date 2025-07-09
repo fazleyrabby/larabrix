@@ -119,7 +119,8 @@
                                 </div>
                             </div>
                             <div class="card-footer text-end">
-                                <button type="submit" class="btn btn-primary">Submit</button>
+                                <button type="submit" class="btn btn-primary">Save</button>
+                                <button type="submit" name="action" value="save_and_create" class="btn btn-success">Save and create</button>
                             </div>
                         </form>
                     </div>

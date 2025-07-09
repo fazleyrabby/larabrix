@@ -124,7 +124,7 @@
                     </div>
               </div>
             </div>
-            <div class="col-12 variants">
+            <div class="col-12 variants d-none">
                 <div class="card">
                     <div class="card-header">
                         <h3 class="card-title">Variation</h3>
@@ -166,11 +166,23 @@
                     </div>
                 </div>
             </div>
-            <div class="col-12">
+            <div class="col-12 variant-combo d-none">
                 <div class="card">
                     <div class="card-body">
                         <div class="row">
-                            <div id="variant-combinations-wrapper"></div>
+                            <table class="table table-bordered">
+                                <thead>
+                                    <tr>
+                                        <th>Variant</th>
+                                        <th>Price</th>
+                                        <th>SKU</th>
+                                        <th>Image</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="variant-combinations-wrapper">
+                                    <!-- JS-generated rows go here -->
+                                </tbody>
+                            </table>
                         </div>
                     </div>
                 </div>
@@ -294,35 +306,30 @@
         combinationsIds.forEach((comboIds, index) => {
             const comboNames = combinationsNames[index];
             const label = comboNames.join(' / ');
-            const formGroup = document.createElement('div');
-            formGroup.classList.add('row', 'g-3', 'align-items-end', 'mb-3');
 
             // ⛏️ Fix: generate all id inputs
             const idHTML = comboIds.map(id =>
                 `<input type="hidden" name="combinations[${index}][ids][]" value="${id}">`
             ).join('');
+            const row = document.createElement('tr');
 
-            formGroup.innerHTML = `
-                <div class="col-md-4">
-                    <label class="form-label">Variant: <strong>${label}</strong></label>
-                    <input type="hidden" name="combinations[${index}][label]" value="${label}">
-                    ${idHTML}
-                </div>
-                <div class="col-md-2">
-                    <label>Price</label>
-                    <input type="number" name="combinations[${index}][price]" class="form-control" required>
-                </div>
-                <div class="col-md-2">
-                    <label>SKU</label>
-                    <input type="text" name="combinations[${index}][sku]" class="form-control" required>
-                </div>
-                <div class="col-md-4">
-                    <label>Image</label>
-                    <input type="file" name="combinations[${index}][image]" class="form-control">
-                </div>
+            row.innerHTML = `<td>
+                        <label class="form-label"><strong>${label}</strong></label>
+                        <input type="hidden" name="combinations[${index}][label]" value="${label}">
+                        ${idHTML}
+                    </td>
+                    <td>
+                        <input type="number" name="combinations[${index}][price]" class="form-control" required>
+                    </td>
+                    <td>
+                        <input type="text" name="combinations[${index}][sku]" class="form-control" required>
+                    </td>
+                    <td>
+                        <input type="file" name="combinations[${index}][image]" class="form-control">
+                    </td>
             `;
 
-            wrapper.appendChild(formGroup);
+            wrapper.appendChild(row)
         });
     }
 
@@ -358,13 +365,16 @@
 
         const type = document.getElementById('type');
         const variants = document.querySelector('.variants');
-        type.addEventListener('change', function () {
+        const variantCombinations = document.querySelector('.variant-combo')
+        type.addEventListener('change', function() {
             if (this.value == 'variable') {
-                variants.classList.remove('d-none');
+                variants.classList.remove('d-none')
+                variantCombinations.classList.remove('d-none')
             } else {
-                variants.classList.add('d-none');
+                variants.classList.add('d-none')
+                variantCombinations.classList.add('d-none')
             }
-        });
+        })
     });
 
     let newIndex = 1;

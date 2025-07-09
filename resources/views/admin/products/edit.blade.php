@@ -132,7 +132,7 @@
                         </div>
                     </div>
 
-                    <div class="col-12 variants">
+                    <div class="col-12 variants {{ $product->type == 'simple' ? 'd-none' : '' }}">
                     <div class="card">
                         <div class="card-header">
                             <h3 class="card-title">Variation</h3>
@@ -200,38 +200,22 @@
                         </div>
                     </div>
                 </div>
-                    <div class="col-12">
+                    <div class="col-12 variant-combo {{ $product->type == 'simple' ? 'd-none' : '' }}">
                         <div class="card">
                             <div class="card-body">
                                 <div class="row">
-                                    <div id="variant-combinations-wrapper">
-                                        {{-- @foreach ($combinations as $index => $combination)
-                                            <div class="row g-3 align-items-end mb-2">
-                                                <div class="col-md-4">
-                                                    <label class="form-label">Variant: <strong>{{ $combination['label'] }}</strong></label>
-                                                    <input type="hidden" name="combinations[{{ $index }}][label]" value="{{ $combination['label'] }}">
-                                                </div>
-                                                <div class="col-md-2">
-                                                    <label>Price</label>
-                                                    <input type="number" name="combinations[{{ $index }}][price]" class="form-control" required  value="{{ $combination['price'] }}">
-                                                    @foreach ($combination['ids'] as $valueId)
-                                                        <input type="hidden" name="combinations[{{ $index }}][ids][]" value="{{ $valueId }}">
-                                                    @endforeach
-                                                </div>
-                                                <div class="col-md-2">
-                                                    <label>SKU</label>
-                                                    <input type="text" name="combinations[{{ $index }}][sku]" class="form-control" required value="{{ $combination['sku'] }}">
-                                                </div>
-                                                <div class="col-md-4">
-                                                    <label>Image</label>
-                                                    <input type="file" name="combinations[{{ $index }}][image]" class="form-control" >
-                                                    @if (!empty($combination['image']))
-                                                        <img src="{{ asset('storage/'. $combination['image']) }}" alt="variant image" class="mt-2" width="80">
-                                                    @endif
-                                                </div>
-                                            </div>
-                                        @endforeach --}}
-                                    </div>
+                                    <table class="table table-bordered">
+                                        <thead>
+                                            <tr>
+                                                <th>Variant</th>
+                                                <th>Price</th>
+                                                <th>SKU</th>
+                                                <th>Image</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="variant-combinations-wrapper">
+                                        </tbody>
+                                    </table>
                                 </div>
                             </div>
                         </div>
@@ -258,11 +242,14 @@
 
             const type = document.getElementById('type');
             const variants = document.querySelector('.variants');
+            const variantCombinations = document.querySelector('.variant-combo')
             type.addEventListener('change', function() {
                 if (this.value == 'variable') {
                     variants.classList.remove('d-none')
+                    variantCombinations.classList.remove('d-none')
                 } else {
                     variants.classList.add('d-none')
+                    variantCombinations.classList.add('d-none')
                 }
             })
         });
@@ -382,7 +369,7 @@
 
             const wrapper = document.getElementById('variant-combinations-wrapper');
             const renderedKeys = new Set();
-            wrapper.innerHTML = '';
+            wrapper.innerHTML = ``;
 
             let newIndex = 0;
             combinationsIds.forEach((comboIds, i) => {
@@ -401,28 +388,24 @@
                     `<input type="hidden" name="combinations[${newIndex}][ids][]" value="${id}">`
                 ).join('');
 
-                wrapper.innerHTML += `
-                    <div class="row g-3 align-items-end mb-2">
-                        <div class="col-md-4">
-                            <label class="form-label">Variant: <strong>${label}</strong></label>
+                wrapper.innerHTML += `<tr>
+                        <td>
+                            <label class="form-label"><strong>${label}</strong></label>
+                            <input type="hidden" name="combinations[${newIndex}][variant_id]" value="${existing?.variant_id ?? ''}">
                             <input type="hidden" name="combinations[${newIndex}][label]" value="${label}">
                             ${idHTML}
-                        </div>
-                        <div class="col-md-2">
-                            <label>Price</label>
+                        </td>
+                        <td>
                             <input type="number" name="combinations[${newIndex}][price]" class="form-control" required value="${existing?.price ?? ''}">
-                        </div>
-                        <div class="col-md-2">
-                            <label>SKU</label>
+                        </td>
+                        <td>
                             <input type="text" name="combinations[${newIndex}][sku]" class="form-control" required value="${existing?.sku ?? ''}">
-                        </div>
-                        <div class="col-md-4">
-                            <label>Image</label>
+                        </td>
+                        <td>
                             <input type="file" name="combinations[${newIndex}][image]" class="form-control">
                             ${existing?.image ? `<img src="/storage/${existing.image}" alt="variant image" class="mt-2" width="80">` : ''}
-                        </div>
-                    </div>
-                `;
+                        </td>
+                    </tr>`;
 
                 newIndex++;
             });

@@ -45,7 +45,10 @@ class CrudController extends Controller
             $this->deleteImage($request->input('filepond_input'));
         }
         Crud::create($data);
-        return redirect()->route('admin.cruds.create')->with(['success' => 'Successfully created!']);
+        if ($request->input('action') === 'save_and_create') {
+            return redirect()->route('admin.cruds.create')->with('success', 'Saved. You can add another one.');
+        }
+        return redirect()->route('admin.cruds.index')->with(['success' => 'Successfully created!']);
     }
 
     public function show(Crud $crud)

@@ -30,7 +30,7 @@ class ProductController extends Controller
 
     public function create()
     {
-        $categories = Category::pluck('title', 'id');
+        $categories = Category::toBase()->pluck('title', 'id');
         $attributes = Attribute::with('values')->get();
         return view('admin.products.create', compact('categories','attributes'));
     }
@@ -38,7 +38,7 @@ class ProductController extends Controller
     public function edit(Product $product)
     {
         // $this->authorize('create', Product::class);
-        $categories = Category::pluck('title', 'id');
+        $categories = Category::toBase()->pluck('title', 'id');
         $attributes = Attribute::with('values')->get();
         $combinations = $this->service->variantCombinations($product);
         $attrRows = $this->service->attributeRows($combinations);
@@ -55,16 +55,7 @@ class ProductController extends Controller
             $data['image'] = $this->uploadPhoto($request->file('image'));
         }
         $product = Product::create($data);
-
-        $combinations = $request->combinations;
-        foreach ($combinations as $combination) {
-            $variant = ProductVariant::create([
-                'product_id' => $product->id,
-                'sku' => $combination['sku'],
-                'price' => $combination['price'],
-            ]);
-            $variant->attributeValues()->attach($combination['ids']);
-        }
+        $this->storeCombinations($request, $product);
         return redirect()->route('admin.products.create')->with(['success' => 'Successfully created!']);
     }
 
@@ -78,29 +69,17 @@ class ProductController extends Controller
     public function update(ProductRequest $request, Product $product)
     {
         // $this->authorize('create', Product::class);
-        // $product = Product::findOrFail($id);
         $data = $request->validated();
         if ($request->hasFile('image')) {
             $data['image'] = $this->uploadPhoto($request->file('image'), $product->image);
         }
         $product->update($data);
-
-        // Clear old variants and their pivot records
+        $oldVariants = $product->variants->keyBy('id');
         foreach ($product->variants as $oldVariant) {
             $oldVariant->attributeValues()->detach();
             $oldVariant->delete();
         }
-
-        // Recreate variants from submitted combinations
-        $combinations = $request->combinations ?? [];
-        foreach ($combinations as $combination) {
-            $variant = ProductVariant::create([
-                'product_id' => $product->id,
-                'sku' => $combination['sku'],
-                'price' => $combination['price'],
-            ]);
-            $variant->attributeValues()->attach($combination['ids']);
-        }
+        $this->storeCombinations($request, $product, $oldVariants);
         return redirect()->route('admin.products.index')->with(['success' => 'Successfully updated!']);
     }
 
@@ -114,6 +93,27 @@ class ProductController extends Controller
         return redirect()->route('admin.products.index')->with(['success' => 'Successfully deleted!']);
     }
 
+    private function storeCombinations($request, $product, $oldVariants=[])
+    {
+        $combinations = $request->combinations ?? [];
+        foreach ($combinations as $combination) {
+            $image = null;
+
+            if (isset($combination['image']) && $combination['image'] instanceof \Illuminate\Http\UploadedFile) {
+                $image = $this->uploadPhoto($combination['image']);
+            }
+            if (!$image && $oldVariants && isset($combination['variant_id'])) {
+                $image = $oldVariants[$combination['variant_id']]->image ?? null;
+            }
+            $variant = ProductVariant::create([
+                'product_id' => $product->id,
+                'sku' => $combination['sku'],
+                'price' => $combination['price'],
+                'image' => $image,
+            ]);
+            $variant->attributeValues()->attach($combination['ids']);
+        }
+    }
     // public function bulkDelete(Request $request, CommonBusinessService $commonBusinessService)
     // {
     //     $ids = $request->input('ids');

@@ -11,8 +11,8 @@
             width: 40px;
             height: 40px;
             position: absolute;
-            top: 15%;
-            right: -4%;
+            top: 14px;
+            right: -15px;
             -webkit-transform: translate(-50%, -50%);
             transform: translate(-50%, -50%);
             box-shadow: 0 4px 8px rgb(0 0 0 / 3%);

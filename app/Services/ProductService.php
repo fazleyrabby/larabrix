@@ -26,11 +26,12 @@ class ProductService
         return $product->variants->map(function ($variant) {
             $attrs = $variant->attributeValues;
             return [
+                'variant_id' => $variant->id,
                 'label' => $attrs->pluck('title')->implode(' / '),
                 'ids' => $attrs->pluck('id')->all(),
                 'price' => $variant->price,
                 'sku' => $variant->sku,
-                'image' => $variant->image_path,
+                'image' => $variant->image,
                 'attr_pairs' => $attrs->map(fn ($attr) => [
                     'attr_id' => $attr->attribute_id,
                     'attr_value_id' => $attr->id,

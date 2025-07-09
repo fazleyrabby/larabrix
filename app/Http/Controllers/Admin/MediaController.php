@@ -45,18 +45,21 @@ class MediaController extends Controller
                 }
             }
             Media::insert($data);
-            $response = [
-                'success' => true,
-                'message' => 'Media Successfully Updated!',
-                'refresh' => true
-            ];
+            $success = 'success';
+            $message = 'Media Successfully Updated!';
+            $refresh = true;
         } catch (\Throwable $th) {
             Log::error('Error occurred while media File upload :'. $th);
-            $response = [
-                'success' => false,
-                'message' => 'Upload Error!',
-            ];
+            $success = 'error';
+            $message = 'Upload Error';
+            $refresh = false;
         }
+
+        $response = [
+            'success' => $success,
+            'message' => $message,
+            'refresh' => $refresh
+        ];
 
         return response()->json($response);
     }

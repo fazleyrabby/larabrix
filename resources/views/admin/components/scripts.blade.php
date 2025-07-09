@@ -145,7 +145,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 submitBtn.innerHTML = originalBtnHTML;
 
                 // Show toast
-                toast(response.data.success ? 'success' : 'error', response.data.message ?? response.data);
+                toast(response.data.success ?? 'error', response.data.message ?? response.data);
 
                 // Optional: run success callback
                 if (typeof success === "function") {
