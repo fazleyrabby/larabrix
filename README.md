@@ -25,6 +25,9 @@ Some Dummy Screenshots below:
 
 ![crud](<docs/crud.png>)
 ![crud update](<docs/crud-update.png>)
+![media gallery](<docs/media.png>)
+Product Variation
+![product](<docs/product.png>)
 
 Sorting Menu 
 ![menu](<docs/menu.gif>)
