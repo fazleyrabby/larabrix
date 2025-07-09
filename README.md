@@ -22,7 +22,7 @@
 
 | ✔️ | Feature                                      | Priority | ETA       |
 |----|----------------------------------------------|----------|-----------|
-| ✅ | Authentication                               | High     | ✅ Done    |
+| 🔄 | Authentication                               | High     | Q3 2025   |
 | ✅ | Common CRUD module                           | High     | ✅ Done    |
 | ✅ | Dynamic Menu Management                      | High     | ✅ Done    |
 | ✅ | Kanban Task Manager                          | High     | ✅ Done    |
