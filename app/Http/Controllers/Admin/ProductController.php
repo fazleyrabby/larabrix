@@ -14,6 +14,8 @@ use App\Services\ProductService;
 use App\Traits\UploadPhotos;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 class ProductController extends Controller
 {
@@ -47,16 +49,23 @@ class ProductController extends Controller
 
     public function store(ProductRequest $request)
     {
-        // dd($request->all());
-        // $this->authorize('create', Product::class);
-        $data = $request->validated(); // Get validated data
-        // Check if there's an image file and upload it
-        if ($request->hasFile('image')) {
-            $data['image'] = $this->uploadPhoto($request->file('image'));
+        try {
+            DB::transaction(function () use ($request) {
+                $data = $request->validated();
+                if ($request->hasFile('image')) {
+                    $data['image'] = $this->uploadPhoto($request->file('image'));
+                }
+                $product = Product::create($data);
+                $this->service->storeCombinations($request, $product);
+            });
+            return redirect()->route('admin.products.create')->with('success', 'Successfully created!');
+        } catch (\Throwable $e) {
+            Log::error('Product creation failed', [
+                'error' => $e->getMessage(),
+            ]);
+
+            return redirect()->back()->withErrors('Failed to create the product. Please try again.');
         }
-        $product = Product::create($data);
-        $this->storeCombinations($request, $product);
-        return redirect()->route('admin.products.create')->with(['success' => 'Successfully created!']);
     }
 
 
@@ -68,52 +77,46 @@ class ProductController extends Controller
 
     public function update(ProductRequest $request, Product $product)
     {
-        // $this->authorize('create', Product::class);
-        $data = $request->validated();
-        if ($request->hasFile('image')) {
-            $data['image'] = $this->uploadPhoto($request->file('image'), $product->image);
+        try {
+            DB::transaction(function () use ($request, $product) {
+                $data = $request->validated();
+                if ($request->hasFile('image')) {
+                    $data['image'] = $this->uploadPhoto($request->file('image'), $product->image);
+                }
+                $product->update($data);
+                $oldVariants = $product->variants->keyBy('id');
+                $this->service->storeCombinations($request, $product, $oldVariants);
+            });
+            
+            return redirect()->route('admin.products.index')->with('success','Successfully updated!');
+        } catch (\Throwable $e) {
+            Log::error('Product update failed', [
+                'product_id' => $product->id,
+                'error' => $e->getMessage(),
+            ]);
+
+            return redirect()->back()->with('success', 'Failed to update the product. Please try again.');
         }
-        $product->update($data);
-        $oldVariants = $product->variants->keyBy('id');
-        foreach ($product->variants as $oldVariant) {
-            $oldVariant->attributeValues()->detach();
-            $oldVariant->delete();
-        }
-        $this->storeCombinations($request, $product, $oldVariants);
-        return redirect()->route('admin.products.index')->with(['success' => 'Successfully updated!']);
     }
 
 
     public function destroy($id)
     {
-        // $this->authorize('delete', Product::class);
-        $product = Product::findOrFail($id);
-        $this->deleteImage($product->image);
-        $product->delete();
-        return redirect()->route('admin.products.index')->with(['success' => 'Successfully deleted!']);
-    }
-
-    private function storeCombinations($request, $product, $oldVariants=[])
-    {
-        $combinations = $request->combinations ?? [];
-        foreach ($combinations as $combination) {
-            $image = null;
-
-            if (isset($combination['image']) && $combination['image'] instanceof \Illuminate\Http\UploadedFile) {
-                $image = $this->uploadPhoto($combination['image']);
-            }
-            if (!$image && $oldVariants && isset($combination['variant_id'])) {
-                $image = $oldVariants[$combination['variant_id']]->image ?? null;
-            }
-            $variant = ProductVariant::create([
-                'product_id' => $product->id,
-                'sku' => $combination['sku'],
-                'price' => $combination['price'],
-                'image' => $image,
+        try {
+            $product = Product::findOrFail($id);
+            $this->deleteImage($product->image);
+            $product->delete();
+            return redirect()->route('admin.products.index')->with('success','Successfully deleted!');
+        } catch (\Throwable $e) {
+            Log::error('Product update failed', [
+                'product_id' => $id,
+                'error' => $e->getMessage(),
             ]);
-            $variant->attributeValues()->attach($combination['ids']);
+
+            return redirect()->back()->with('error', 'Successfully updated!');
         }
     }
+
     // public function bulkDelete(Request $request, CommonBusinessService $commonBusinessService)
     // {
     //     $ids = $request->input('ids');

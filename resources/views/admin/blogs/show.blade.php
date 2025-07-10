@@ -1,5 +1,5 @@
 @extends('admin.layouts.app')
-@section('title', 'Attribute Create')
+@section('title', 'Category View')
 @section('content')
     <!-- Page header -->
     <div class="page-header d-print-none">
@@ -11,13 +11,13 @@
                         Overview
                     </div> --}}
                     <h2 class="page-title">
-                        Attributes
+                        Categories
                     </h2>
                 </div>
                 <!-- Page title actions -->
                 <div class="col-auto ms-auto d-print-none">
                     <div class="btn-list">
-                        <a href="{{ route('admin.products.attributes.index') }}" class="btn btn-danger">
+                        <a href="{{ route('admin.categories.index') }}" class="btn btn-danger">
                             <svg  xmlns="http://www.w3.org/2000/svg"  width="24"  height="24"  viewBox="0 0 24 24"  fill="none"  stroke="currentColor"  stroke-width="2"  stroke-linecap="round"  stroke-linejoin="round"  class="icon icon-tabler icons-tabler-outline icon-tabler-chevron-left"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M15 6l-6 6l6 6" /></svg>
                             Back
                         </a>
@@ -31,45 +31,27 @@
           <div class="row row-deck row-cards">
             <div class="col-12">
               <div class="card">
-                <form action="{{ route('admin.products.attributes.store') }}" method="post">
-                    @csrf
                     <div class="card-header">
-                        <h3 class="card-title">Create new Attribute</h3>
+                        <h3 class="card-title">Category preview</h3>
                     </div>
                     <div class="card-body">
                         <div class="mb-3 row">
-                            <label class="col-3 col-form-label required">Title</label>
+                            <label class="col-3 col-form-label">Category Title</label>
                             <div class="col">
-                                <input type="text" class="form-control" aria-describedby="emailHelp"
-                                    placeholder="Attribute title" name="title" value="{{ old('title') }}">
-                                <small class="form-hint">
-                                    @error('title')
-                                        <div class="text-danger mt-2">{{ $message }}</div>
-                                    @enderror
-                                </small>
-                            </div>
-                        </div>
-                        <div class="mb-3 row">
-                            <label class="col-3 col-form-label required">Slug</label>
-                            <div class="col">
-                                <input type="text" class="form-control" aria-describedby=""
-                                    placeholder="Attribute Slug" name="slug" value="{{ old('slug') }}">
-                                <small class="form-hint">
-                                    @error('slug')
-                                        <div class="text-danger mt-2">{{ $message }}</div>
-                                    @enderror
-                                </small>
+                                {{ $category->title }}
                             </div>
                         </div>
                     </div>
                     <div class="card-footer text-end">
-                        <button type="submit" class="btn btn-primary">Submit</button>
+                        <a href="{{ route('admin.categories.edit', $category->id) }}" class="btn btn-primary">
+                            <svg  xmlns="http://www.w3.org/2000/svg"  width="24"  height="24"  viewBox="0 0 24 24"  fill="none"  stroke="currentColor"  stroke-width="2"  stroke-linecap="round"  stroke-linejoin="round"  class="icon icon-tabler icons-tabler-outline icon-tabler-edit"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M7 7h-1a2 2 0 0 0 -2 2v9a2 2 0 0 0 2 2h9a2 2 0 0 0 2 -2v-1" /><path d="M20.385 6.585a2.1 2.1 0 0 0 -2.97 -2.97l-8.415 8.385v3h3l8.385 -8.415z" /><path d="M16 5l3 3" /></svg>
+                            Edit
+                        </a>
                     </div>
-                </form>
               </div>
             </div>
           </div>
         </div>
       </div>
-
+     
 @endsection

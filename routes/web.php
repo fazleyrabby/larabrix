@@ -1,18 +1,14 @@
 <?php
 
+use App\Http\Controllers\Admin\BlogController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Admin\CrudController;
 use App\Http\Controllers\Admin\MenuController;
 use App\Http\Controllers\Admin\TaskController;
 use App\Http\Controllers\Auth\LoginController;
-use App\Http\Controllers\Admin\ProductController;
 use App\Http\Controllers\Auth\RegisterController;
-use App\Http\Controllers\Admin\CategoryController;
-use App\Http\Controllers\Admin\AttributeController;
 use App\Http\Controllers\Admin\DashboardController;
-use App\Http\Controllers\Admin\AttributeValueController;
 use App\Http\Controllers\Admin\MediaController;
-use App\Http\Controllers\Admin\ProductVariantController;
 // use App\Http\Controllers\Admin\CrudController;
 
 // Route::get('/', [LoginController::class, 'loginForm'])->name('login');
@@ -39,17 +35,6 @@ Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () 
 
 
     Route::group([
-        'prefix' => '/products',
-        'as' => 'products.',
-    ], function () {
-        Route::resource('attributes', AttributeController::class)->names('attributes');
-        // Route::resource('attributes.values', AttributeValueController::class)->shallow()->names('attributes.values');
-        Route::resource('categories', CategoryController::class)->names('categories');
-        Route::resource('/', ProductController::class)->parameters(['' => 'product']);
-        Route::resource('{product}/variants', ProductVariantController::class)->names('variants');
-    });
-
-    Route::group([
         'prefix' => '/media',
         'as' => 'media.',
     ], function () {
@@ -58,9 +43,11 @@ Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () 
         Route::resource('/', MediaController::class);
     });
 
-
+    Route::resource('blogs', BlogController::class)->names('blogs');
 });
 
 Route::get('/', function () {
     return view('welcome');
 });
+
+require __DIR__.'/ecommerce.php';

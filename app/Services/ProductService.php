@@ -3,12 +3,15 @@
 
 namespace App\Services;
 
-use App\Models\Category;
 use App\Models\Product;
+use App\Models\Category;
+use App\Traits\UploadPhotos;
+use App\Models\ProductVariant;
 use Illuminate\Support\Facades\DB;
 
 class ProductService
 {
+    use UploadPhotos;
     public function getPaginatedItems($params){
         $query = Product::query()->with('category:id,title');
         $searchQuery = $params['q'] ?? null;
@@ -18,7 +21,6 @@ class ProductService
             $product->description = $product->short_description;
             return $product;
         });
-
         return $products->appends($params);
     }
 
@@ -49,5 +51,64 @@ class ProductService
                 'attr_value_ids' => $items->pluck('attr_value_id')->unique()->values()->all(),
             ])
             ->values();
+    }
+
+    public function storeCombinations($request, Product $product, $oldVariants = [])
+    {
+        $combinations = $request->combinations ?? [];
+        $savedVariantIds = [];
+
+        foreach ($combinations as $combination) {
+            $variant = null;
+
+            if (!empty($combination['variant_id'])) {
+                $variant = ProductVariant::find($combination['variant_id']);
+
+                if ($variant) {
+                    $image = $variant->image;
+
+                    if (isset($combination['image']) && $combination['image'] instanceof \Illuminate\Http\UploadedFile) {
+                        $image = $this->uploadPhoto($combination['image'], $variant->image);
+                    }
+
+                    $variant->update([
+                        'sku' => $combination['sku'],
+                        'price' => $combination['price'],
+                        'image' => $image,
+                    ]);
+
+                    $variant->attributeValues()->sync($combination['ids']);
+
+                    $savedVariantIds[] = $variant->id;
+                    continue;
+                }
+            }
+
+            $image = null;
+            if (isset($combination['image']) && $combination['image'] instanceof \Illuminate\Http\UploadedFile) {
+                $image = $this->uploadPhoto($combination['image']);
+            } elseif ($oldVariants && isset($combination['variant_id'])) {
+                $image = $oldVariants[$combination['variant_id']]->image ?? null;
+            }
+
+            $variant = ProductVariant::create([
+                'product_id' => $product->id,
+                'sku' => $combination['sku'],
+                'price' => $combination['price'],
+                'image' => $image,
+            ]);
+
+            $variant->attributeValues()->attach($combination['ids']);
+
+            $savedVariantIds[] = $variant->id;
+        }
+
+        $product->variants()
+            ->whereNotIn('id', $savedVariantIds)
+            ->get()
+            ->each(function ($variant) {
+                $variant->attributeValues()->detach();
+                $variant->delete(); // soft delete
+            });
     }
 }
