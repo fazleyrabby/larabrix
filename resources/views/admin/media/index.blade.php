@@ -27,7 +27,7 @@
 @endpush
     <!-- Page header -->
     <div class="page-header d-print-none">
-        <div class="container-xl">
+        <div class="container-fluid">
             <div class="row g-2 align-items-center">
                 <div class="col">
                     <!-- Page pre-title -->
@@ -58,7 +58,7 @@
         </div>
     </div>
     <div class="page-body">
-        <div class="container-xl">
+        <div class="container-fluid">
             <div class="row row-deck row-cards">
                 <div class="col-12">
                     <div class="card">
@@ -90,7 +90,7 @@
                             </div>
 
                         </div>
-                        <div class="container">
+                        <div class="container-fluid">
                             <div class="row row-deck row-cards">
                                 <div class="com-md-12">
                                     <div class="d-flex space-x-2">

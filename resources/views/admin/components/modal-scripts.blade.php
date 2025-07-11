@@ -123,8 +123,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
             checkboxes.forEach(cb => {
                 const imgUrl = cb.dataset.url;
+                const imgUrlFullPath = cb.dataset.fullpath;
                 imageWrapper.innerHTML += `
-                    <img width="200" src="${imgUrl}" class="mr-3 mb-3">
+                    <img width="200" src="${imgUrlFullPath}" class="mr-3 mb-3">
                     <input type="hidden" name="${inputName}" value="${imgUrl}">
                 `;
             });

@@ -9,6 +9,8 @@ use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\MediaController;
+use App\Http\Controllers\TestController;
+
 // use App\Http\Controllers\Admin\CrudController;
 
 // Route::get('/', [LoginController::class, 'loginForm'])->name('login');
@@ -38,9 +40,15 @@ Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () 
         'prefix' => '/media',
         'as' => 'media.',
     ], function () {
-        Route::get('/download', [MediaController::class, 'downloadImage'])->name('download');
-        Route::post('/delete', [MediaController::class, 'delete'])->name('delete');
-        Route::resource('/', MediaController::class);
+        Route::get('/', [MediaController::class, 'index'])->name('index'); // Media UI
+        Route::post('/store', [MediaController::class, 'store'])->name('store'); // Upload file(s)
+
+        // Route::post('/create-folder', [MediaController::class, 'createFolder'])->name('create-folder'); // Make directory
+        // Route::get('/browse', [MediaController::class, 'browse'])->name('browse'); // AJAX list contents
+        // Route::get('/folder-tree', [MediaController::class, 'folderTree'])->name('folder-tree'); // AJAX sidebar
+
+        // Route::get('/download', [MediaController::class, 'downloadImage'])->name('download'); // Download file
+        Route::post('/delete', [MediaController::class, 'delete'])->name('delete'); // Delete selected
     });
 
     Route::resource('blogs', BlogController::class)->names('blogs');
@@ -49,5 +57,7 @@ Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () 
 Route::get('/', function () {
     return view('welcome');
 });
+
+Route::get('/test', [TestController::class, 'index']);
 
 require __DIR__.'/ecommerce.php';

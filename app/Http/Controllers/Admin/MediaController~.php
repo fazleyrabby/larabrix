@@ -68,6 +68,7 @@ class MediaController extends Controller
         return Storage::disk('public')->download($request->url);
     }
 
+
     public function delete(Request $request)
     {
         $ids = $request->ids;
@@ -86,5 +87,62 @@ class MediaController extends Controller
             $message = $ex->getMessage();
         }
         return redirect()->route('admin.media.index')->with($status, $message);
+    }
+
+
+    public function browse(Request $request)
+    {
+        $folder = trim($request->get('folder', ''), '/');
+        $path = $folder ? "media/{$folder}" : "media";
+
+        return response()->json([
+            'current_folder' => $folder,
+            'folders' => Storage::disk('public')->directories($path),
+            'files' => Storage::disk('public')->files($path),
+            'parent_folder' => $this->getParentFolder($folder),
+        ]);
+    }
+
+    private function getParentFolder($folder)
+    {
+        if (!$folder) return null;
+        $parts = explode('/', $folder);
+        array_pop($parts);
+        return implode('/', $parts);
+    }
+
+    public function createFolder(Request $request)
+    {
+        $request->validate(['folder' => 'required|string']);
+
+        $path = 'media/' . trim($request->input('folder'), '/');
+
+        if (!Storage::disk('public')->exists($path)) {
+            Storage::disk('public')->makeDirectory($path);
+        }
+
+        return response()->json(['status' => 'ok']);
+    }
+    public function folderTree()
+    {
+        return response()->json([
+            'tree' => $this->getFolderTree('media'),
+        ]);
+    }
+
+    private function getFolderTree($path)
+    {
+        $directories = Storage::disk('public')->directories($path);
+        $tree = [];
+
+        foreach ($directories as $dir) {
+            $tree[] = [
+                'name' => basename($dir),
+                'full_path' => str_replace('media/', '', $dir),
+                'children' => $this->getFolderTree($dir),
+            ];
+        }
+
+        return $tree;
     }
 }

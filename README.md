@@ -34,11 +34,12 @@
 | ❌ | CMS (Page Builder / Static Pages)            | Medium   | Q4 2025    |
 | ❌ | Blog / Posts with Categories & Tags          | Low      | Q4 2025    |
 | ❌ | Additional E-commerce (Cart, Payment, etc.)  | High     | Q4 2025    |
-| ❌ | Basic API Setup with Token Auth              | Medium   | Q4 2025    |
+| ❌ | Basic API Setup with Token Auth              | Low      | Q4 2025    |
 | ❌ | Reports Management                           | Medium   | Q4 2025    |
 | ❌ | Support Ticket Module                        | Low      | Q4 2025    |
 | ❌ | Notification Center                          | Low      | Q4 2025    |
-
+| ❌ | Custom CMS (Markdown / WYSIWIG / DnD)        | Medium   | Q4 2025    |
+| ❌ | Custom Form builder                          | Medium   | Q4 2025    |
 ---
 
 ## 📸 Screenshots
