@@ -164,7 +164,8 @@ document.addEventListener("DOMContentLoaded", function () {
                         toast("error", error.response.data.errors[key]);
                     }
                 } else {
-                    toast("error", "Something went wrong.");
+                    $message = error.response?.data?.message ?? "Something went wrong.";
+                    toast("error", $message);
                 }
 
                 // Optional: global error handler

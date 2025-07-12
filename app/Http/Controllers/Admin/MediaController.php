@@ -8,6 +8,7 @@ use App\Traits\UploadPhotos;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Validator;
 
 class MediaController extends Controller
 {
@@ -16,20 +17,24 @@ class MediaController extends Controller
     {
         $search_query = $request->q;
         $status = $request->status ?? 1;
-        $media = Media::select('id', 'url', 'created_at', 'status')
+        $media = Media::toBase()->select('id', 'url', 'created_at', 'status')
             ->where('url', 'like', '%' . $search_query . '%')
             ->when(!request()->has('q'), function ($query) use ($status) {
                 $query->where('status', $status);
-            })->orderBy('created_at', 'desc')->paginate(12);
+            })->orderBy('created_at', 'desc')->paginate(6);
 
         if ($request->ajax()) {
-            return response()->json([
-                'html' => view('admin.components.media.items', compact('media'))->render(),
-                'meta' => [
-                    'current_page' => $media->currentPage(),
-                    'last_page' => $media->lastPage(),
-                ],
-            ]);
+            $html = view('admin.components.media.items', compact('media'))->render();
+            if($request->get('type') == 'modal'){
+                return response()->json([
+                    'html' => $html,
+                    'meta' => [
+                        'current_page' => $media->currentPage(),
+                        'last_page' => $media->lastPage(),
+                    ],
+                ]);
+            }
+            return $html;
         }
         return view('admin.media.index', compact('media'));
     }
@@ -39,9 +44,21 @@ class MediaController extends Controller
         try {
             if ($request->hasFile('images')) {
                 foreach ($request->file('images') as $file) {
-                    $image = $this->uploadPhoto($file, '', 'media/');
-                    $data[] =  [
-                        'url' => $image,
+                    $validator = Validator::make(
+                        ['image' => $file],
+                        ['image' => 'image|mimes:jpeg,png,jpg,gif,webp|max:2048'] // max 2MB
+                    );
+                     if ($validator->fails()) {
+                        return response()->json([
+                            'success' => 'error',
+                            'message' => 'One or more files are invalid: ' . $validator->errors()->first(),
+                            'refresh' => false,
+                        ], 422);
+                    }
+
+                    $imagePath = $this->uploadPhoto($file, '', 'media/');
+                    $data[] = [
+                        'url' => $imagePath,
                         'created_at' => now(),
                         'updated_at' => now(),
                     ];
