@@ -1,6 +1,6 @@
 # Larabrix
 
-![Laravel](https://img.shields.io/badge/laravel-10.x-red)
+![Laravel](https://img.shields.io/badge/laravel-12.x-red)
 ![PHP](https://img.shields.io/badge/php-^8.2-blue)
 ![Status](https://img.shields.io/badge/status-in--progress-yellow)
 
