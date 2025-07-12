@@ -152,14 +152,49 @@ document.addEventListener("DOMContentLoaded", () => {
     function loadMedia(url, modalId, page = 1) {
         const loader = document.querySelector('.loader');
         const container = document.getElementById(`ajax-container-${modalId}`);
+         const pagination = document.getElementById(`pagination-${modalId}`);
         if (loader) loader.style.display = 'block';
 
-        axios.get(url)
+        axios.get(`${url}&page=${page}`)
             .then(response => {
-                if (page === 1) {
-                    container.innerHTML = response.data;
-                } else {
-                    container.insertAdjacentHTML('beforeend', response.data);
+                container.innerHTML = response.data.html;
+                const meta = response.data.meta;
+                if(pagination){
+                    pagination.innerHTML = '';
+                    const ul = document.createElement('ul');
+                    ul.className = 'pagination justify-content-center';
+                    // prev button
+                    if (meta.current_page > 1) {
+                        ul.innerHTML += `
+                            <li class="page-item">
+                                <a class="page-link" href="#" data-page="${meta.current_page - 1}" rel="prev" aria-label="« Previous">‹</a>
+                            </li>`;
+                    }
+                    // page numbers
+                    for (let i = 1; i <= meta.last_page; i++) {
+                        ul.innerHTML += `
+                            <li class="page-item ${i === meta.current_page ? 'active' : ''}">
+                                <a class="page-link" href="#" data-page="${i}">${i}</a>
+                            </li>`;
+                    }
+                    // Next button
+                    if (meta.current_page < meta.last_page) {
+                        ul.innerHTML += `
+                            <li class="page-item">
+                                <a class="page-link" href="#" data-page="${meta.current_page + 1}" rel="next" aria-label="Next »">›</a>
+                            </li>`;
+                    }
+
+                     pagination.appendChild(ul);
+
+                    // Attach events to all page links
+                    pagination.querySelectorAll('a.page-link[data-page]').forEach(link => {
+                        link.addEventListener('click', e => {
+                            e.preventDefault();
+                            const page = parseInt(link.getAttribute('data-page'));
+                            loadMedia(url, modalId, page);
+                        });
+                    });
                 }
             })
             .catch(() => {
@@ -169,6 +204,28 @@ document.addEventListener("DOMContentLoaded", () => {
                 if (loader) loader.style.display = 'none';
             });
     }
+
+    // old load more function
+    // function loadMedia(url, modalId, page = 1) {
+    //     const loader = document.querySelector('.loader');
+    //     const container = document.getElementById(`ajax-container-${modalId}`);
+    //     if (loader) loader.style.display = 'block';
+
+    //     axios.get(url)
+    //         .then(response => {
+    //             if (page === 1) {
+    //                 container.innerHTML = response.data;
+    //             } else {
+    //                 container.insertAdjacentHTML('beforeend', response.data);
+    //             }
+    //         })
+    //         .catch(() => {
+    //             console.error("Failed to load media.");
+    //         })
+    //         .finally(() => {
+    //             if (loader) loader.style.display = 'none';
+    //         });
+    // }
 });
 </script>
 

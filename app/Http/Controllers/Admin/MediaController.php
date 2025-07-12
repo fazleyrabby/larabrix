@@ -20,14 +20,17 @@ class MediaController extends Controller
             ->where('url', 'like', '%' . $search_query . '%')
             ->when(!request()->has('q'), function ($query) use ($status) {
                 $query->where('status', $status);
-            })->orderBy('created_at', 'desc');
+            })->orderBy('created_at', 'desc')->paginate(12);
 
         if ($request->ajax()) {
-            $media = $media->paginate(12);
-            return view('admin.components.media.items', compact('media'));
-            // return view('admin.media.ajax', compact('media'));
+            return response()->json([
+                'html' => view('admin.components.media.items', compact('media'))->render(),
+                'meta' => [
+                    'current_page' => $media->currentPage(),
+                    'last_page' => $media->lastPage(),
+                ],
+            ]);
         }
-        $media = $media->paginate(15);
         return view('admin.media.index', compact('media'));
     }
 
@@ -86,5 +89,10 @@ class MediaController extends Controller
             $message = $ex->getMessage();
         }
         return redirect()->route('admin.media.index')->with($status, $message);
+    }
+
+    public function tree(){
+        $directories = Storage::disk('public')->directories('media/');
+        dd($directories);
     }
 }

@@ -47,7 +47,8 @@
                     </div>
                 </div>
                 <div>
-                    <button id="load-more-{{ $modalId }}" class="btn btn-primary">Load More</button>
+                    {{-- <button id="load-more-{{ $modalId }}" class="btn btn-primary">Load More</button> --}}
+                    <div id="pagination-{{ $modalId }}" class="d-flex justify-content-center gap-2 mt-3"></div>
                 </div>
             </div>
             <div class="modal-footer bg-whitesmoke br">
