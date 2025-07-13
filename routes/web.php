@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Admin\BlogController;
+use App\Http\Controllers\Admin\FormBuilderController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Admin\CrudController;
 use App\Http\Controllers\Admin\MenuController;
@@ -51,6 +52,9 @@ Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () 
         Route::post('/delete', [MediaController::class, 'delete'])->name('delete'); // Delete selected
     });
 
+    Route::resource('forms', FormBuilderController::class);
+    Route::get('forms/{form}/builder', [FormBuilderController::class, 'builder'])->name('forms.builder');
+    Route::post('forms/{form}/builder', [FormBuilderController::class, 'saveBuilder'])->name('forms.builder.save');
     Route::resource('blogs', BlogController::class)->names('blogs');
 });
 

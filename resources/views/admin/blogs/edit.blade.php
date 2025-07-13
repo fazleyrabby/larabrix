@@ -73,7 +73,7 @@
                                 </div>
                             </div>
                             <div class="mb-3 row">
-                                <label class="col-3 col-form-label required">Body</label>
+                                <label class="col-3 col-form-label required">Tags</label>
                                 <div class="col">
                                     <select name="tags[]" id="tags" multiple class="form-control">
                                         @foreach ($tags as $id => $tag)
