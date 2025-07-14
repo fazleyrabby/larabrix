@@ -29,7 +29,7 @@ class FormBuilderRequest extends FormRequest
             'fields.*.type' => ['required', Rule::in(['text', 'email', 'textarea', 'select', 'checkbox', 'radio'])],
             'fields.*.label' => 'required|string|max:255',
             'fields.*.name' => 'required|string|max:255',
-            'fields.*.options' => 'nullable|array',
+            // 'fields.*.options' => 'nullable|array',
         ];
     }
 }

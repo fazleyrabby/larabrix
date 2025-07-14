@@ -110,9 +110,9 @@ class FormBuilderController extends Controller
                 $fields[$i]['validation'] = array_map('trim', explode(',', $field['validation']));
             }
 
-            if (!empty($field['options']) && is_string($field['options'])) {
-                $fields[$i]['options'] = array_map('trim', explode(',', $field['options']));
-            }
+            // if (!empty($field['options']) && is_string($field['options'])) {
+            //     $fields[$i]['options'] = array_map('trim', explode(',', $field['options']));
+            // }
         }
         return $fields;
     }
