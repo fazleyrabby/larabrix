@@ -1,5 +1,49 @@
 @extends('admin.layouts.app')
 @section('title', 'Form Edit')
+@push('styles')
+    <style>
+        .sortable-ghost {
+            opacity: 0.4;
+            background: transparent;
+            box-shadow: none;
+        }
+
+        .sortable-list .field-preview {
+            cursor: move;
+        }
+
+        .field-preview {
+            position: relative;
+        }
+
+        .edit-btns {
+            opacity: 0;
+            position: absolute;
+            top: 5px;
+            right: 5px;
+            transition: opacity 200ms ease;
+        }
+
+        .edit-field-btn,
+        .remove-field-btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            text-decoration: none;
+        }
+
+        .edit-field-btn svg,
+        .remove-field-btn svg {
+            pointer-events: none;
+            /* Prevent svg from capturing clicks */
+        }
+
+        .field-preview:hover .edit-btns {
+            opacity: 1;
+        }
+    </style>
+@endpush
 @section('content')
     <!-- Page header -->
     <div class="page-header d-print-none">
@@ -41,7 +85,7 @@
                             <h3 class="card-title">Components</h3>
                         </div>
                         <div class="card-body">
-                            <div class="row g-3">
+                            <div class="row g-3 components">
                                 <div class="col-6">
                                     <div class="row g-3 align-items-center">
                                         <div class="col text-truncate">
@@ -106,6 +150,7 @@
                     <div class="card">
                         <form action="{{ route('admin.forms.update', $form->id) }}" method="post">
                             @csrf
+                            @method('put')
                             <div class="card-header">
                                 <h3 class="card-title">Create new form</h3>
                             </div>
@@ -167,12 +212,14 @@
             <div class="mb-3 d-none" id="options-container">
                 <label class="form-label">Options</label>
                 <div id="options-list"></div>
-                <button type="button" class="btn btn-sm btn-outline-secondary mt-2" id="add-option-btn">Add Option</button>
+                <button type="button" class="btn btn-sm btn-outline-secondary mt-2" id="add-option-btn">Add
+                    Option</button>
             </div>
 
             <div class="mt-4">
                 {{-- <button class="btn btn-primary w-100" type="button" id="save-offcanvas-btn">Save</button> --}}
-                <button class="btn btn-primary" type="button" id="save-offcanvas-btn" data-bs-dismiss="offcanvas">Save</button>
+                <button class="btn btn-primary" type="button" id="save-offcanvas-btn"
+                    data-bs-dismiss="offcanvas">Save</button>
             </div>
         </div>
     </div>
@@ -180,13 +227,15 @@
 @endsection
 
 @push('scripts')
- <script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.15.6/Sortable.min.js"
+        integrity="sha512-csIng5zcB+XpulRUa+ev1zKo7zRNGpEaVfNB9On1no9KYTEY/rLGAEEpvgdw6nim1WdTuihZY1eqZ31K7/fZjw=="
+        crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <script>
         const existingFields = @json($fields);
-        console.log(existingFields)
         let fieldIndex = 0;
         let editingIndex = null;
-        
-        function addField(type, fieldData={}) {
+
+        function createFieldElement(type, fieldData = {}) {
             const wrapper = document.createElement('div');
             wrapper.className = 'field-preview border p-3 mb-3';
             wrapper.dataset.index = fieldIndex;
@@ -194,7 +243,8 @@
 
             let label = fieldData?.label || `Untitled ${type}`;
             let name = fieldData?.name || `${type}_${fieldIndex}`;
-            let validation = Array.isArray(fieldData?.validation) ? fieldData.validation.join(',') : fieldData?.validation || '';
+            let validation = Array.isArray(fieldData?.validation) ? fieldData.validation.join(',') : fieldData
+                ?.validation || '';
             let options = fieldData?.options || [];
 
             // Convert string options (comma-separated or JSON) to array of {key, value}
@@ -202,7 +252,10 @@
                 try {
                     options = JSON.parse(options);
                 } catch {
-                    options = options.split(',').map(opt => ({ key: opt.trim(), value: opt.trim() }));
+                    options = options.split(',').map(opt => ({
+                        key: opt.trim(),
+                        value: opt.trim()
+                    }));
                 }
             }
 
@@ -215,11 +268,15 @@
                     html = `<textarea class="form-control" disabled placeholder="Textarea Preview"></textarea>`;
                     break;
                 case 'select':
-                html = `<select class="form-select" disabled><option>Option 1</option></select>`;
-                break;
+                case 'multiselect':
+                    html = `<select class="form-select" disabled><option>Option 1</option></select>`;
+                    break;
                 case 'radio':
                 case 'checkbox':
                     html = `<div><input type="${type}" disabled> <label>Option 1</label></div>`;
+                    break;
+                case 'file':
+                    html = `<input type="file" class="form-control" disabled>`;
                     break;
                 default:
                     html = `<input type="text" class="form-control" disabled>`;
@@ -228,21 +285,26 @@
             wrapper.innerHTML = `
                 <label class="form-label field-label">${label}</label>
                 ${html}
-                <a class="btn edit-field-btn" data-bs-toggle="offcanvas" href="#offcanvasEnd" role="button" aria-controls="offcanvasEnd">Edit</a>
+                <div class="edit-btns"><a class="edit-field-btn" data-bs-toggle="offcanvas" href="#offcanvasEnd" role="button" aria-controls="offcanvasEnd"><svg  xmlns="http://www.w3.org/2000/svg"  width="24"  height="24"  viewBox="0 0 24 24"  fill="none"  stroke="currentColor"  stroke-width="2"  stroke-linecap="round"  stroke-linejoin="round"  class="icon icon-tabler icons-tabler-outline icon-tabler-edit"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M7 7h-1a2 2 0 0 0 -2 2v9a2 2 0 0 0 2 2h9a2 2 0 0 0 2 -2v-1" /><path d="M20.385 6.585a2.1 2.1 0 0 0 -2.97 -2.97l-8.415 8.385v3h3l8.385 -8.415z" /><path d="M16 5l3 3" /></svg></a>
+                <span type="button" class="remove-field-btn"><svg xmlns="http://www.w3.org/2000/svg"  width="24"  height="24"  viewBox="0 0 24 24"  fill="none"  stroke="currentColor"  stroke-width="2"  stroke-linecap="round"  stroke-linejoin="round"  class="icon icon-tabler icons-tabler-outline icon-tabler-x"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M18 6l-12 12" /><path d="M6 6l12 12" /></svg></span></div>
                 <input type="hidden" name="fields[${fieldIndex}][type]" value="${type}">
                 <input type="hidden" name="fields[${fieldIndex}][label]" value="${label}">
                 <input type="hidden" name="fields[${fieldIndex}][name]" value="${name}">
                 <input type="hidden" name="fields[${fieldIndex}][options]" value='${JSON.stringify(options)}'>
                 <input type="hidden" name="fields[${fieldIndex}][validation]" value="${validation}">
                 ${fieldData?.id ? `<input type="hidden" name="fields[${fieldIndex}][id]" value="${fieldData.id}">` : ''}
-                <button type="button" class="btn btn-danger remove-field-btn">Remove Field</button>`;
-
-            document.getElementById('fields-preview-wrapper').appendChild(wrapper);
-            fieldIndex++;
+                `;
 
             wrapper.querySelector('.remove-field-btn').addEventListener('click', () => {
                 wrapper.remove();
             });
+            return wrapper;
+        }
+
+        function addField(type, field = {}) {
+            const newField = createFieldElement(type, field);
+            document.getElementById('fields-preview-wrapper').appendChild(newField);
+            fieldIndex++;
         }
 
         document.querySelectorAll('.btn-add-field').forEach(btn => {
@@ -255,8 +317,6 @@
         existingFields.forEach(field => {
             addField(field.type, field)
         });
-
-        
 
         // Create option input row
         function createOptionRow(key = '', value = '') {
@@ -277,37 +337,39 @@
 
         document.addEventListener('click', e => {
             if (e.target.classList.contains('edit-field-btn')) {
-                    const field = e.target.closest('.field-preview');
-                    editingIndex = field.dataset.index;
+                const field = e.target.closest('.field-preview');
+                editingIndex = field.dataset.index;
 
-                    const label = field.querySelector(`input[name="fields[${editingIndex}][label]"]`).value;
-                    const name = field.querySelector(`input[name="fields[${editingIndex}][name]"]`).value;
-                    const validation = field.querySelector(`input[name="fields[${editingIndex}][validation]"]`).value;
-                    const options = field.querySelector(`input[name="fields[${editingIndex}][options]"]`).value;
-                    const type = field.dataset.type;
+                const label = field.querySelector(`input[name="fields[${editingIndex}][label]"]`).value;
+                const name = field.querySelector(`input[name="fields[${editingIndex}][name]"]`).value;
+                const validation = field.querySelector(`input[name="fields[${editingIndex}][validation]"]`).value;
+                const options = field.querySelector(`input[name="fields[${editingIndex}][options]"]`).value;
+                const type = field.dataset.type;
 
-                    document.getElementById('offcanvas-label').value = label;
-                    document.getElementById('offcanvas-name').value = name;
-                    document.getElementById('offcanvas-validation').value = validation;
+                document.getElementById('offcanvas-label').value = label;
+                document.getElementById('offcanvas-name').value = name;
+                document.getElementById('offcanvas-validation').value = validation;
 
-                    // Show/hide options section
-                    document.getElementById('options-container').classList.toggle('d-none', !['select', 'radio', 'checkbox'].includes(type));
+                // Show/hide options section
+                document.getElementById('options-container').classList.toggle('d-none', !['select', 'radio',
+                    'checkbox'
+                ].includes(type));
 
-                    const optionsList = document.getElementById('options-list');
-                    optionsList.innerHTML = '';
-                    try {
-                        const parsed = JSON.parse(options || '[]');
-                        if (Array.isArray(parsed)) {
-                            parsed.forEach(opt => {
-                                optionsList.appendChild(createOptionRow(opt.key || '', opt.value || ''));
-                            });
-                        }
-                    } catch (err) {
-                        console.warn('Invalid options JSON');
+                const optionsList = document.getElementById('options-list');
+                optionsList.innerHTML = '';
+                try {
+                    const parsed = JSON.parse(options || '[]');
+                    if (Array.isArray(parsed)) {
+                        parsed.forEach(opt => {
+                            optionsList.appendChild(createOptionRow(opt.key || '', opt.value || ''));
+                        });
                     }
+                } catch (err) {
+                    console.warn('Invalid options JSON');
                 }
-            });
-            // Handle Save
+            }
+        });
+        // Handle Save
         document.getElementById('save-offcanvas-btn').addEventListener('click', () => {
             if (editingIndex === null) return;
             const label = document.getElementById('offcanvas-label').value;
@@ -320,7 +382,10 @@
                 const key = row.querySelector('.option-key').value.trim();
                 const value = row.querySelector('.option-value').value.trim();
                 if (key || value) {
-                    options.push({ key, value });
+                    options.push({
+                        key,
+                        value
+                    });
                 }
             });
 
@@ -330,6 +395,45 @@
             preview.querySelector(`input[name="fields[${editingIndex}][name]"]`).value = name;
             preview.querySelector(`input[name="fields[${editingIndex}][validation]"]`).value = validation;
             preview.querySelector(`input[name="fields[${editingIndex}][options]"]`).value = JSON.stringify(options);
+        });
+
+        new Sortable(document.querySelector('.components'), {
+            ghostClass: 'sortable-ghost',
+            group: {
+                name: 'shared',
+                pull: 'clone',
+                put: false
+            },
+            animation: 150,
+            sort: false
+        });
+
+        new Sortable(document.querySelector('.sortable-list'), {
+            group: 'shared',
+            animation: 150,
+            fallbackOnBody: true,
+            swapThreshold: 0.5,
+            fallbackTolerance: 10,
+            onAdd: function(evt) {
+                const type = evt.item.querySelector('.btn-add-field').dataset.type;
+                const dropIndex = evt.newIndex;
+                console.log(dropIndex)
+                // Remove the cloned button
+                evt.item.remove();
+                // Create the new field
+                const newField = createFieldElement(
+                type); // use a helper that returns the element without appending
+                // Insert at the drop index
+                const container = document.querySelector('.sortable-list');
+                const children = container.children;
+                if (dropIndex >= children.length) {
+                    container.appendChild(newField);
+                } else {
+                    container.insertBefore(newField, children[dropIndex]);
+                }
+                
+                fieldIndex++;
+            }
         });
     </script>
     {{-- <script>
@@ -403,5 +507,4 @@
             container.appendChild(createField(fieldIndex++));
         });
     </script> --}}
-    
 @endpush

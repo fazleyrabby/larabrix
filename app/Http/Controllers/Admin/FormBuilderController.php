@@ -34,7 +34,7 @@ class FormBuilderController extends Controller
                 ]);
 
         foreach ($fields as $index => $fieldData) {
-            $form->formFields()->create($this->formatFieldData($fieldData, $index));
+            $form->formFields()->create($this->formatFieldData($fieldData));
         }
 
         return redirect()->route('admin.forms.index')->with('success', 'Form created successfully.');
@@ -59,7 +59,6 @@ class FormBuilderController extends Controller
     public function update(FormBuilderRequest $request, Form $form)
     {
         $fields = $this->formatFields($request);
-
         $form->update([
                     'name' => $request->name,
                     'slug' => str()->slug($request->name)
@@ -74,7 +73,7 @@ class FormBuilderController extends Controller
         FormField::destroy($toDelete);
 
         foreach ($fields as $index => $fieldData) {
-            $data = $this->formatFieldData($fieldData, $index);
+            $data = $this->formatFieldData($fieldData);
             if (!empty($fieldData['id'])) {
                 $form->formFields()->where('id', $fieldData['id'])->update($data);
             } else {
@@ -105,11 +104,13 @@ class FormBuilderController extends Controller
 
     private function formatFields($request){
         $fields = $request->input('fields', []);
+        $order = 0;
         foreach ($fields as $i => $field) {
+            $fields[$i]['order'] = $order;
             if (!empty($field['validation']) && is_string($field['validation'])) {
                 $fields[$i]['validation'] = array_map('trim', explode(',', $field['validation']));
             }
-
+            $order++;
             // if (!empty($field['options']) && is_string($field['options'])) {
             //     $fields[$i]['options'] = array_map('trim', explode(',', $field['options']));
             // }
@@ -117,14 +118,14 @@ class FormBuilderController extends Controller
         return $fields;
     }
 
-    private function formatFieldData($fieldData, $index){
+    private function formatFieldData($fieldData){
         return [
             'type' => $fieldData['type'],
             'label' => $fieldData['label'],
             'name' => $fieldData['name'],
             'options' => $fieldData['options'] ?? null,
             'validation' => $fieldData['validation'] ?? null,
-            'order' => $index,
+            'order' => $fieldData['order'],
         ];
     }
 }
