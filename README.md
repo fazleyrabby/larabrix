@@ -26,7 +26,8 @@
 | ✅ | Common CRUD module                           | High     | ✅ Done    |
 | ✅ | Dynamic Menu Management                      | High     | ✅ Done    |
 | ✅ | Kanban Task Manager                          | High     | ✅ Done    |
-| 🔄 | Product & Category Management                | High     | Q3 2025    |
+| ✅ | Product & Category Management                | High     | Q3 2025    |
+| ✅ | Custom Form builder                          | Medium   | Q4 2025    |
 | 🔄 | Media Library (upload & manage)              | High     | Q3 2025    |
 | ❌ | Global Settings Panel                        | Medium   | Q3 2025    |
 | ❌ | Dashboard Widgets / Analytics Cards          | Medium   | Q3 2025    |
@@ -39,7 +40,6 @@
 | ❌ | Support Ticket Module                        | Low      | Q4 2025    |
 | ❌ | Notification Center                          | Low      | Q4 2025    |
 | ❌ | Custom CMS (Markdown / WYSIWIG / DnD)        | Medium   | Q4 2025    |
-| ❌ | Custom Form builder                          | Medium   | Q4 2025    |
 ---
 
 ## 📸 Screenshots
