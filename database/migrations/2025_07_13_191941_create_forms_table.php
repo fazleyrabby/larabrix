@@ -13,9 +13,7 @@ return new class extends Migration
     {
         Schema::create('forms', function (Blueprint $table) {
             $table->id();
-            $table->string('name');
-            $table->string('slug')->unique();
-            $table->json('fields')->nullable(); // Stores form field definitions
+            $table->string('name'); // Stores form field definitions
             $table->timestamps();
         });
     }

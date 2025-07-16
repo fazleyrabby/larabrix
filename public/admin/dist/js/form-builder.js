@@ -28,8 +28,8 @@ function createFieldElement(type, fieldData = {}) {
 
     let html = '';
     switch (type) {
-         case 'text': html = '<input type="text" class="form-control" placeholder="Input Preview">'; break;
-        case 'textarea': html = '<textarea class="form-control" placeholder="Textarea Preview"></textarea>'; break;
+        case 'text': html = `<input type="text" class="form-control" placeholder="${placeholder || 'Input Preview'}">`; break;
+        case 'textarea': html = `<textarea class="form-control" placeholder="${placeholder || 'Textarea Preview'}"></textarea>`; break;
         case 'file': html = '<input type="file" class="form-control">'; break;
         case 'select':
         case 'multiselect':
@@ -129,6 +129,7 @@ document.body.addEventListener('click', (e) => {
     offcanvasElements.validation.value = getInputValue('validation');
     offcanvasElements.saveBtn.dataset.type = type;
 
+
     offcanvasElements.container.classList.toggle('d-none', !['select', 'radio', 'checkbox', 'multiselect'].includes(type));
     offcanvasElements.optionsList.innerHTML = '';
     parseOptions(getInputValue('options')).forEach(opt => {
@@ -154,8 +155,14 @@ offcanvasElements.saveBtn.addEventListener('click', (e) => {
 
     const preview = document.querySelector(`.field-preview[data-index="${editingIndex}"]`);
     preview.querySelector('.field-label').innerText = label;
+    
     ['label', 'name', 'placeholder', 'validation'].forEach(field => {
-        preview.querySelector(`[name="fields[${editingIndex}][${field}]"]`).value = eval(field);
+        preview.querySelector(`[name="fields[${editingIndex}][${field}]"]`).value = {
+            label,
+            name,
+            placeholder,
+            validation
+        }[field];
     });
     preview.querySelector(`[name="fields[${editingIndex}][options]"]`).value = JSON.stringify(options);
 
@@ -164,6 +171,10 @@ offcanvasElements.saveBtn.addEventListener('click', (e) => {
         preview.querySelector('select.form-select').innerHTML = html;
     } else if (['radio', 'checkbox'].includes(type)) {
         preview.querySelector(`.${type}-container`).innerHTML = html;
+    } else if(type == 'text') {
+        preview.querySelector('input[type="text"]').setAttribute('placeholder', placeholder); 
+    }else if(type == 'textarea'){
+        preview.querySelector('textarea').setAttribute('placeholder', placeholder);
     }
 });
 

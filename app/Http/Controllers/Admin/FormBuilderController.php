@@ -30,7 +30,6 @@ class FormBuilderController extends Controller
         }
         $form = Form::create([
                     'name' => $request->name,
-                    'slug' => str()->slug($request->name)
                 ]);
 
         foreach ($fields as $index => $fieldData) {
@@ -51,6 +50,7 @@ class FormBuilderController extends Controller
                 'id' => $field->id,
                 'type' => $field->type,
                 'label' => $field->label,
+                'placeholder' => $field->placeholder,
                 'name' => $field->name,
                 'options' => $field->options ?? [],
                 'validation' => $field->validation ?? [],
@@ -64,7 +64,6 @@ class FormBuilderController extends Controller
         $fields = $this->formatFields($request);
         $form->update([
                     'name' => $request->name,
-                    'slug' => str()->slug($request->name)
                 ]);
 
         // Update existing and create new fields
@@ -128,6 +127,7 @@ class FormBuilderController extends Controller
             'type' => $fieldData['type'],
             'label' => $fieldData['label'],
             'name' => $fieldData['name'],
+            'placeholder' => $fieldData['placeholder'],
             'options' => $fieldData['options'] ?? null,
             'validation' => $fieldData['validation'] ?? null,
             'order' => $fieldData['order'],

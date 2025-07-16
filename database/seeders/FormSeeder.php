@@ -10,78 +10,74 @@ class FormSeeder extends Seeder
 {
     public function run()
     {
-        // First form
-        $form1 = Form::create([
-            'name' => 'Contact Form',
-            'slug' => 'contact'
-        ]);
+        // First Form: Contact Form
+        $contactForm = Form::create(['name' => 'Contact Form']);
 
-        $form1Fields = [
+        $contactForm->formFields()->createMany([
             [
                 'type' => 'text',
-                'label' => 'Name',
-                'name' => 'name',
+                'label' => 'Full Name',
+                'name' => 'full_name',
+                'placeholder' => 'Enter your full name',
                 'options' => null,
-                'validation' => ['required'],
+                'validation' => implode(",", ['required']),
                 'order' => 1,
             ],
             [
                 'type' => 'email',
                 'label' => 'Email',
                 'name' => 'email',
+                'placeholder' => 'you@example.com',
                 'options' => null,
-                'validation' => ['required', 'email'],
+                'validation' => implode(",", ['required', 'email']),
                 'order' => 2,
             ],
             [
                 'type' => 'textarea',
                 'label' => 'Message',
                 'name' => 'message',
+                'placeholder' => 'Write your message...',
                 'options' => null,
-                'validation' => ['required'],
+                'validation' => implode(",", ['required']),
                 'order' => 3,
             ],
-        ];
-
-        foreach ($form1Fields as $field) {
-            $form1->formFields()->create($field);
-        }
-
-        // Second form
-        $form2 = Form::create([
-            'name' => 'Feedback Form',
-            'slug' => 'feedback',
         ]);
 
-        $form2Fields = [
+        // Second Form: Feedback Form
+        $feedbackForm = Form::create(['name' => 'Feedback Form']);
+
+        $feedbackForm->formFields()->createMany([
             [
-                'type' => 'select',
-                'label' => 'Rating',
-                'name' => 'rating',
-                'options' => ['Excellent', 'Good', 'Fair', 'Poor'],
-                'validation' => ['required'],
+                'type' => 'text',
+                'label' => 'Name',
+                'name' => 'name',
+                'placeholder' => 'Your name',
+                'options' => null,
+                'validation' => implode(",", []),
                 'order' => 1,
             ],
             [
-                'type' => 'checkbox',
-                'label' => 'Subscribe to newsletter',
-                'name' => 'subscribe',
-                'options' => ['Yes'],
-                'validation' => null,
+                'type' => 'radio',
+                'label' => 'How satisfied are you?',
+                'name' => 'satisfaction',
+                'placeholder' => '',
+                'options' => json_encode([
+                    ['key' => '1', 'value' => 'Not Satisfied'],
+                    ['key' => '2', 'value' => 'Neutral'],
+                    ['key' => '3', 'value' => 'Very Satisfied'],
+                ]),
+                'validation' => implode(",", ['required']),
                 'order' => 2,
             ],
             [
-                'type' => 'text',
+                'type' => 'textarea',
                 'label' => 'Additional Comments',
                 'name' => 'comments',
+                'placeholder' => 'Share your thoughts...',
                 'options' => null,
-                'validation' => null,
+                'validation' => implode(",", []),
                 'order' => 3,
             ],
-        ];
-
-        foreach ($form2Fields as $field) {
-            $form2->formFields()->create($field);
-        }
+        ]);
     }
 }

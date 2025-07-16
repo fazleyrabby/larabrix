@@ -16,6 +16,7 @@ return new class extends Migration
             $table->foreignId('form_id')->constrained()->onDelete('cascade');
             $table->string('type'); // text, email, checkbox etc.
             $table->string('label');
+            $table->string('placeholder')->nullable();
             $table->string('name');
             $table->json('options')->nullable(); // for select, radio
             $table->json('validation')->nullable(); // ['required', 'email']
