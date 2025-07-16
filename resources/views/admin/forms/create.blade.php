@@ -176,14 +176,12 @@
 
                                 <h3>Fields</h3>
                                 <div id="fields-preview-wrapper" class="sortable-list">
-                                    <!-- Form fields get appended here visually -->
                                 </div>
-                                {{-- <button type="button" class="btn btn-secondary mb-3" id="add-field-btn">Add
-                                    Field</button> --}}
 
                             </div>
                             <div class="card-footer text-end">
                                 <button type="submit" class="btn btn-primary">Submit</button>
+                                <button type="submit" name="edit" value="1" class="btn btn-success">Save and Edit</button>
                             </div>
                         </form>
                     </div>
@@ -204,6 +202,10 @@
                 <input type="text" class="form-control" id="offcanvas-label">
             </div>
             <div class="mb-3">
+                <label>Placeholder</label>
+                <input type="text" class="form-control" id="offcanvas-placeholder">
+            </div>
+            <div class="mb-3">
                 <label>Field Name</label>
                 <input type="text" class="form-control" id="offcanvas-name">
             </div>
@@ -219,13 +221,11 @@
             </div>
 
             <div class="mt-4">
-                {{-- <button class="btn btn-primary w-100" type="button" id="save-offcanvas-btn">Save</button> --}}
                 <button class="btn btn-primary" type="button" id="save-offcanvas-btn"
                     data-bs-dismiss="offcanvas">Save</button>
             </div>
         </div>
     </div>
-
 
 @endsection
 
@@ -233,182 +233,5 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.15.6/Sortable.min.js"
         integrity="sha512-csIng5zcB+XpulRUa+ev1zKo7zRNGpEaVfNB9On1no9KYTEY/rLGAEEpvgdw6nim1WdTuihZY1eqZ31K7/fZjw=="
         crossorigin="anonymous" referrerpolicy="no-referrer"></script>
-    <script>
-        let fieldIndex = 0;
-        let editingIndex = null;
-
-        function createFieldElement(type) {
-            const wrapper = document.createElement('div');
-            wrapper.className = 'field-preview border p-3 mb-3';
-            wrapper.dataset.index = fieldIndex;
-            wrapper.dataset.type = type;
-
-            let html = '';
-            switch (type) {
-                case 'text':
-                    html = `<input type="text" class="form-control" disabled placeholder="Input Preview">`;
-                    break;
-                case 'textarea':
-                    html = `<textarea class="form-control" disabled placeholder="Textarea Preview"></textarea>`;
-                    break;
-                case 'select':
-                case 'multiselect':
-                    html = `<select class="form-select" disabled><option>Option 1</option></select>`;
-                    break;
-                case 'radio':
-                case 'checkbox':
-                    html = `<div><input type="${type}" disabled> <label>Option 1</label></div>`;
-                    break;
-                case 'file':
-                    html = `<input type="file" class="form-control" disabled>`;
-                    break;
-                default:
-                    html = `<input type="text" class="form-control" disabled>`;
-            }
-
-            wrapper.innerHTML = `
-                <label class="form-label field-label">Untitled ${type}</label>
-                ${html}
-                <div class="edit-btns"><a class="edit-field-btn" data-bs-toggle="offcanvas" href="#offcanvasEnd" role="button" aria-controls="offcanvasEnd"><svg  xmlns="http://www.w3.org/2000/svg"  width="24"  height="24"  viewBox="0 0 24 24"  fill="none"  stroke="currentColor"  stroke-width="2"  stroke-linecap="round"  stroke-linejoin="round"  class="icon icon-tabler icons-tabler-outline icon-tabler-edit"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M7 7h-1a2 2 0 0 0 -2 2v9a2 2 0 0 0 2 2h9a2 2 0 0 0 2 -2v-1" /><path d="M20.385 6.585a2.1 2.1 0 0 0 -2.97 -2.97l-8.415 8.385v3h3l8.385 -8.415z" /><path d="M16 5l3 3" /></svg></a>
-                <span type="button" class="remove-field-btn"><svg  xmlns="http://www.w3.org/2000/svg"  width="24"  height="24"  viewBox="0 0 24 24"  fill="none"  stroke="currentColor"  stroke-width="2"  stroke-linecap="round"  stroke-linejoin="round"  class="icon icon-tabler icons-tabler-outline icon-tabler-x"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M18 6l-12 12" /><path d="M6 6l12 12" /></svg></span></div>
-                <input type="hidden" name="fields[${fieldIndex}][type]" value="${type}">
-                <input type="hidden" name="fields[${fieldIndex}][label]" value="Untitled ${type}">
-                <input type="hidden" name="fields[${fieldIndex}][name]" value="${type}_${fieldIndex}">
-                <input type="hidden" name="fields[${fieldIndex}][options]" value="">
-                <input type="hidden" name="fields[${fieldIndex}][validation]" value="">`;
-
-            wrapper.querySelector('.remove-field-btn').addEventListener('click', () => wrapper.remove());
-            return wrapper;
-        }
-
-        function addField(type) {
-            const newField = createFieldElement(type);
-            document.getElementById('fields-preview-wrapper').appendChild(newField);
-            fieldIndex++;
-        }
-        document.querySelectorAll('.btn-add-field').forEach(btn => {
-            btn.addEventListener('click', () => {
-                const type = btn.dataset.type;
-                addField(type);
-            });
-        });
-
-        // Create option input row
-        function createOptionRow(key = '', value = '') {
-            const div = document.createElement('div');
-            div.classList.add('d-flex', 'gap-2', 'mb-2', 'option-row');
-            div.innerHTML = `
-                <input type="text" class="form-control form-control-sm option-key" placeholder="Key" value="${key}">
-                <input type="text" class="form-control form-control-sm option-value" placeholder="Value" value="${value}">
-                <button type="button" class="btn btn-sm btn-danger remove-option-btn">&times;</button>
-            `;
-            div.querySelector('.remove-option-btn').addEventListener('click', () => div.remove());
-            return div;
-        }
-        // Add new option row in offcanvas
-        document.getElementById('add-option-btn').addEventListener('click', () => {
-            document.getElementById('options-list').appendChild(createOptionRow());
-        });
-
-        document.addEventListener('click', e => {
-            if (e.target.classList.contains('edit-field-btn')) {
-                const field = e.target.parentNode.closest('.field-preview');
-                editingIndex = field.dataset.index;
-
-                const label = field.querySelector(`input[name="fields[${editingIndex}][label]"]`).value;
-                const name = field.querySelector(`input[name="fields[${editingIndex}][name]"]`).value;
-                const validation = field.querySelector(`input[name="fields[${editingIndex}][validation]"]`).value;
-                const options = field.querySelector(`input[name="fields[${editingIndex}][options]"]`).value;
-                const type = field.dataset.type;
-
-                document.getElementById('offcanvas-label').value = label;
-                document.getElementById('offcanvas-name').value = name;
-                document.getElementById('offcanvas-validation').value = validation;
-
-                // Show/hide options section
-                document.getElementById('options-container').classList.toggle('d-none', !['select', 'radio',
-                    'checkbox', 'multiselect'
-                ].includes(type));
-
-                const optionsList = document.getElementById('options-list');
-                optionsList.innerHTML = '';
-                try {
-                    const parsed = JSON.parse(options || '[]');
-                    if (Array.isArray(parsed)) {
-                        parsed.forEach(opt => {
-                            optionsList.appendChild(createOptionRow(opt.key || '', opt.value || ''));
-                        });
-                    }
-                } catch (err) {
-                    console.warn('Invalid options JSON');
-                }
-            }
-        });
-        // Handle Save
-        document.getElementById('save-offcanvas-btn').addEventListener('click', () => {
-            if (editingIndex === null) return;
-            const label = document.getElementById('offcanvas-label').value;
-            const name = document.getElementById('offcanvas-name').value;
-            const validation = document.getElementById('offcanvas-validation').value;
-
-            const optionRows = document.querySelectorAll('#options-list .option-row');
-            const options = [];
-            optionRows.forEach(row => {
-                const key = row.querySelector('.option-key').value.trim();
-                const value = row.querySelector('.option-value').value.trim();
-                if (key || value) {
-                    options.push({
-                        key,
-                        value
-                    });
-                }
-            });
-
-            const preview = document.querySelector(`.field-preview[data-index="${editingIndex}"]`);
-            preview.querySelector('.field-label').innerText = label;
-            preview.querySelector(`input[name="fields[${editingIndex}][label]"]`).value = label;
-            preview.querySelector(`input[name="fields[${editingIndex}][name]"]`).value = name;
-            preview.querySelector(`input[name="fields[${editingIndex}][validation]"]`).value = validation;
-            preview.querySelector(`input[name="fields[${editingIndex}][options]"]`).value = JSON.stringify(options);
-        });
-
-
-        new Sortable(document.querySelector('.components'), {
-            ghostClass: 'sortable-ghost',
-            group: {
-                name: 'shared',
-                pull: 'clone',
-                put: false
-            },
-            animation: 150,
-            sort: false
-        });
-
-        new Sortable(document.querySelector('.sortable-list'), {
-            group: 'shared',
-            animation: 150,
-            fallbackOnBody: true,
-            swapThreshold: 0.5,
-            fallbackTolerance: 10,
-            onAdd: function(evt) {
-                const type = evt.item.querySelector('.btn-add-field').dataset.type;
-                const dropIndex = evt.newIndex;
-                console.log(dropIndex)
-                // Remove the cloned button
-                evt.item.remove();
-                // Create the new field
-                const newField = createFieldElement(type); // use a helper that returns the element without appending
-                // Insert at the drop index
-                const container = document.querySelector('.sortable-list');
-                const children = container.children;
-                if (dropIndex >= children.length) {
-                    container.appendChild(newField);
-                } else {
-                    container.insertBefore(newField, children[dropIndex]);
-                }
-
-                fieldIndex++;
-            }
-        });
-    </script>
+    <script src="{{ asset('admin/dist/js/form-builder.js') }}"></script>
 @endpush

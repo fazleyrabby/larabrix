@@ -37,6 +37,9 @@ class FormBuilderController extends Controller
             $form->formFields()->create($this->formatFieldData($fieldData));
         }
 
+        if($request->input('edit')){
+            return redirect()->route('admin.forms.edit', $form->id)->with('success', 'Form created successfully.');
+        }
         return redirect()->route('admin.forms.index')->with('success', 'Form created successfully.');
     }
 
@@ -80,7 +83,9 @@ class FormBuilderController extends Controller
                 $form->formFields()->create($data);
             }
         }
-
+        if($request->input('edit')){
+            return redirect()->back()->with('success', 'Form updated successfully.');
+        }
         return redirect()->route('admin.forms.index')->with('success', 'Form updated successfully.');
     }
 

@@ -22,18 +22,18 @@
 
 | ✔️ | Feature                                      | Priority | ETA       |
 |----|----------------------------------------------|----------|-----------|
-| 🔄 | Authentication                               | High     | Q3 2025   |
+| 🔄 | Authentication                               | High     | Q3 2025    |
 | ✅ | Common CRUD module                           | High     | ✅ Done    |
 | ✅ | Dynamic Menu Management                      | High     | ✅ Done    |
 | ✅ | Kanban Task Manager                          | High     | ✅ Done    |
 | ✅ | Product & Category Management                | High     | Q3 2025    |
-| ✅ | Custom Form builder                          | Medium   | Q4 2025    |
+| ✅ | Custom Form builder                          | Medium   | ✅ Done    |
 | 🔄 | Media Library (upload & manage)              | High     | Q3 2025    |
+| 🔄 | Blog / Posts with Categories & Tags          | Low      | Q3 2025    |
 | ❌ | Global Settings Panel                        | Medium   | Q3 2025    |
 | ❌ | Dashboard Widgets / Analytics Cards          | Medium   | Q3 2025    |
 | ❌ | Import/Export CSV for CRUD                   | Medium   | Q3 2025    |
 | ❌ | CMS (Page Builder / Static Pages)            | Medium   | Q4 2025    |
-| ❌ | Blog / Posts with Categories & Tags          | Low      | Q4 2025    |
 | ❌ | Additional E-commerce (Cart, Payment, etc.)  | High     | Q4 2025    |
 | ❌ | Basic API Setup with Token Auth              | Low      | Q4 2025    |
 | ❌ | Reports Management                           | Medium   | Q4 2025    |
