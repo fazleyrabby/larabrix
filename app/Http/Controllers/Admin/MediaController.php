@@ -41,6 +41,12 @@ class MediaController extends Controller
 
     public function store(Request $request)
     {
+        if(!$request->hasFile('images')){
+            return response()->json([
+                'success' => 'error',
+                'message' => "No image selected!",
+            ]);
+        }
         try {
             if ($request->hasFile('images')) {
                 foreach ($request->file('images') as $file) {

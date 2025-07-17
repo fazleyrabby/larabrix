@@ -101,7 +101,7 @@
                                         <button class="btn btn-primary ajax-btn" type="submit">Upload</button>
                                         </form>
                                         <div>
-                                            <button type="button" class="btn btn-danger delete-btn">Delete
+                                            <button type="button" class="btn btn-danger delete-btn" style="display: none">Delete
                                             </button>
                                         </div>
                                     </div>
@@ -138,6 +138,15 @@
 <script src="{{ asset('admin/dist/libs/fslightbox/index.js') }}" defer></script>
 <script>
     document.addEventListener('DOMContentLoaded', function () {
+        document.addEventListener('change', function(e){
+            if(!e.target.classList.contains('form-imagecheck-input')) return;
+            const checkedInputs = document.querySelectorAll('.form-imagecheck-input:checked');
+            if(checkedInputs.length > 0){
+                document.querySelector('.delete-btn').style.display = 'block'
+            }else{
+                document.querySelector('.delete-btn').style.display = 'none'
+            }
+        })
         document.addEventListener('click', function (e) {
             if (e.target.classList.contains('delete-btn')) {
                 const checkedInputs = document.querySelectorAll('.form-imagecheck-input:checked');
