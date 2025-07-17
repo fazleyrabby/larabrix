@@ -1,6 +1,7 @@
 @push('scripts')
 
 <script>
+"use strict";
 document.addEventListener("DOMContentLoaded", () => {
     let currentModalId = null;
     let currentUrl = null;
@@ -124,15 +125,25 @@ document.addEventListener("DOMContentLoaded", () => {
             checkboxes.forEach(cb => {
                 const imgUrl = cb.dataset.url;
                 const imgUrlFullPath = cb.dataset.fullpath;
-                imageWrapper.innerHTML += `
-                    <img width="200" src="${imgUrlFullPath}" class="mr-3 mb-3">
+                imageWrapper.innerHTML += `<div class="image-wrapper"><img width="200" src="${imgUrlFullPath}" class="mr-3 mb-3">
                     <input type="hidden" name="${inputName}" value="${imgUrl}">
-                `;
+                    <span type="button" class="remove-image"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-x"><path stroke="none" d="M0 0h24v24H0z" fill="none"></path><path d="M18 6l-12 12"></path><path d="M6 6l12 12"></path></svg></span></div>`;
+
+                imageWrapper.querySelector('.remove-image').addEventListener('click', (e) => {
+                    e.target.closest('.image-wrapper').remove();
+                });
             });
+
         }
 
         closeModal(modal);
     });
+
+    document.querySelectorAll('.remove-image').forEach(removeBtn => {
+        removeBtn.addEventListener('click', (e) => {
+            e.target.closest('.image-wrapper').remove();
+        });
+    })
 
     function closeModal(modal) {
         modal.classList.remove('show');

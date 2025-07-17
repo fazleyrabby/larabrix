@@ -12,6 +12,7 @@
     <link rel="stylesheet" href="{{ asset('admin/dist/css/tabler-vendors.min.css') }}">
     <link rel="stylesheet" href="{{ asset('admin/dist/css/tabler-themes.css') }}">
     <link rel="stylesheet" href="{{ asset('admin/preview/css/demo.css') }}">
+    <link rel="stylesheet" href="{{ asset('admin/dist/css/style.css') }}">
 
     @vite(['resources/css/app.css','resources/js/app.js'])
     <style>

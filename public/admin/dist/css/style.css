@@ -1,0 +1,22 @@
+.image-wrapper{
+    position: relative;
+    display: inline-block;
+}
+
+
+.image-wrapper .remove-image {
+    cursor: pointer;
+    position: absolute;
+    top: 0;
+    right: 0;
+    background: #fff;
+    opacity: 0.5;
+    height: 25px;
+    width: 25px;
+}
+
+.image-wrapper .remove-image svg {
+    pointer-events: none;
+    height: 25px;
+    width: 25px;
+}

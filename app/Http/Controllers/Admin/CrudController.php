@@ -38,7 +38,7 @@ class CrudController extends Controller
         if ($request->hasFile('default_file_input')) {
             $data['default_file_input'] = $this->uploadPhoto($request->file('default_file_input'));
         }
-        if($request->filled('filepond_input')){
+        if ($request->filled('filepond_input')) {
             $file = $this->processFilepondTempFile($request->input('filepond_input'));
             $data['filepond_input'] = $this->uploadPhoto($file);
             // To delete temp file
@@ -72,19 +72,30 @@ class CrudController extends Controller
     {
         $crud = Crud::findOrFail($id);
         $data = $request->validated();
-        $filepondInput = $request->input('filepond_input');
+
+        $data['media_input'] = $request->input('media_input');
+        
         if ($request->hasFile('default_file_input')) {
-            $data['default_file_input'] = $this->uploadPhoto($request->file('default_file_input'), $crud->default_file_input);
+            $data['default_file_input'] = $this->uploadPhoto(
+                $request->file('default_file_input'),
+                $crud->default_file_input
+            );
         }
-        $data['filepond_input'] = !$filepondInput ? null : $crud->filepond_input;
-        if($request->filled('filepond_input') && Str::startsWith($filepondInput, 'tmp/')){
-            $file = $this->processFilepondTempFile($filepondInput);
-            $data['filepond_input'] = $this->uploadPhoto($file, $crud->filepond_input ?? '');
-            // To delete temp file
-            $this->deleteImage($filepondInput);
+
+        $filepondInput = $request->input('filepond_input');
+
+        if ($request->filled('filepond_input') && Str::startsWith($filepondInput, 'tmp/')) {
+            $tempFile = $this->processFilepondTempFile($filepondInput);
+            $data['filepond_input'] = $this->uploadPhoto($tempFile, $crud->filepond_input ?? '');
+            $this->deleteImage($filepondInput); // Clean up
+        } else {
+            $data['filepond_input'] = null;
         }
         $crud->update($data);
-        return redirect()->route('admin.cruds.index')->with(['success' => 'Successfully updated!']);
+
+        return redirect()
+            ->route('admin.cruds.index')
+            ->with('success', 'Successfully updated!');
     }
 
     public function destroy($id)

@@ -99,7 +99,16 @@
                                 <div class="col">
                                     <button data-modal-toggle="crud-modal" id="crud-modal-btn" class="btn btn-primary">Upload File</button>
                                     <div id="crud-modal-wrapper">
-                                        <img width="100" src="{{ asset($crud->media_input) }}" />
+                                        @if ($crud->media_input)
+                                            <div class="my-3">Image Preview:</div>
+                                            <div class="image-wrapper">
+                                                <img width="200" src="{{ asset($crud->media_input) }}" />
+                                                <input type="hidden" name="media_input" value="{{ $crud->media_input }}">
+                                                <span type="button" class="remove-image">
+                                                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-x"><path stroke="none" d="M0 0h24v24H0z" fill="none"></path><path d="M18 6l-12 12"></path><path d="M6 6l12 12"></path></svg>
+                                                </span>
+                                            </div>
+                                        @endif
                                     </div>
                                 </div>
                             </div>
@@ -132,7 +141,7 @@
 
     @include('admin.components.media.popup', [
         'modalId' => 'crud-modal',
-        'inputType' => 'single',
+        'inputType' => 'multiple',
         'imageInputName' => 'media_input'
     ])
 
