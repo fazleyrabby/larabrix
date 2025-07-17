@@ -149,7 +149,9 @@ document.addEventListener("DOMContentLoaded", function () {
 
                 // Optional: run success callback
                 if (typeof success === "function") {
-                    success(response.data.message ?? response.data, response.data.refresh ?? "");
+                    const refreshUrl = form.dataset.refreshUrl ?? "";
+                    const refreshTarget = form.dataset.refreshTarget ?? "";
+                    success(response.data.message ?? response.data, refreshUrl, refreshTarget);
                 }
 
             } catch (error) {
@@ -171,18 +173,27 @@ document.addEventListener("DOMContentLoaded", function () {
                 // Optional: global error handler
                 // errosresponse(error.response, error.message);
             }
+            
         }
     });
 });
 
-function loadData(url, container, target) {
+function loadData(url, containerSelector, target=null) {
     // const table = document.getElementById("ajax-table");
     // const container = document.getElementById("ajax-container");
-    target.classList.add("onLoading");
+    const container = typeof containerSelector === 'string'
+        ? document.querySelector(containerSelector)
+        : containerSelector;
+
+    if (!container) {
+        console.warn("Container not found:", containerSelector);
+        return;
+    }
+    target?.classList.add("onLoading");
 
     axios.get(url)
         .then(response => {
-            container.innerHTML = response.data;
+            container.innerHTML = response.data.html ?? response.data;
         })
         .catch(error => {
             console.error("Failed to load data!", error);

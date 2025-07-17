@@ -24,9 +24,15 @@ trait UploadPhotos
         if (! $photo->isValid()) {
             return null;
         }
+
+        $directory = 'media/' . ltrim($directory, 'media/');
+        $directory = rtrim(preg_replace('/\/+/', '/', $directory), '/') . '/';
         // Generate a unique filename
         $photoPath = self::generateUniqueFileNameWithDirectory($photo->getClientOriginalExtension(), $directory, $prefix);
 
+        if (!Storage::disk(self::FILESYSTEM)->exists($directory)) {
+            Storage::disk(self::FILESYSTEM)->makeDirectory($directory);
+        }
         // Create and store the new image
         $img = Image::read($photo->getRealPath());
         $img = $img->encode(new AutoEncoder(quality: 80));

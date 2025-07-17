@@ -6,5 +6,8 @@ use Illuminate\Database\Eloquent\Model;
 
 class Media extends Model
 {
-    //
+    public function folder()
+    {
+        return $this->belongsTo(MediaFolder::class, 'folder_id');
+    }
 }

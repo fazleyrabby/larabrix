@@ -43,7 +43,7 @@ Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () 
     ], function () {
         Route::get('/', [MediaController::class, 'index'])->name('index'); // Media UI
         Route::post('/store', [MediaController::class, 'store'])->name('store'); // Upload file(s)
-
+        Route::post('/store-folder', [MediaController::class, 'storeFolder'])->name('store.folder');
         // Route::post('/create-folder', [MediaController::class, 'createFolder'])->name('create-folder'); // Make directory
         // Route::get('/browse', [MediaController::class, 'browse'])->name('browse'); // AJAX list contents
         // Route::get('/folder-tree', [MediaController::class, 'folderTree'])->name('folder-tree'); // AJAX sidebar

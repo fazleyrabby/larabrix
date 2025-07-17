@@ -68,7 +68,7 @@
                                     Show
                                     <div class="mx-2 d-inline-block">
                                         <select name="limit" onchange="updateData(this)"
-                                            data-route="{{ route('admin.cruds.index') }}">
+                                            data-route="{{ route('admin.media.index') }}">
                                             <option value="5" @selected((request()->limit ?? 10) == 5)>5</option>
                                             <option value="10" @selected((request()->limit ?? 10) == 10)>10</option>
                                             <option value="20" @selected((request()->limit ?? 10) == 20)>20</option>
@@ -98,11 +98,19 @@
                                         enctype="multipart/form-data" novalidate>
                                         @csrf
                                         <input type="file" name="images[]" id="media" multiple />
+                                        <input type="text" name="folder_id" value="{{ request()->folder_id }}">
                                         <button class="btn btn-primary ajax-btn" type="submit">Upload</button>
                                         </form>
                                         <div>
                                             <button type="button" class="btn btn-danger delete-btn" style="display: none">Delete
                                             </button>
+                                        </div>
+                                        <div>
+                                            <form action="{{ route('admin.media.store.folder') }}" method="post">
+                                                @csrf
+                                                <input type="text" name="name" class="form-control">
+                                                <button class="btn btn-success" id="add-folder" type="submit">Add Folder</button>
+                                            </form>
                                         </div>
                                     </div>
                                 </div>
@@ -204,6 +212,7 @@
         const target = document.querySelector(".media-container");
         const container = document.getElementById("ajax-container");
         loadData(url, container, target)
+        document.querySelector('.ajax-form').reset()
     }
 
 

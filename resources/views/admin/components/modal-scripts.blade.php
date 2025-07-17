@@ -40,10 +40,11 @@ document.addEventListener("DOMContentLoaded", () => {
                     const loader = modal.querySelector('.loader');
                     loader.style.display = 'block';
                     const formData = new FormData(uploadForm);
+                    const folderId = uploadForm.querySelector('[name="folder_id"]').value ?? null
 
-                    axios.post(uploadForm.action, formData)
+                    axios.post(uploadForm.action, formData, folderId)
                         .then(() => {
-                            loadMedia(route, modalId, 1);
+                            loadMedia(route, modalId, 1, folderId);
                             setTimeout(() => {
                                 const firstCheckbox = modal.querySelector('.form-imagecheck-input');
                                 if (firstCheckbox) firstCheckbox.checked = true;
@@ -160,16 +161,37 @@ document.addEventListener("DOMContentLoaded", () => {
         document.body.style.overflow = '';
     }
 
-    function loadMedia(url, modalId, page = 1) {
+    function loadMedia(url, modalId, page = 1, folderId=null) {
         const loader = document.querySelector('.loader');
         const container = document.getElementById(`ajax-container-${modalId}`);
-         const pagination = document.getElementById(`pagination-${modalId}`);
+        const pagination = document.getElementById(`pagination-${modalId}`);
         if (loader) loader.style.display = 'block';
 
-        axios.get(`${url}&page=${page}`)
+        const urlObj = new URL(url, window.location.origin);
+        const params = urlObj.searchParams;
+        params.set('page', page);
+        if (folderId !== null) {
+            params.set('folder_id', folderId);
+        }
+
+        urlObj.search = params.toString();
+        console.log(urlObj.toString())
+        axios.get(urlObj.toString())
             .then(response => {
                 container.innerHTML = response.data.html;
                 const meta = response.data.meta;
+                // set parent id 
+                const urlParams = new URLSearchParams((new URL(url)).search);
+                const folderId = urlParams.get('folder_id') || '';
+                const folderInput = document.getElementById(`media-folder-id-${modalId}`);
+                const mediafolderInput = document.getElementById(`media-folder-folder-id-${modalId}`);
+                console.log(1)
+                if (folderInput) {
+                    folderInput.value = folderId;
+                }
+                if (mediafolderInput) {
+                    mediafolderInput.value = folderId;
+                }
                 if(pagination){
                     pagination.innerHTML = '';
                     const ul = document.createElement('ul');
@@ -203,7 +225,7 @@ document.addEventListener("DOMContentLoaded", () => {
                         link.addEventListener('click', e => {
                             e.preventDefault();
                             const page = parseInt(link.getAttribute('data-page'));
-                            loadMedia(url, modalId, page);
+                            loadMedia(url, modalId, page, folderId);
                         });
                     });
                 }
@@ -216,6 +238,16 @@ document.addEventListener("DOMContentLoaded", () => {
             });
     }
 
+
+    document.addEventListener('click', function (e) {
+        const link = e.target.closest('.folder-link');
+        if (link) {
+            e.preventDefault();
+            const url = link.dataset.url;
+            const modalId = link.closest('[id^="ajax-container-"]').id.replace('ajax-container-', '');
+            loadMedia(url, modalId, 1);
+        }
+    });
     // old load more function
     // function loadMedia(url, modalId, page = 1) {
     //     const loader = document.querySelector('.loader');

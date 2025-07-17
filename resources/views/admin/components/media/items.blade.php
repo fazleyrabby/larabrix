@@ -1,27 +1,126 @@
-@php $isModal = request()->get('type') == 'modal'; @endphp
-<form class="delete_form media-container row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 g-2"
-    action="{{ route('admin.media.delete') }}" method="post">
+<style>
+    .media-flex {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 1rem;
+    }
+
+    .media-item {
+        width: calc(25% - 1rem); /* 4 items per row */
+        min-width: 200px;
+        background-color: #f8f9fa;
+        border-radius: 6px;
+        overflow: hidden;
+        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+        display: flex;
+        flex-direction: column;
+    }
+
+    .form-imagecheck-figure {
+        height: 240px;
+    }
+
+    .form-imagecheck-image {
+        object-fit: cover;
+        width: 100%;
+        height: 100%;
+    }
+
+    @media (max-width: 992px) {
+        .media-item {
+            width: calc(33.333% - 1rem); /* 3 items per row */
+        }
+    }
+
+    @media (max-width: 768px) {
+        .media-item {
+            width: calc(50% - 1rem); /* 2 items per row */
+        }
+    }
+
+    @media (max-width: 576px) {
+        .media-item {
+            width: 100%; /* 1 item per row */
+        }
+    }
+</style>
+
+@php
+    $isModal = request()->get('type') == 'modal';
+    $folderId = request()->get('folder_id');
+@endphp
+
+@if ($folderId)
+    @php $parentFolder = \App\Models\MediaFolder::find($folderId); @endphp
+    <div class="mb-3 d-flex align-items-center gap-2">
+        @if ($isModal)
+            <a href="#"
+               class="btn btn-sm btn-secondary folder-link"
+               data-url="{{ request()->fullUrlWithQuery(['folder_id' => $parentFolder?->parent_id]) }}">
+                ⬅ Back
+            </a>
+        @else
+            <a href="{{ request()->fullUrlWithQuery(['folder_id' => $parentFolder?->parent_id]) }}"
+               class="btn btn-sm btn-secondary">
+                ⬅ Back
+            </a>
+        @endif
+
+        <strong>{{ $parentFolder?->name }}</strong>
+    </div>
+@endif
+
+<form class="delete_form media-container media-flex" action="{{ route('admin.media.delete') }}" method="post">
     @csrf
-    @foreach ($media as $index => $item)
-        <div class="col image-container">
-            <label class="form-imagecheck d-block position-relative w-100 h-100">
+
+    {{-- Show folders --}}
+    @foreach ($folders as $folder)
+        <div class="media-item folder-container p-3 text-center">
+            @if ($isModal)
+                {{-- In modal: clickable but no page reload (AJAX will handle) --}}
+                <a href="#" 
+                   class="folder-link d-block text-decoration-none text-dark"
+                   data-folder-id="{{ $folder->id }}"
+                   data-url="{{ route('admin.media.index') }}?type=modal&folder_id={{ $folder->id }}">
+                    <div class="folder-icon" style="font-size: 48px;">📁</div>
+                    <div class="folder-name mt-2 text-truncate" title="{{ $folder->name }}">
+                        {{ $folder->name }}
+                    </div>
+                </a>
+            @else
+                {{-- Normal page: regular link --}}
+                <a href="{{ request()->fullUrlWithQuery(['folder_id' => $folder->id]) }}"
+                   class="d-block text-decoration-none text-dark">
+                    <div class="folder-icon" style="font-size: 48px;">📁</div>
+                    <div class="folder-name mt-2 text-truncate" title="{{ $folder->name }}">
+                        {{ $folder->name }}
+                    </div>
+                </a>
+            @endif
+        </div>
+    @endforeach
+
+    {{-- Show media items (same for modal and normal) --}}
+    @foreach ($media as $item)
+        <div class="media-item image-container">
+            <label class="form-imagecheck position-relative d-block w-100 h-100">
                 <input name="ids[]" type="checkbox" value="{{ $item->id }}"
-                    class="form-imagecheck-input position-absolute top-0 start-0 z-2" data-url="{{ $item->url }}"
+                    class="form-imagecheck-input position-absolute top-0 start-0 z-2"
+                    data-url="{{ $item->url }}"
                     data-fullpath="{{ Storage::disk('public')->url($item->url) }}" />
-                <span class="form-imagecheck-figure d-block overflow-hidden rounded shadow-sm w-100 h-100">
+                <span class="form-imagecheck-figure d-block w-100">
                     <img src="{{ Storage::disk('public')->url($item->url) }}" alt="Media Item"
-                        class="form-imagecheck-image w-100 h-100 object-fit-cover" style="max-height: 240px;" />
+                        class="form-imagecheck-image" />
                 </span>
             </label>
-
             @if (!$isModal)
-                <span class="view btn btn-sm btn-primary mt-2"
+                <span class="view btn btn-sm btn-primary m-2"
                     data-created-at="{{ \Carbon\Carbon::parse($item->created_at)->isoFormat('LLL') }}"
-                    data-preview-url="{{ Storage::disk('public')->url($item->url) }}" data-url="{{ $item->url }}">
+                    data-preview-url="{{ Storage::disk('public')->url($item->url) }}"
+                    data-url="{{ $item->url }}">
                     View
                 </span>
             @endif
         </div>
     @endforeach
-
 </form>

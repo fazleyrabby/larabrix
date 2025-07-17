@@ -1,42 +1,54 @@
 @push('styles')
-
-<style>
-
-    .custom.loader{
-        position: absolute;
-        left: 50%;
-        top: 50%;
-        transform: translate(-50%, -50%);
-        width: 4rem;
-        height: 4rem;
-    }
-
-</style>
-
+    <style>
+        .custom.loader {
+            position: absolute;
+            left: 50%;
+            top: 50%;
+            transform: translate(-50%, -50%);
+            width: 4rem;
+            height: 4rem;
+        }
+    </style>
 @endpush
-<div class="modal media-modal"
-    id="{{ $modalId }}"
-    data-type="{{ $inputType }}"
+<div class="modal media-modal" id="{{ $modalId }}" data-type="{{ $inputType }}"
     data-route="{{ route('admin.media.index') }}?type=modal&inputType={{ $inputType }}"
     data-image-input="{{ $imageInputName }}">
     <div class="modal-dialog modal-xl modal-dialog-scrollable" role="document">
         <div class="modal-content">
             <div class="modal-header">
                 <div class="modal-header">
-                    <h5 class="modal-title"><a target="_blank" href="{{ route('admin.media.index') }}">Media Gallery</a></h5>
+                    <h5 class="modal-title"><a target="_blank" href="{{ route('admin.media.index') }}">Media Gallery</a>
+                    </h5>
                     <button class="btn-close" data-modal-dismiss="modal"></button>
                 </div>
             </div>
             <div class="modal-body">
                 <div class="row mb-3 align-items-end">
-                    <form class="ajaxform-file-upload mb-3" action="{{ route('admin.media.store') }}" method="post"
-                        enctype="multipart/form-data" novalidate>
-                        @csrf
-                        <div class="form-group">
-                            <input type="file" name="images[]" id="media" multiple />
-                        <button class="btn btn-primary" type="submit">Upload</button>
-                        </div>
-                    </form>
+                    <div class="d-flex align-items-center gap-3 mb-3 flex-wrap">
+                        {{-- Upload Form --}}
+                        <form class="ajaxform-file-upload d-flex align-items-center gap-2"
+                            action="{{ route('admin.media.store') }}" method="post" enctype="multipart/form-data"
+                            novalidate>
+                            @csrf
+                            <input type="file" name="images[]" id="media" multiple class="form-control">
+                            <input type="" name="folder_id" id="media-folder-id-{{ $modalId }}"
+                                value="{{ request()->folder_id }}">
+                            <button class="btn btn-primary" type="submit">Upload</button>
+                        </form>
+
+                        {{-- Add Folder Form --}}
+                        <form class="add-folder d-flex align-items-center gap-2 ajax-form"
+                            action="{{ route('admin.media.store.folder') }}" method="post"
+                            data-refresh-url="{{ route('admin.media.index', ['folder_id' => request()->folder_id, 'type' => 'modal']) }}" 
+                            data-refresh-target="#ajax-container-{{ $modalId }}"
+                            >
+                            @csrf
+                            <input type="text" name="name" class="form-control" placeholder="Folder name">
+                            <input type="" name="parent_id" id="media-folder-folder-id-{{ $modalId }}"
+                                value="{{ request()->folder_id }}">
+                            <button class="btn btn-success" id="add-folder" type="submit">Add Folder</button>
+                        </form>
+                    </div>
                     <div>
                         <div class="loader custom"></div>
                         <div class="row gutters-sm" id="ajax-container-{{ $modalId }}">
@@ -58,3 +70,18 @@
         </div>
     </div>
 </div>
+
+
+@push('scripts')
+<script>
+function success(response, url, container) {
+    let folderId = document.getElementById("media-folder-folder-id-{{ $modalId }}").value;
+    folderId = folderId || document.getElementById("media-folder-id-{{ $modalId }}").value;
+    console.log(folderId)
+    const target = document.querySelector(".media-container");
+    loadData(`${url}&folder_id=${folderId}`, container, target)
+    document.querySelector('.ajax-form').reset()
+}
+</script>
+    
+@endpush

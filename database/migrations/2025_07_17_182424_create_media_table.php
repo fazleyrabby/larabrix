@@ -15,6 +15,7 @@ return new class extends Migration
             $table->id();
             $table->string('url');
             $table->tinyInteger('status')->default(true);
+            $table->foreignId('folder_id')->nullable()->constrained('media_folders')->nullOnDelete();
             $table->timestamps();
         });
     }
