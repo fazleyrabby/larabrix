@@ -20,7 +20,7 @@ class MediaController extends Controller
         $search_query = $request->q;
         $status = $request->status ?? 1;
         $limit = $request->limit ?? 10;
-        $folderId = $request->folder_id;
+        $folderId = $request->parent_id;
         $folders = MediaFolder::toBase()->where('parent_id', $folderId)->orderBy('created_at','DESC')->get();
         $media = Media::toBase()->select('id', 'url', 'created_at', 'status')
             ->where('folder_id', $folderId)
@@ -54,7 +54,7 @@ class MediaController extends Controller
                 'message' => "No image selected!",
             ]);
         }
-        $folder = MediaFolder::find($request->folder_id);
+        $folder = MediaFolder::find($request->parent_id);
         $folderPath = $folder ? $folder->path : 'media';
         $data = [];
         try {

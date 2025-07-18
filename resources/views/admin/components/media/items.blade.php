@@ -1,3 +1,8 @@
+@php
+    $isModal = request()->get('type') == 'modal';
+    $folderId = request()->get('parent_id');
+@endphp
+
 <style>
     .media-flex {
         display: flex;
@@ -6,18 +11,24 @@
     }
 
     .media-item {
-        width: calc(25% - 1rem); /* 4 items per row */
-        min-width: 200px;
+        width: calc(12.5% - 1rem); /* 8 items per row */
+        min-width: @if($isModal) 120px @else 140px @endif;
         background-color: #f8f9fa;
         border-radius: 6px;
-        overflow: hidden;
+        /* overflow: hidden; */
         box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
         display: flex;
         flex-direction: column;
+        position:relative;
+    }
+    .media-item .context{
+        position: absolute;
+        top:0;
+        right: 0;
     }
 
     .form-imagecheck-figure {
-        height: 240px;
+        height: 180px;
     }
 
     .form-imagecheck-image {
@@ -26,15 +37,27 @@
         height: 100%;
     }
 
+    @media (max-width: 1400px) {
+        .media-item {
+            width: calc(14.285% - 1rem); /* 7 items per row */
+        }
+    }
+
+    @media (max-width: 1200px) {
+        .media-item {
+            width: calc(16.666% - 1rem); /* 6 items per row */
+        }
+    }
+
     @media (max-width: 992px) {
         .media-item {
-            width: calc(33.333% - 1rem); /* 3 items per row */
+            width: calc(20% - 1rem); /* 5 items per row */
         }
     }
 
     @media (max-width: 768px) {
         .media-item {
-            width: calc(50% - 1rem); /* 2 items per row */
+            width: calc(25% - 1rem); /* 4 items per row */
         }
     }
 
@@ -45,23 +68,19 @@
     }
 </style>
 
-@php
-    $isModal = request()->get('type') == 'modal';
-    $folderId = request()->get('folder_id');
-@endphp
+
 
 @if ($folderId)
     @php $parentFolder = \App\Models\MediaFolder::find($folderId); @endphp
     <div class="mb-3 d-flex align-items-center gap-2">
         @if ($isModal)
-            <a href="#"
-               class="btn btn-sm btn-secondary folder-link"
-               data-url="{{ request()->fullUrlWithQuery(['folder_id' => $parentFolder?->parent_id]) }}">
+            <a href="#" class="btn btn-sm btn-secondary folder-link"
+                data-url="{{ request()->fullUrlWithQuery(['parent_id' => $parentFolder?->parent_id]) }}">
                 ⬅ Back
             </a>
         @else
-            <a href="{{ request()->fullUrlWithQuery(['folder_id' => $parentFolder?->parent_id]) }}"
-               class="btn btn-sm btn-secondary">
+            <a href="{{ request()->fullUrlWithQuery(['parent_id' => $parentFolder?->parent_id]) }}"
+                class="btn btn-sm btn-secondary">
                 ⬅ Back
             </a>
         @endif
@@ -78,10 +97,9 @@
         <div class="media-item folder-container p-3 text-center">
             @if ($isModal)
                 {{-- In modal: clickable but no page reload (AJAX will handle) --}}
-                <a href="#" 
-                   class="folder-link d-block text-decoration-none text-dark"
-                   data-folder-id="{{ $folder->id }}"
-                   data-url="{{ route('admin.media.index') }}?type=modal&folder_id={{ $folder->id }}">
+                <a href="#" class="folder-link d-block text-decoration-none text-dark"
+                    data-folder-id="{{ $folder->id }}"
+                    data-url="{{ route('admin.media.index') }}?type=modal&parent_id={{ $folder->id }}">
                     <div class="folder-icon" style="font-size: 48px;">📁</div>
                     <div class="folder-name mt-2 text-truncate" title="{{ $folder->name }}">
                         {{ $folder->name }}
@@ -89,24 +107,42 @@
                 </a>
             @else
                 {{-- Normal page: regular link --}}
-                <a href="{{ request()->fullUrlWithQuery(['folder_id' => $folder->id]) }}"
-                   class="d-block text-decoration-none text-dark">
+                <a href="{{ request()->fullUrlWithQuery(['parent_id' => $folder->id]) }}"
+                    class="d-block text-decoration-none text-dark">
                     <div class="folder-icon" style="font-size: 48px;">📁</div>
                     <div class="folder-name mt-2 text-truncate" title="{{ $folder->name }}">
                         {{ $folder->name }}
                     </div>
                 </a>
             @endif
+            <div class="dropdown context">
+            <a href="#" class="btn-action dropdown-toggle" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><!-- Download SVG icon from http://tabler.io/icons/icon/dots-vertical -->
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-1">
+                <path d="M12 12m-1 0a1 1 0 1 0 2 0a1 1 0 1 0 -2 0"></path>
+                <path d="M12 19m-1 0a1 1 0 1 0 2 0a1 1 0 1 0 -2 0"></path>
+                <path d="M12 5m-1 0a1 1 0 1 0 2 0a1 1 0 1 0 -2 0"></path></svg></a>
+            <div class="dropdown-menu dropdown-menu-end" style="">
+                <span class="dropdown-item" href="#" data-modal-toggle="folder-context-{{ $folder->id }}" id="folder-context-{{ $folder->id }}-btn" class="btn btn-primary">Move to</span>
+                <a class="dropdown-item text-danger" href="#">Delete</a>
+            </div>
+            </div>
         </div>
+
+        @include('admin.components.modal', [
+            'id' => "folder-context-{$folder->id}",
+            'title' => 'My Modal Title',
+            'slot' => 'test' // or pass rendered view: view('partials.modal-body')->render()
+        ])
     @endforeach
+
+    
 
     {{-- Show media items (same for modal and normal) --}}
     @foreach ($media as $item)
         <div class="media-item image-container">
             <label class="form-imagecheck position-relative d-block w-100 h-100">
                 <input name="ids[]" type="checkbox" value="{{ $item->id }}"
-                    class="form-imagecheck-input position-absolute top-0 start-0 z-2"
-                    data-url="{{ $item->url }}"
+                    class="form-imagecheck-input position-absolute top-0 start-0 z-2" data-url="{{ $item->url }}"
                     data-fullpath="{{ Storage::disk('public')->url($item->url) }}" />
                 <span class="form-imagecheck-figure d-block w-100">
                     <img src="{{ Storage::disk('public')->url($item->url) }}" alt="Media Item"
@@ -116,8 +152,7 @@
             @if (!$isModal)
                 <span class="view btn btn-sm btn-primary m-2"
                     data-created-at="{{ \Carbon\Carbon::parse($item->created_at)->isoFormat('LLL') }}"
-                    data-preview-url="{{ Storage::disk('public')->url($item->url) }}"
-                    data-url="{{ $item->url }}">
+                    data-preview-url="{{ Storage::disk('public')->url($item->url) }}" data-url="{{ $item->url }}">
                     View
                 </span>
             @endif

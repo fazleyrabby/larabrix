@@ -93,25 +93,21 @@
                         <div class="container-fluid">
                             <div class="row row-deck row-cards">
                                 <div class="com-md-12">
-                                    <div class="d-flex space-x-2">
+                                     <div class="d-flex align-items-center gap-3 mb-3 flex-wrap">
                                         <form class="ajax-form" action="{{ route('admin.media.store') }}" method="post"
                                         enctype="multipart/form-data" novalidate>
                                         @csrf
                                         <input type="file" name="images[]" id="media" multiple />
-                                        <input type="text" name="folder_id" value="{{ request()->folder_id }}">
+                                        <input type="text" name="parent_id" value="{{ request()->folder_id }}">
                                         <button class="btn btn-primary ajax-btn" type="submit">Upload</button>
                                         </form>
-                                        <div>
-                                            <button type="button" class="btn btn-danger delete-btn" style="display: none">Delete
-                                            </button>
-                                        </div>
-                                        <div>
-                                            <form action="{{ route('admin.media.store.folder') }}" method="post">
-                                                @csrf
-                                                <input type="text" name="name" class="form-control">
-                                                <button class="btn btn-success" id="add-folder" type="submit">Add Folder</button>
-                                            </form>
-                                        </div>
+                                        <button type="button" class="btn btn-danger delete-btn" style="display: none">Delete
+                                        </button>
+                                        <form class="d-flex align-items-center gap-2 ajax-form" action="{{ route('admin.media.store.folder') }}" method="post">
+                                            @csrf
+                                            <input type="text" name="name" class="form-control">
+                                            <button class="btn btn-success" id="add-folder" type="submit">Add Folder</button>
+                                        </form>
                                     </div>
                                 </div>
                                 <div class="col-md-8">

@@ -13,7 +13,7 @@
 <div class="modal media-modal" id="{{ $modalId }}" data-type="{{ $inputType }}"
     data-route="{{ route('admin.media.index') }}?type=modal&inputType={{ $inputType }}"
     data-image-input="{{ $imageInputName }}">
-    <div class="modal-dialog modal-xl modal-dialog-scrollable" role="document">
+    <div class="modal-dialog modal-fullscreen modal-dialog-scrollable" role="document">
         <div class="modal-content">
             <div class="modal-header">
                 <div class="modal-header">
@@ -31,21 +31,21 @@
                             novalidate>
                             @csrf
                             <input type="file" name="images[]" id="media" multiple class="form-control">
-                            <input type="" name="folder_id" id="media-folder-id-{{ $modalId }}"
-                                value="{{ request()->folder_id }}">
+                            <input type="hidden" name="parent_id" id="media-folder-id-{{ $modalId }}"
+                                value="{{ request()->parent_id }}">
                             <button class="btn btn-primary" type="submit">Upload</button>
                         </form>
 
                         {{-- Add Folder Form --}}
                         <form class="add-folder d-flex align-items-center gap-2 ajax-form"
                             action="{{ route('admin.media.store.folder') }}" method="post"
-                            data-refresh-url="{{ route('admin.media.index', ['folder_id' => request()->folder_id, 'type' => 'modal']) }}" 
+                            data-refresh-url="{{ route('admin.media.index', ['parent_id' => request()->parent_id, 'type' => 'modal']) }}" 
                             data-refresh-target="#ajax-container-{{ $modalId }}"
                             >
                             @csrf
                             <input type="text" name="name" class="form-control" placeholder="Folder name">
-                            <input type="" name="parent_id" id="media-folder-folder-id-{{ $modalId }}"
-                                value="{{ request()->folder_id }}">
+                            <input type="hidden" name="parent_id" id="media-folder-folder-id-{{ $modalId }}"
+                                value="{{ request()->parent_id }}">
                             <button class="btn btn-success" id="add-folder" type="submit">Add Folder</button>
                         </form>
                     </div>
@@ -79,8 +79,8 @@ function success(response, url, container) {
     folderId = folderId || document.getElementById("media-folder-id-{{ $modalId }}").value;
     console.log(folderId)
     const target = document.querySelector(".media-container");
-    loadData(`${url}&folder_id=${folderId}`, container, target)
-    document.querySelector('.ajax-form').reset()
+    loadData(`${url}&parent_id=${folderId}`, container, target)
+    document.querySelector('input[name="name"]').value = ""
 }
 </script>
     
