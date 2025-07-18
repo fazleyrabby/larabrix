@@ -21,7 +21,7 @@ class MediaController extends Controller
         $status = $request->status ?? 1;
         $limit = $request->limit ?? 10;
         $folderId = $request->parent_id;
-        $folders = MediaFolder::toBase()->where('parent_id', $folderId)->orderBy('created_at','DESC')->get();
+        $folders = MediaFolder::toBase()->where('parent_id', $folderId)->orderBy('created_at', 'DESC')->get();
         $media = Media::toBase()->select('id', 'url', 'created_at', 'status')
             ->where('folder_id', $folderId)
             ->where('url', 'like', '%' . $search_query . '%')
@@ -128,8 +128,8 @@ class MediaController extends Controller
 
     public function storeFolder(Request $request)
     {
-        try {
-            $request->validate([
+        $request->validate(
+            [
                 'name' => [
                     'required',
                     'string',
@@ -139,8 +139,14 @@ class MediaController extends Controller
                     }),
                 ],
                 'parent_id' => 'nullable|exists:media_folders,id',
-            ]);
-
+            ],
+            [
+                'name.required' => 'The folder name is required.',
+                'name.unique' => 'A folder with this name already exists in the selected directory.',
+                'parent_id.exists' => 'The selected parent folder does not exist.',
+            ]
+        );
+        try {
             $parentPath = '';
             if ($request->parent_id) {
                 $parent = MediaFolder::find($request->parent_id);
@@ -170,9 +176,13 @@ class MediaController extends Controller
             'message' => $message
         ];
 
-        if($request->ajax()){
+        if ($request->ajax()) {
             return response()->json($response);
         }
-        return redirect()->back()->with($success,$message);
+        return redirect()->back()->with($success, $message);
+    }
+
+    public function move(Request $request){
+        dd($request);
     }
 }

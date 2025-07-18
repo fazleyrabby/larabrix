@@ -6,27 +6,45 @@
             let currentUrl = null;
 
             // Open modal
-            document.body.addEventListener('click', e => {
-                const button = e.target.closest('[data-modal-toggle]');
-                if (!button) return;
+            // document.body.addEventListener('click', e => {
+            //     const button = e.target.closest('[data-modal-toggle]');
+            //     if (!button) return;
 
-                console.log(button);
-                const modalId = button.getAttribute('data-modal-toggle');
-                const modal = document.getElementById(modalId);
-                if (!modal) return;
+            //     console.log(button);
+            //     const modalId = button.getAttribute('data-modal-toggle');
+            //     const modal = document.getElementById(modalId);
+            //     if (!modal) return;
 
-                modal.classList.add('show');
-                modal.style.display = 'block';
-                document.body.classList.add('modal-open');
-                // openModal(modal)
+            //     modal.classList.add('show');
+            //     modal.style.display = 'block';
+            //     document.body.classList.add('modal-open');
+            //     // openModal(modal)
 
-                modal.querySelectorAll('[data-modal-dismiss]').forEach(btn => {
-                    btn.addEventListener('click', () => closeModal(modal));
+            //     modal.querySelectorAll('[data-modal-dismiss]').forEach(btn => {
+            //         btn.addEventListener('click', () => closeModal(modal));
+            //     });
+
+            //     if (modal.dataset.route && modal.dataset.imageInput) {
+            //         setupMediaModal(modal);
+            //     }
+            // });
+
+            const offcanvases = document.querySelectorAll('.offcanvas');
+
+            offcanvases.forEach(offcanvas => {
+                offcanvas.addEventListener('show.bs.offcanvas', event => {
+                    const target = event.target; // safer to use event.target in event listeners
+                    if (target.dataset.route && target.dataset.imageInput) {
+                        setupMediaModal(target);
+                    }
+                    const nestedModals = offcanvas.querySelectorAll('.modal');
+                    nestedModals.forEach(modal => {
+                    // Move modal to body to fix z-index/backdrop issues
+                    if (!document.body.contains(modal)) {
+                        document.body.appendChild(modal);
+                    }
+                    });
                 });
-
-                if (modal.dataset.route && modal.dataset.imageInput) {
-                    setupMediaModal(modal);
-                }
             });
 
             function refreshUploadInput(form) {
@@ -56,48 +74,32 @@
                         const imgUrl = cb.dataset.url;
                         const imgUrlFullPath = cb.dataset.fullpath;
                         imageWrapper.innerHTML +=
-                            `<div class="image-wrapper"><img width="200" src="${imgUrlFullPath}" class="mr-3 mb-3">
+                            `<div class="image-wrapper"><img src="${imgUrlFullPath}" class="mr-3 mb-3">
                     <input type="hidden" name="${inputName}" value="${imgUrl}">
                     <span type="button" class="remove-image"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-x"><path stroke="none" d="M0 0h24v24H0z" fill="none"></path><path d="M18 6l-12 12"></path><path d="M6 6l12 12"></path></svg></span></div>`;
-
-                        imageWrapper.querySelector('.remove-image').addEventListener('click', (
-                            e) => {
-                            e.target.closest('.image-wrapper').remove();
-                        });
                     });
-
                 }
-
-                closeModal(modal);
             });
 
-            document.querySelectorAll('.remove-image').forEach(removeBtn => {
-                removeBtn.addEventListener('click', (e) => {
+            document.body.addEventListener('click', function(e) {
+                if (e.target.closest('.remove-image')) {
                     e.target.closest('.image-wrapper').remove();
-                });
-            })
+                }
+            });
 
-            function openModal(modal) {
-                modal.classList.add('show');
-                modal.style.display = 'block';
-                document.body.classList.add('modal-open');
 
-                // Create backdrop
-                let backdrop = document.createElement('div');
-                backdrop.className = 'modal-backdrop fade show';
-                document.body.appendChild(backdrop);
-            }
+            // document.addEventListener('click', function(e) {
+            //     const folderModalContextBtn = e.target.closest('#folder-context-modal-btn');
+            //     if (!folderModalContextBtn) return;
 
-            function closeModal(modal) {
-                modal.classList.remove('show');
-                modal.style.display = 'none';
+            //     const folderContextModalId = `folder-context-${folderModalContextBtn.dataset.id}`;
+            //     const modal = document.getElementById(folderContextModalId);
+            //     if (!modal) return;
 
-                // Remove backdrop
-                const backdrop = document.querySelector('.modal-backdrop');
-                if (backdrop) backdrop.remove();
-
-                document.body.classList.remove('modal-open');
-            }
+            //     const bsModal = tabler.bootstrap.Modal.getInstance(modal) || new tabler.bootstrap.Modal(
+            //         modal);
+            //     bsModal.show();
+            // });
 
             function setupMediaModal(modal) {
                 const modalId = modal.id;
@@ -194,6 +196,7 @@
                         // const folderId = urlParams.get('parent_id') || '';
                         const folderInput = document.getElementById(`media-folder-id-${modalId}`);
                         const mediafolderInput = document.getElementById(`media-folder-folder-id-${modalId}`);
+
 
                         if (folderInput) {
                             folderInput.value = parentId;

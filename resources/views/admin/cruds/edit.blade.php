@@ -97,12 +97,24 @@
                             <div class="mb-3 row">
                                 <label class="col-3 col-form-label required">Media File Input</label>
                                 <div class="col">
-                                    <button data-modal-toggle="crud-modal" id="crud-modal-btn" class="btn btn-primary">Upload File</button>
-                                    <div id="crud-modal-wrapper">
+                                    {{-- <button type="button" data-bs-toggle="modal" id="crud-modal-btn" data-bs-target="#crud-modal" class="btn btn-primary">Upload File</button> --}}
+                                    <button 
+                                        type="button" 
+                                        class="btn btn-primary" 
+                                        id="crud-offcanvas-btn" 
+                                        data-bs-toggle="offcanvas" 
+                                        data-bs-target="#crud-offcanvas" 
+                                        aria-controls="crud-offcanvas"
+                                        aria-expanded="false"
+                                    >
+                                        Upload File
+                                    </button>
+
+                                    <div id="crud-offcanvas-wrapper">
                                         @if ($crud->media_input)
                                             <div class="my-3">Image Preview:</div>
                                             <div class="image-wrapper">
-                                                <img width="200" src="{{ asset($crud->media_input) }}" />
+                                                <img src="{{ asset($crud->media_input) }}" />
                                                 <input type="hidden" name="media_input" value="{{ $crud->media_input }}">
                                                 <span type="button" class="remove-image">
                                                     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-x"><path stroke="none" d="M0 0h24v24H0z" fill="none"></path><path d="M18 6l-12 12"></path><path d="M6 6l12 12"></path></svg>
@@ -140,8 +152,8 @@
     </div>
 
     @include('admin.components.media.popup', [
-        'modalId' => 'crud-modal',
-        'inputType' => 'multiple',
+        'modalId' => 'crud-offcanvas',
+        'inputType' => 'single',
         'imageInputName' => 'media_input'
     ])
 

@@ -11,8 +11,15 @@
     }
 
     .media-item {
-        width: calc(12.5% - 1rem); /* 8 items per row */
-        min-width: @if($isModal) 120px @else 140px @endif;
+        width: calc(12.5% - 1rem);
+
+        /* 8 items per row */
+        min-width: @if ($isModal)
+            120px
+        @else
+            140px
+        @endif
+        ;
         background-color: #f8f9fa;
         border-radius: 6px;
         /* overflow: hidden; */
@@ -21,9 +28,10 @@
         flex-direction: column;
         position:relative;
     }
-    .media-item .context{
+
+    .media-item .context {
         position: absolute;
-        top:0;
+        top: 0;
         right: 0;
     }
 
@@ -39,31 +47,36 @@
 
     @media (max-width: 1400px) {
         .media-item {
-            width: calc(14.285% - 1rem); /* 7 items per row */
+            width: calc(14.285% - 1rem);
+            /* 7 items per row */
         }
     }
 
     @media (max-width: 1200px) {
         .media-item {
-            width: calc(16.666% - 1rem); /* 6 items per row */
+            width: calc(16.666% - 1rem);
+            /* 6 items per row */
         }
     }
 
     @media (max-width: 992px) {
         .media-item {
-            width: calc(20% - 1rem); /* 5 items per row */
+            width: calc(20% - 1rem);
+            /* 5 items per row */
         }
     }
 
     @media (max-width: 768px) {
         .media-item {
-            width: calc(25% - 1rem); /* 4 items per row */
+            width: calc(25% - 1rem);
+            /* 4 items per row */
         }
     }
 
     @media (max-width: 576px) {
         .media-item {
-            width: 100%; /* 1 item per row */
+            width: 100%;
+            /* 1 item per row */
         }
     }
 </style>
@@ -116,26 +129,50 @@
                 </a>
             @endif
             <div class="dropdown context">
-            <a href="#" class="btn-action dropdown-toggle" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><!-- Download SVG icon from http://tabler.io/icons/icon/dots-vertical -->
-                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-1">
-                <path d="M12 12m-1 0a1 1 0 1 0 2 0a1 1 0 1 0 -2 0"></path>
-                <path d="M12 19m-1 0a1 1 0 1 0 2 0a1 1 0 1 0 -2 0"></path>
-                <path d="M12 5m-1 0a1 1 0 1 0 2 0a1 1 0 1 0 -2 0"></path></svg></a>
-            <div class="dropdown-menu dropdown-menu-end" style="">
-                <span class="dropdown-item" href="#" data-modal-toggle="folder-context-{{ $folder->id }}" id="folder-context-{{ $folder->id }}-btn" class="btn btn-primary">Move to</span>
-                <a class="dropdown-item text-danger" href="#">Delete</a>
-            </div>
+                <a href="#" class="btn-action dropdown-toggle" data-bs-toggle="dropdown" aria-haspopup="true"
+                    aria-expanded="false"><!-- Download SVG icon from http://tabler.io/icons/icon/dots-vertical -->
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round" class="icon icon-1">
+                        <path d="M12 12m-1 0a1 1 0 1 0 2 0a1 1 0 1 0 -2 0"></path>
+                        <path d="M12 19m-1 0a1 1 0 1 0 2 0a1 1 0 1 0 -2 0"></path>
+                        <path d="M12 5m-1 0a1 1 0 1 0 2 0a1 1 0 1 0 -2 0"></path>
+                    </svg></a>
+                <div class="dropdown-menu dropdown-menu-end">
+                    {{-- <button type="button" class="dropdown-item" id="folder-context-modal-btn"
+                        data-id="{{ $folder->id }}">Move to</button> --}}
+                    <button
+                        type="button"
+                        class="dropdown-item"
+                        data-bs-toggle="modal"
+                        data-bs-target="#folder-context-{{ $folder->id }}"
+                        id="folder-context-{{ $folder->id }}-btn">
+                        Move to
+                    </button>
+                    <a class="dropdown-item text-danger" href="#">Delete</a>
+                </div>
             </div>
         </div>
-
-        @include('admin.components.modal', [
-            'id' => "folder-context-{$folder->id}",
-            'title' => 'My Modal Title',
-            'slot' => 'test' // or pass rendered view: view('partials.modal-body')->render()
-        ])
+        @php $folders = \App\Models\MediaFolder::toBase()->whereNot('id', $folder->id)->select('name', 'id','parent_id')->get(); @endphp
+        <x-modal 
+            id="folder-context-{{ $folder->id }}" 
+            title="Move {{ $folder->name }} to" 
+            backdrop="false"
+            showFooter="false"
+            >
+            <label for="folder">Select folder</label>
+            <select name="folder_id" class="form-control mb-3">
+                <option value="">/</option>
+                @foreach ($folders as $id => $item)
+                    <option value="{{ $item->id }}" @selected($item->id == $folder->parent_id)>{{ $item->name }}</option>
+                @endforeach
+            </select>
+            <input type="hidden" value="{{ $folder->id }}" name="id">
+            <button class="btn btn-primary move-folder">Save</button>
+        </x-modal>
     @endforeach
 
-    
+
 
     {{-- Show media items (same for modal and normal) --}}
     @foreach ($media as $item)

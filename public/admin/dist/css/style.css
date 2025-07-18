@@ -3,6 +3,11 @@
     display: inline-block;
 }
 
+.image-wrapper img{
+    height: 200px;
+    width: 200px;
+    object-fit: cover;
+}
 
 .image-wrapper .remove-image {
     cursor: pointer;
@@ -20,3 +25,11 @@
     height: 25px;
     width: 25px;
 }
+
+.modal-backdrop.show {
+  z-index: 1060; /* above offcanvas (usually 1050) */
+}
+.modal.show {
+  z-index: 1070;
+}
+
