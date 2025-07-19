@@ -14,6 +14,7 @@ export default {
 
   // Line options
   lineStyle: {
+    curvature: 0,
     stroke: '#808080',
     strokeWidth: 1,
     strokeLinecap: 'round',

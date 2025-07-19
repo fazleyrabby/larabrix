@@ -1,43 +1,44 @@
 import { merge, getLineUid } from '../util'
 import Line from '../components/line'
 
-export default function createLines(lines, markers, isRecentlyCreated = false) {
+export default function createLines(lines) {
   let point1 = false, point2 = false
+  const { curvature, ...lineStyle } = this.params.lineStyle
 
-  // Create group for holding lines
-  // we're checking if `linesGroup` exists or not becuase we may add lines
-  // after the map has loaded so we will append the futured lines to this group as well.
-  this.linesGroup = this.linesGroup || this.canvas.createGroup('jvm-lines-group')
-  
   for (let index in lines) {
-    const config = lines[index]
+    const lineConfig = lines[index]
 
-    for (let mindex in markers) {
-      const markerConfig = isRecentlyCreated ? markers[mindex].config : markers[mindex]
-
-      if (markerConfig.name === config.from) {
+    for (let { config: markerConfig } of Object.values(this._markers)) {
+      if (markerConfig.name === lineConfig.from) {
         point1 = this.getMarkerPosition(markerConfig)
       }
 
-      if (markerConfig.name === config.to) {
+      if (markerConfig.name === lineConfig.to) {
         point2 = this.getMarkerPosition(markerConfig)
       }
     }
 
     if (point1 !== false && point2 !== false) {
+      const {
+        curvature: curvatureOption,
+        ...style
+      } = lineConfig.style || {}
+
       // Register lines with unique keys
-      this._lines[getLineUid(config.from, config.to)] = new Line({
-        index: index,
-        map: this,
-        // Merge the default `lineStyle` object with the custom `line` config style
-        style: merge({ initial: this.params.lineStyle }, { initial: config.style || {} }, true),
-        x1: point1.x,
-        y1: point1.y,
-        x2: point2.x,
-        y2: point2.y,
-        group: this.linesGroup,
-        config
-      })
+      this._lines[getLineUid(lineConfig.from, lineConfig.to)] = new Line(
+        {
+          index,
+          map: this,
+          group: this._linesGroup,
+          config: lineConfig,
+          x1: point1.x,
+          y1: point1.y,
+          x2: point2.x,
+          y2: point2.y,
+          curvature: curvatureOption == 0 ? 0 : (curvatureOption || curvature),
+        },
+        merge(lineStyle, style, true)
+      )
     }
   }
 }

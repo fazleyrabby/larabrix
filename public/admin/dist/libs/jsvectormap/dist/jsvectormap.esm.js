@@ -159,12 +159,6 @@ var inherit = function inherit(target, source) {
 
 var eventRegistry = {};
 var eventUid = 1;
-
-/**
- * ------------------------------------------------------------------------
- * Event Handler
- * ------------------------------------------------------------------------
- */
 var EventHandler = {
   on: function on(element, event, handler, options) {
     if (options === void 0) {
@@ -235,8 +229,8 @@ function setupContainerEvents() {
     EventHandler.on(this.container, 'wheel', function (event) {
       var deltaY = ((event.deltaY || -event.wheelDelta || event.detail) >> 10 || 1) * 75;
       var rect = _this.container.getBoundingClientRect();
-      var offsetX = event.pageX - rect.left - window.pageXOffset;
-      var offsetY = event.pageY - rect.top - window.pageYOffset;
+      var offsetX = event.pageX - rect.left - window.scrollX;
+      var offsetY = event.pageY - rect.top - window.scrollY;
       var zoomStep = Math.pow(1 + map.params.zoomOnScrollSpeed / 1000, -1.5 * deltaY);
       if (map.tooltip) {
         map._tooltip.hide();
@@ -303,8 +297,10 @@ function setupElementEvents() {
       data.element.hover(true);
       if (showTooltip) {
         map._tooltip.text(data.tooltipText);
-        map._tooltip.show();
         map._emit(data.event, [event, map._tooltip, data.code]);
+        if (!event.defaultPrevented) {
+          map._tooltip.show();
+        }
       }
     } else {
       data.element.hover(false);
@@ -325,14 +321,14 @@ function setupElementEvents() {
 
       // We're checking if regions/markers|SelectableOne option is presented
       if (map.params[data.type + "sSelectableOne"]) {
-        map._clearSelected(data.type + "s");
+        data.type === 'region' ? map.clearSelectedRegions() : map.clearSelectedMarkers();
       }
       if (data.element.isSelected) {
         element.select(false);
       } else {
         element.select(true);
       }
-      map._emit(data.event, [data.code, element.isSelected, map._getSelected(data.type + "s")]);
+      map._emit(data.event, [data.code, element.isSelected, data.type === 'region' ? map.getSelectedRegions() : map.getSelectedMarkers()]);
     }
   });
 
@@ -347,10 +343,19 @@ function setupElementEvents() {
 
 function setupZoomButtons() {
   var _this = this;
-  var zoomin = createElement('div', 'jvm-zoom-btn jvm-zoomin', '&#43;', true);
-  var zoomout = createElement('div', 'jvm-zoom-btn jvm-zoomout', '&#x2212', true);
-  this.container.appendChild(zoomin);
-  this.container.appendChild(zoomout);
+  var zoomInOption = this.params.zoomInButton;
+  var zoomOutOption = this.params.zoomOutButton;
+  var getZoomButton = function getZoomButton(zoomOption) {
+    return typeof zoomOption === 'string' ? document.querySelector(zoomOption) : zoomOption;
+  };
+  var zoomIn = zoomInOption ? getZoomButton(zoomInOption) : createElement('div', 'jvm-zoom-btn jvm-zoomin', '&#43;', true);
+  var zoomOut = zoomOutOption ? getZoomButton(zoomOutOption) : createElement('div', 'jvm-zoom-btn jvm-zoomout', '&#x2212', true);
+  if (!zoomInOption) {
+    this.container.appendChild(zoomIn);
+  }
+  if (!zoomOutOption) {
+    this.container.appendChild(zoomOut);
+  }
   var handler = function handler(zoomin) {
     if (zoomin === void 0) {
       zoomin = true;
@@ -359,8 +364,8 @@ function setupZoomButtons() {
       return _this._setScale(zoomin ? _this.scale * _this.params.zoomStep : _this.scale / _this.params.zoomStep, _this._width / 2, _this._height / 2, false, _this.params.zoomAnimate);
     };
   };
-  EventHandler.on(zoomin, 'click', handler());
-  EventHandler.on(zoomout, 'click', handler(false));
+  EventHandler.on(zoomIn, 'click', handler());
+  EventHandler.on(zoomOut, 'click', handler(false));
 }
 
 function setupContainerTouchEvents() {
@@ -380,11 +385,12 @@ function setupContainerTouchEvents() {
     }
     if (touches.length == 1) {
       if (lastTouchesLength == 1) {
+        var _map$_tooltip;
         transXOld = map.transX;
         transYOld = map.transY;
         map.transX -= (touchX - touches[0].pageX) / map.scale;
         map.transY -= (touchY - touches[0].pageY) / map.scale;
-        map._tooltip.hide();
+        (_map$_tooltip = map._tooltip) == null || _map$_tooltip.hide();
         map._applyTransform();
         if (transXOld != map.transX || transYOld != map.transY) {
           e.preventDefault();
@@ -394,9 +400,10 @@ function setupContainerTouchEvents() {
       touchY = touches[0].pageY;
     } else if (touches.length == 2) {
       if (lastTouchesLength == 2) {
+        var _map$_tooltip2;
         scale = Math.sqrt(Math.pow(touches[0].pageX - touches[1].pageX, 2) + Math.pow(touches[0].pageY - touches[1].pageY, 2)) / touchStartDistance;
         map._setScale(touchStartScale * scale, centerTouchX, centerTouchY);
-        map._tooltip.hide();
+        (_map$_tooltip2 = map._tooltip) == null || _map$_tooltip2.hide();
         e.preventDefault();
       } else {
         var rect = map.container.getBoundingClientRect();
@@ -435,6 +442,17 @@ function _assertThisInitialized(e) {
   if (void 0 === e) throw new ReferenceError("this hasn't been initialised - super() hasn't been called");
   return e;
 }
+function _defineProperties(e, r) {
+  for (var t = 0; t < r.length; t++) {
+    var o = r[t];
+    o.enumerable = o.enumerable || !1, o.configurable = !0, "value" in o && (o.writable = !0), Object.defineProperty(e, _toPropertyKey(o.key), o);
+  }
+}
+function _createClass(e, r, t) {
+  return r && _defineProperties(e.prototype, r), t && _defineProperties(e, t), Object.defineProperty(e, "prototype", {
+    writable: !1
+  }), e;
+}
 function _createForOfIteratorHelperLoose(r, e) {
   var t = "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"];
   if (t) return (t = t.call(r)).next.bind(t);
@@ -464,10 +482,33 @@ function _extends() {
 function _inheritsLoose(t, o) {
   t.prototype = Object.create(o.prototype), t.prototype.constructor = t, _setPrototypeOf(t, o);
 }
+function _objectWithoutPropertiesLoose(r, e) {
+  if (null == r) return {};
+  var t = {};
+  for (var n in r) if ({}.hasOwnProperty.call(r, n)) {
+    if (-1 !== e.indexOf(n)) continue;
+    t[n] = r[n];
+  }
+  return t;
+}
 function _setPrototypeOf(t, e) {
   return _setPrototypeOf = Object.setPrototypeOf ? Object.setPrototypeOf.bind() : function (t, e) {
     return t.__proto__ = e, t;
   }, _setPrototypeOf(t, e);
+}
+function _toPrimitive(t, r) {
+  if ("object" != typeof t || !t) return t;
+  var e = t[Symbol.toPrimitive];
+  if (void 0 !== e) {
+    var i = e.call(t, r || "default");
+    if ("object" != typeof i) return i;
+    throw new TypeError("@@toPrimitive must return a primitive value.");
+  }
+  return ("string" === r ? String : Number)(t);
+}
+function _toPropertyKey(t) {
+  var i = _toPrimitive(t, "string");
+  return "symbol" == typeof i ? i : i + "";
 }
 function _unsupportedIterableToArray(r, a) {
   if (r) {
@@ -477,11 +518,6 @@ function _unsupportedIterableToArray(r, a) {
   }
 }
 
-/**
- * ------------------------------------------------------------------------
- * Class Definition
- * ------------------------------------------------------------------------
- */
 var BaseComponent = /*#__PURE__*/function () {
   function BaseComponent() {}
   var _proto = BaseComponent.prototype;
@@ -500,11 +536,6 @@ var BaseComponent = /*#__PURE__*/function () {
   return BaseComponent;
 }();
 
-/**
- * ------------------------------------------------------------------------
- * Interactable
- * ------------------------------------------------------------------------
- */
 var Interactable = {
   getLabelText: function getLabelText(key, label) {
     if (!label) {
@@ -514,8 +545,8 @@ var Interactable = {
       var params = [];
 
       // Pass additional paramater (Marker config object) in case it's a Marker.
-      if (this.config && this.config.marker) {
-        params.push(this.config.marker);
+      if (this.constructor.Name === 'marker') {
+        params.push(this.getConfig());
       }
 
       // Becuase we need to add the key always at the end
@@ -560,11 +591,6 @@ var Interactable = {
   }
 };
 
-/**
- * ------------------------------------------------------------------------
- * Class Definition
- * ------------------------------------------------------------------------
- */
 var Region = /*#__PURE__*/function (_BaseComponent) {
   function Region(_ref) {
     var _this;
@@ -639,33 +665,16 @@ function createRegions() {
   }
 }
 
-/**
- * ------------------------------------------------------------------------
- * Class Definition
- * ------------------------------------------------------------------------
- */
+var LINE_CLASS = 'jvm-line';
 var Line = /*#__PURE__*/function (_BaseComponent) {
-  function Line(_ref) {
+  function Line(options, style) {
     var _this;
-    var index = _ref.index,
-      map = _ref.map,
-      style = _ref.style,
-      x1 = _ref.x1,
-      y1 = _ref.y1,
-      x2 = _ref.x2,
-      y2 = _ref.y2,
-      group = _ref.group,
-      config = _ref.config;
     _this = _BaseComponent.call(this) || this;
-    _this.config = config;
-    _this.shape = map.canvas.createLine({
-      x1: x1,
-      y1: y1,
-      x2: x2,
-      y2: y2,
-      dataIndex: index
-    }, style, group);
-    _this.shape.addClass('jvm-line');
+    _this._options = options;
+    _this._style = {
+      initial: style
+    };
+    _this._draw();
     return _this;
   }
   _inheritsLoose(Line, _BaseComponent);
@@ -673,113 +682,148 @@ var Line = /*#__PURE__*/function (_BaseComponent) {
   _proto.setStyle = function setStyle(property, value) {
     this.shape.setStyle(property, value);
   };
+  _proto.getConfig = function getConfig() {
+    return this._options.config;
+  };
+  _proto._draw = function _draw() {
+    var _this$_options = this._options,
+      index = _this$_options.index,
+      group = _this$_options.group,
+      map = _this$_options.map;
+    var config = {
+      d: this._getDAttribute(),
+      fill: 'none',
+      dataIndex: index
+    };
+    this.shape = map.canvas.createPath(config, this._style, group);
+    this.shape.addClass(LINE_CLASS);
+  };
+  _proto._getDAttribute = function _getDAttribute() {
+    var _this$_options2 = this._options,
+      x1 = _this$_options2.x1,
+      y1 = _this$_options2.y1,
+      x2 = _this$_options2.x2,
+      y2 = _this$_options2.y2,
+      curvature = _this$_options2.curvature;
+    return "M" + x1 + "," + y1 + this._getQCommand(x1, y1, x2, y2, curvature) + x2 + "," + y2;
+  };
+  _proto._getQCommand = function _getQCommand(x1, y1, x2, y2, curvature) {
+    if (!curvature) {
+      return ' ';
+    }
+    var curveX = (x1 + x2) / 2 + curvature * (y2 - y1);
+    var curveY = (y1 + y2) / 2 - curvature * (x2 - x1);
+    return " Q" + curveX + "," + curveY + " ";
+  };
   return Line;
 }(BaseComponent);
 
-function createLines(lines, markers, isRecentlyCreated) {
-  if (isRecentlyCreated === void 0) {
-    isRecentlyCreated = false;
-  }
+var _excluded = ["curvature"],
+  _excluded2 = ["curvature"];
+function createLines(lines) {
   var point1 = false,
     point2 = false;
-
-  // Create group for holding lines
-  // we're checking if `linesGroup` exists or not becuase we may add lines
-  // after the map has loaded so we will append the futured lines to this group as well.
-  this.linesGroup = this.linesGroup || this.canvas.createGroup('jvm-lines-group');
+  var _this$params$lineStyl = this.params.lineStyle,
+    curvature = _this$params$lineStyl.curvature,
+    lineStyle = _objectWithoutPropertiesLoose(_this$params$lineStyl, _excluded);
   for (var index in lines) {
-    var config = lines[index];
-    for (var mindex in markers) {
-      var markerConfig = isRecentlyCreated ? markers[mindex].config : markers[mindex];
-      if (markerConfig.name === config.from) {
+    var lineConfig = lines[index];
+    for (var _i = 0, _Object$values = Object.values(this._markers); _i < _Object$values.length; _i++) {
+      var markerConfig = _Object$values[_i].config;
+      if (markerConfig.name === lineConfig.from) {
         point1 = this.getMarkerPosition(markerConfig);
       }
-      if (markerConfig.name === config.to) {
+      if (markerConfig.name === lineConfig.to) {
         point2 = this.getMarkerPosition(markerConfig);
       }
     }
     if (point1 !== false && point2 !== false) {
+      var _ref = lineConfig.style || {},
+        curvatureOption = _ref.curvature,
+        style = _objectWithoutPropertiesLoose(_ref, _excluded2);
+
       // Register lines with unique keys
-      this._lines[getLineUid(config.from, config.to)] = new Line({
+      this._lines[getLineUid(lineConfig.from, lineConfig.to)] = new Line({
         index: index,
         map: this,
-        // Merge the default `lineStyle` object with the custom `line` config style
-        style: merge({
-          initial: this.params.lineStyle
-        }, {
-          initial: config.style || {}
-        }, true),
+        group: this._linesGroup,
+        config: lineConfig,
         x1: point1.x,
         y1: point1.y,
         x2: point2.x,
         y2: point2.y,
-        group: this.linesGroup,
-        config: config
-      });
+        curvature: curvatureOption == 0 ? 0 : curvatureOption || curvature
+      }, merge(lineStyle, style, true));
     }
   }
 }
 
-/**
- * ------------------------------------------------------------------------
- * Class Definition
- * ------------------------------------------------------------------------
- */
+var NAME = 'marker';
+var JVM_PREFIX$1 = 'jvm-';
+var MARKER_CLASS = JVM_PREFIX$1 + "element " + JVM_PREFIX$1 + "marker";
+var MARKER_LABEL_CLASS = JVM_PREFIX$1 + "element " + JVM_PREFIX$1 + "label";
 var Marker = /*#__PURE__*/function (_BaseComponent) {
-  function Marker(_ref) {
+  function Marker(options, style) {
     var _this;
-    var index = _ref.index,
-      style = _ref.style,
-      label = _ref.label,
-      cx = _ref.cx,
-      cy = _ref.cy,
-      map = _ref.map,
-      group = _ref.group;
     _this = _BaseComponent.call(this) || this;
-
-    // Private
-    _this._map = map;
+    _this._options = options;
+    _this._style = style;
+    _this._labelX = null;
+    _this._labelY = null;
+    _this._offsets = null;
     _this._isImage = !!style.initial.image;
-
-    // Protected
-    _this.config = arguments[0];
-    _this.shape = map.canvas[_this._isImage ? 'createImage' : 'createCircle']({
-      dataIndex: index,
-      cx: cx,
-      cy: cy
-    }, style, group);
-    _this.shape.addClass('jvm-marker jvm-element');
+    _this._draw();
+    if (_this._options.label) {
+      _this._drawLabel();
+    }
     if (_this._isImage) {
       _this.updateLabelPosition();
-    }
-    if (label) {
-      _this._createLabel(_this.config);
     }
     return _this;
   }
   _inheritsLoose(Marker, _BaseComponent);
   var _proto = Marker.prototype;
+  _proto.getConfig = function getConfig() {
+    return this._options.config;
+  };
   _proto.updateLabelPosition = function updateLabelPosition() {
+    var map = this._options.map;
     if (this.label) {
       this.label.set({
-        x: this._labelX * this._map.scale + this._offsets[0] + this._map.transX * this._map.scale + 5 + (this._isImage ? (this.shape.width || 0) / 2 : this.shape.node.r.baseVal.value),
-        y: this._labelY * this._map.scale + this._map.transY * this._map.scale + this._offsets[1]
+        x: this._labelX * map.scale + this._offsets[0] + map.transX * map.scale + 5 + (this._isImage ? (this.shape.width || 0) / 2 : this.shape.node.r.baseVal.value),
+        y: this._labelY * map.scale + map.transY * this._options.map.scale + this._offsets[1]
       });
     }
   };
-  _proto._createLabel = function _createLabel(_ref2) {
-    var index = _ref2.index,
-      map = _ref2.map,
-      label = _ref2.label,
-      labelsGroup = _ref2.labelsGroup,
-      cx = _ref2.cx,
-      cy = _ref2.cy,
-      marker = _ref2.marker,
-      isRecentlyCreated = _ref2.isRecentlyCreated;
+  _proto._draw = function _draw() {
+    var _this$_options = this._options,
+      index = _this$_options.index,
+      map = _this$_options.map,
+      group = _this$_options.group,
+      cx = _this$_options.cx,
+      cy = _this$_options.cy;
+    var shapeType = this._isImage ? 'createImage' : 'createCircle';
+    this.shape = map.canvas[shapeType]({
+      dataIndex: index,
+      cx: cx,
+      cy: cy
+    }, this._style, group);
+    this.shape.addClass(MARKER_CLASS);
+  };
+  _proto._drawLabel = function _drawLabel() {
+    var _this$_options2 = this._options,
+      index = _this$_options2.index,
+      map = _this$_options2.map,
+      label = _this$_options2.label,
+      labelsGroup = _this$_options2.labelsGroup,
+      cx = _this$_options2.cx,
+      cy = _this$_options2.cy,
+      config = _this$_options2.config,
+      isRecentlyCreated = _this$_options2.isRecentlyCreated;
     var labelText = this.getLabelText(index, label);
     this._labelX = cx / map.scale - map.transX;
     this._labelY = cy / map.scale - map.transY;
-    this._offsets = isRecentlyCreated && marker.offsets ? marker.offsets : this.getLabelOffsets(index, label);
+    this._offsets = isRecentlyCreated && config.offsets ? config.offsets : this.getLabelOffsets(index, label);
     this.label = map.canvas.createText({
       text: labelText,
       dataIndex: index,
@@ -787,12 +831,17 @@ var Marker = /*#__PURE__*/function (_BaseComponent) {
       y: this._labelY,
       dy: '0.6ex'
     }, map.params.markerLabelStyle, labelsGroup);
-    this.label.addClass('jvm-marker jvm-element');
+    this.label.addClass(MARKER_LABEL_CLASS);
     if (isRecentlyCreated) {
       this.updateLabelPosition();
     }
   };
-  return Marker;
+  return _createClass(Marker, null, [{
+    key: "Name",
+    get: function get() {
+      return NAME;
+    }
+  }]);
 }(BaseComponent);
 inherit(Marker, Interactable);
 
@@ -804,11 +853,6 @@ function createMarkers(markers, isRecentlyCreated) {
   if (isRecentlyCreated === void 0) {
     isRecentlyCreated = false;
   }
-  // Create groups for holding markers and markers labels
-  // We're checking if `markersGroup` exists or not becuase we may add markers after the map has loaded
-  // So we will append the futured markers to this group as well.
-  this._markersGroup = this._markersGroup || this.canvas.createGroup('jvm-markers-group');
-  this._markerLabelsGroup = this._markerLabelsGroup || this.canvas.createGroup('jvm-markers-labels-group');
   var _loop = function _loop() {
       var config = markers[index];
       var point = _this.getMarkerPosition(config);
@@ -831,16 +875,14 @@ function createMarkers(markers, isRecentlyCreated) {
       var marker = new Marker({
         index: index,
         map: _this,
-        // Merge the `markerStyle` object with the marker config `style` if presented.
-        style: merge(_this.params.markerStyle, _extends({}, config.style || {}), true),
         label: _this.params.labels && _this.params.labels.markers,
         labelsGroup: _this._markerLabelsGroup,
         cx: point.x,
         cy: point.y,
         group: _this._markersGroup,
-        marker: config,
+        config: config,
         isRecentlyCreated: isRecentlyCreated
-      });
+      }, merge(_this.params.markerStyle, _extends({}, config.style || {}), true));
 
       // Check for marker duplication
       // this is useful when for example: a user clicks a button for creating marker two times
@@ -861,11 +903,6 @@ function createMarkers(markers, isRecentlyCreated) {
   }
 }
 
-/**
- * ------------------------------------------------------------------------
- * Class Definition
- * ------------------------------------------------------------------------
- */
 var Legend = /*#__PURE__*/function () {
   function Legend(options) {
     if (options === void 0) {
@@ -888,13 +925,11 @@ var Legend = /*#__PURE__*/function () {
   var _proto = Legend.prototype;
   _proto.render = function render() {
     var ticks = this._series.scale.getTicks();
-    var inner = createElement('div', 'jvm-legend-inner');
     this._body.innderHTML = '';
     if (this._options.title) {
       var legendTitle = createElement('div', 'jvm-legend-title', this._options.title);
       this._body.appendChild(legendTitle);
     }
-    this._body.appendChild(inner);
     for (var i = 0; i < ticks.length; i++) {
       var tick = createElement('div', 'jvm-legend-tick');
       var sample = createElement('div', 'jvm-legend-tick-sample');
@@ -921,17 +956,12 @@ var Legend = /*#__PURE__*/function () {
       }
       var tickText = createElement('div', 'jvm-legend-tick-text', label);
       tick.appendChild(tickText);
-      inner.appendChild(tick);
+      this._body.appendChild(tick);
     }
   };
   return Legend;
 }();
 
-/**
- * ------------------------------------------------------------------------
- * Class Definition
- * ------------------------------------------------------------------------
- */
 var OrdinalScale = /*#__PURE__*/function () {
   function OrdinalScale(scale) {
     this._scale = scale;
@@ -953,11 +983,6 @@ var OrdinalScale = /*#__PURE__*/function () {
   return OrdinalScale;
 }();
 
-/**
- * ------------------------------------------------------------------------
- * Class Definition
- * ------------------------------------------------------------------------
- */
 var Series = /*#__PURE__*/function () {
   function Series(config, elements, map) {
     if (config === void 0) {
@@ -1339,27 +1364,34 @@ function getMarkerPosition(_ref) {
 }
 
 function repositionLines() {
-  var point1 = false,
-    point2 = false;
-  for (var index in this._lines) {
-    for (var mindex in this._markers) {
-      var marker = this._markers[mindex];
-      if (marker.config.name === this._lines[index].config.from) {
-        point1 = this.getMarkerPosition(marker.config);
-      }
-      if (marker.config.name === this._lines[index].config.to) {
-        point2 = this.getMarkerPosition(marker.config);
-      }
-    }
-    if (point1 !== false && point2 !== false) {
-      this._lines[index].setStyle({
-        x1: point1.x,
-        y1: point1.y,
-        x2: point2.x,
-        y2: point2.y
+  var _this = this;
+  var curvature = this.params.lineStyle.curvature;
+  Object.values(this._lines).forEach(function (line) {
+    var startMarker = Object.values(_this._markers).find(function (_ref) {
+      var config = _ref.config;
+      return config.name === line.getConfig().from;
+    });
+    var endMarker = Object.values(_this._markers).find(function (_ref2) {
+      var config = _ref2.config;
+      return config.name === line.getConfig().to;
+    });
+    if (startMarker && endMarker) {
+      var _this$getMarkerPositi = _this.getMarkerPosition(startMarker.config),
+        x1 = _this$getMarkerPositi.x,
+        y1 = _this$getMarkerPositi.y;
+      var _this$getMarkerPositi2 = _this.getMarkerPosition(endMarker.config),
+        x2 = _this$getMarkerPositi2.x,
+        y2 = _this$getMarkerPositi2.y;
+      var curvatureOption = line._options.curvature == 0 ? 0 : line._options.curvature || curvature;
+      var midX = (x1 + x2) / 2;
+      var midY = (y1 + y2) / 2;
+      var curveX = midX + curvatureOption * (y2 - y1);
+      var curveY = midY - curvatureOption * (x2 - x1);
+      line.setStyle({
+        d: "M" + x1 + "," + y1 + " Q" + curveX + "," + curveY + " " + x2 + "," + y2
       });
     }
-  }
+  });
 }
 
 function repositionMarkers() {
@@ -1432,6 +1464,7 @@ var Defaults = {
   bindTouchEvents: true,
   // Line options
   lineStyle: {
+    curvature: 0,
     stroke: '#808080',
     strokeWidth: 1,
     strokeLinecap: 'round'
@@ -1504,11 +1537,6 @@ var Defaults = {
   }
 };
 
-/**
- * ------------------------------------------------------------------------
- * Class Definition
- * ------------------------------------------------------------------------
- */
 var SVGElement = /*#__PURE__*/function () {
   function SVGElement(name, config) {
     this.node = this._createElement(name);
@@ -1553,11 +1581,6 @@ var SVGElement = /*#__PURE__*/function () {
   return SVGElement;
 }();
 
-/**
- * ------------------------------------------------------------------------
- * Class Definition
- * ------------------------------------------------------------------------
- */
 var SVGShapeElement = /*#__PURE__*/function (_SVGElement) {
   function SVGShapeElement(name, config, style) {
     var _this;
@@ -1601,11 +1624,6 @@ var SVGShapeElement = /*#__PURE__*/function (_SVGElement) {
   return SVGShapeElement;
 }(SVGElement);
 
-/**
- * ------------------------------------------------------------------------
- * Class Definition
- * ------------------------------------------------------------------------
- */
 var SVGTextElement = /*#__PURE__*/function (_SVGShapeElement) {
   function SVGTextElement(config, style) {
     return _SVGShapeElement.call(this, 'text', config, style) || this;
@@ -1618,11 +1636,6 @@ var SVGTextElement = /*#__PURE__*/function (_SVGShapeElement) {
   return SVGTextElement;
 }(SVGShapeElement);
 
-/**
- * ------------------------------------------------------------------------
- * Class Definition
- * ------------------------------------------------------------------------
- */
 var SVGImageElement = /*#__PURE__*/function (_SVGShapeElement) {
   function SVGImageElement(config, style) {
     return _SVGShapeElement.call(this, 'image', config, style) || this;
@@ -1667,11 +1680,6 @@ var SVGImageElement = /*#__PURE__*/function (_SVGShapeElement) {
   return SVGImageElement;
 }(SVGShapeElement);
 
-/**
- * ------------------------------------------------------------------------
- * Class Definition
- * ------------------------------------------------------------------------
- */
 var SVGCanvasElement = /*#__PURE__*/function (_SVGElement) {
   function SVGCanvasElement(container) {
     var _this;
@@ -1709,10 +1717,10 @@ var SVGCanvasElement = /*#__PURE__*/function (_SVGElement) {
 
   // Create `path` element
   ;
-  _proto.createPath = function createPath(config, style) {
+  _proto.createPath = function createPath(config, style, group) {
     var path = new SVGShapeElement('path', config, style);
     path.node.setAttribute('fill-rule', 'evenodd');
-    return this._add(path);
+    return this._add(path, group);
   }
 
   // Create `circle` element
@@ -1765,11 +1773,6 @@ var SVGCanvasElement = /*#__PURE__*/function (_SVGElement) {
   return SVGCanvasElement;
 }(SVGElement);
 
-/**
- * ------------------------------------------------------------------------
- * Class Definition
- * ------------------------------------------------------------------------
- */
 var Tooltip = /*#__PURE__*/function (_BaseComponent) {
   function Tooltip(map) {
     var _this;
@@ -1922,11 +1925,14 @@ var DataVisualization = /*#__PURE__*/function () {
   return DataVisualization;
 }();
 
-/**
- * ------------------------------------------------------------------------
- * Class Definition
- * ------------------------------------------------------------------------
- */
+var JVM_PREFIX = 'jvm-';
+var CONTAINER_CLASS = JVM_PREFIX + "container";
+var MARKERS_GROUP_ID = JVM_PREFIX + "markers-group";
+var MARKERS_LABELS_GROUP_ID = JVM_PREFIX + "markers-labels-group";
+var LINES_GROUP_ID = JVM_PREFIX + "lines-group";
+var SERIES_CONTAINER_CLASS = JVM_PREFIX + "series-container";
+var SERIES_CONTAINER_H_CLASS = SERIES_CONTAINER_CLASS + " " + JVM_PREFIX + "series-h";
+var SERIES_CONTAINER_V_CLASS = SERIES_CONTAINER_CLASS + " " + JVM_PREFIX + "series-v";
 var Map = /*#__PURE__*/function () {
   function Map(options) {
     var _this = this;
@@ -1970,7 +1976,7 @@ var Map = /*#__PURE__*/function () {
   _proto._init = function _init() {
     var options = this.params;
     this.container = getElement(options.selector);
-    this.container.classList.add('jvm-container');
+    this.container.classList.add(CONTAINER_CLASS);
 
     // The map canvas element
     this.canvas = new SVGCanvasElement(this.container);
@@ -1984,11 +1990,21 @@ var Map = /*#__PURE__*/function () {
     // Update size
     this.updateSize();
 
-    // Create lines
-    this._createLines(options.lines || {}, options.markers || {});
+    // Lines group must be created before markers
+    // Otherwise the lines will be drawn on top of the markers.
+    if (options.lines) {
+      this._linesGroup = this.canvas.createGroup(LINES_GROUP_ID);
+    }
+    if (options.markers) {
+      this._markersGroup = this.canvas.createGroup(MARKERS_GROUP_ID);
+      this._markerLabelsGroup = this.canvas.createGroup(MARKERS_LABELS_GROUP_ID);
+    }
 
     // Create markers
     this._createMarkers(options.markers);
+
+    // Create lines
+    this._createLines(options.lines || {});
 
     // Position labels
     this._repositionLabels();
@@ -2038,8 +2054,8 @@ var Map = /*#__PURE__*/function () {
 
     // Create series if any
     if (options.series) {
-      this.container.appendChild(this.legendHorizontal = createElement('div', 'jvm-series-container jvm-series-h'));
-      this.container.appendChild(this.legendVertical = createElement('div', 'jvm-series-container jvm-series-v'));
+      this.container.appendChild(this.legendHorizontal = createElement('div', SERIES_CONTAINER_H_CLASS));
+      this.container.appendChild(this.legendVertical = createElement('div', SERIES_CONTAINER_V_CLASS));
       this._createSeries();
     }
 
@@ -2053,7 +2069,7 @@ var Map = /*#__PURE__*/function () {
     this.container.style.backgroundColor = color;
   }
 
-  // Region methods
+  // Regions
   ;
   _proto.getSelectedRegions = function getSelectedRegions() {
     return this._getSelected('regions');
@@ -2073,13 +2089,16 @@ var Map = /*#__PURE__*/function () {
     this._setSelected('regions', this._normalizeRegions(regions));
   }
 
-  // Markers methods
+  // Markers
   ;
   _proto.getSelectedMarkers = function getSelectedMarkers() {
     return this._getSelected('_markers');
   };
   _proto.clearSelectedMarkers = function clearSelectedMarkers() {
     this._clearSelected('_markers');
+  };
+  _proto.setSelectedMarkers = function setSelectedMarkers(markers) {
+    this._setSelected('_markers', markers);
   };
   _proto.addMarkers = function addMarkers(config) {
     config = Array.isArray(config) ? config : [config];
@@ -2096,7 +2115,10 @@ var Map = /*#__PURE__*/function () {
       // Remove the element from markers object
       delete _this3._markers[index];
     });
-  };
+  }
+
+  // Lines
+  ;
   _proto.addLine = function addLine(from, to, style) {
     if (style === void 0) {
       style = {};
@@ -2115,7 +2137,7 @@ var Map = /*#__PURE__*/function () {
     }
     this._createLines(config.filter(function (line) {
       return !(uids.indexOf(getLineUid(line.from, line.to)) > -1);
-    }), this._markers, true);
+    }), true);
   };
   _proto.removeLines = function removeLines(lines) {
     var _this4 = this;
@@ -2248,12 +2270,6 @@ Object.assign(Map.prototype, core);
  * jsVectorMap
  * Copyrights (c) Mustafa Omar https://github.com/themustafaomar
  * Released under the MIT License.
- */
-
-/**
- * ------------------------------------------------------------------------
- * Class Definition
- * ------------------------------------------------------------------------
  */
 var jsVectorMap = /*#__PURE__*/function () {
   function jsVectorMap(options) {

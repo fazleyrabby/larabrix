@@ -39,10 +39,10 @@
                     }
                     const nestedModals = offcanvas.querySelectorAll('.modal');
                     nestedModals.forEach(modal => {
-                    // Move modal to body to fix z-index/backdrop issues
-                    if (!document.body.contains(modal)) {
-                        document.body.appendChild(modal);
-                    }
+                        // Move modal to body to fix z-index/backdrop issues
+                        if (!document.body.contains(modal)) {
+                            document.body.appendChild(modal);
+                        }
                     });
                 });
             });
@@ -262,6 +262,79 @@
                     loadMedia(url, modalId, 1);
                 }
             });
+
+            document.addEventListener('click', function(e) {
+                const button = e.target.closest('.move-folder');
+
+                if (button) {
+                    e.preventDefault();
+                    const modal = button.closest('.modal');
+                    console.log(modal)
+                    const id = modal.querySelector('input[name="id"]').value;
+                    const isFile = modal.querySelector('input[name="is_file"]').value;
+                    const parent_id = modal.querySelector('select[name="folder_id"]').value;
+
+                    axios.post("{{ route('admin.media.move.folder') }}", {
+                            id: id,
+                            parent_id: parent_id,
+                            isFile: isFile === 'true'
+                        }, {
+                            headers: {
+                                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+                            }
+                        })
+                        .then(response => {
+                            reloadParentModal(button);
+                        })
+                        .catch(error => {
+                            console.error(error);
+                        });
+                }
+            });
+
+            document.addEventListener('click', function(e) {
+            // Handle delete-folder click
+            const deleteBtn = e.target.closest('.delete-folder');
+            if (deleteBtn) {
+                e.preventDefault();
+
+                const folderId = deleteBtn.dataset.id;
+                const url = deleteBtn.dataset.url;
+                if (!folderId) return;
+
+                if (!confirm('Are you sure you want to delete this folder?')) return;
+
+                axios.delete(url, {
+                    headers: {
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+                    }
+                })
+                .then(response => {
+                    // Optionally refresh modal or UI
+                    reloadParentModal(deleteBtn);
+                })
+                .catch(error => {
+                    alert(error?.response?.data?.message || "Error deleting folder.");
+                    console.error(error);
+                });
+            }
+        });
+
+        function reloadParentModal(triggerEl) {
+            const parentModal = triggerEl.closest('.offcanvas');
+            if (!parentModal) {
+                location.reload(true);
+                return;
+            }
+
+            const parentModalId = parentModal.getAttribute('id');
+            const parentModalRoute = parentModal.dataset.route;
+            const folderInput = parentModal.querySelector(`form.ajaxform-file-upload input#media-folder-id-${parentModalId}`);
+            const folderId = folderInput?.value || null;
+
+            loadMedia(parentModalRoute, parentModalId, 1, folderId);
+        }
+           
             // old load more function
             // function loadMedia(url, modalId, page = 1) {
             //     const loader = document.querySelector('.loader');

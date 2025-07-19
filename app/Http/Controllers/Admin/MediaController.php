@@ -7,6 +7,7 @@ use App\Models\Media;
 use App\Models\MediaFolder;
 use App\Traits\UploadPhotos;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
@@ -22,7 +23,7 @@ class MediaController extends Controller
         $limit = $request->limit ?? 10;
         $folderId = $request->parent_id;
         $folders = MediaFolder::toBase()->where('parent_id', $folderId)->orderBy('created_at', 'DESC')->get();
-        $media = Media::toBase()->select('id', 'url', 'created_at', 'status')
+        $media = Media::toBase()->select('id', 'url', 'created_at', 'status', 'folder_id')
             ->where('folder_id', $folderId)
             ->where('url', 'like', '%' . $search_query . '%')
             ->when(!request()->has('q'), function ($query) use ($status) {
@@ -153,7 +154,11 @@ class MediaController extends Controller
                 $parentPath = $parent->path . '/';
             }
 
+            $parentPath = ltrim($parentPath, '/'); // remove leading slash
+            $parentPath = preg_replace('/^media\//', '', $parentPath);// remove existing "media/" prefix if exists
+
             $fullPath = 'media/' . $parentPath . $request->name;
+ 
             // Create the folder physically
             Storage::disk('public')->makeDirectory($fullPath);
 
@@ -182,7 +187,155 @@ class MediaController extends Controller
         return redirect()->back()->with($success, $message);
     }
 
-    public function move(Request $request){
-        dd($request);
+    // public function move(Request $request)
+    // {
+    //     $request->validate([
+    //         'id' => 'required|exists:folders,id',
+    //         'parent_id' => 'nullable|exists:folders,id|not_in:' . $request->id, // prevent moving to self
+    //     ]);
+
+    //     $folder = MediaFolder::findOrFail($request->id);
+    //     $folder->parent_id = $request->parent_id ?: null;
+    //     $folder->save();
+
+    //     return response()->json(['success' => 'success', 'message' => 'Folder moved successfully']);
+    // }
+
+    public function moveFolder(Request $request)
+    {
+        if ($request->isFile) {
+            return $this->moveFile($request);
+        }
+        $request->validate([
+            'id' => 'required|exists:media_folders,id',
+            'parent_id' => 'nullable|exists:media_folders,id|not_in:' . $request->id,
+        ]);
+
+        $folder = MediaFolder::findOrFail($request->id);
+        $oldPath = $this->resolveFolderPath($folder);
+        $newParent = $request->parent_id ? MediaFolder::findOrFail($request->parent_id) : null;
+
+        // Optional: prevent circular move
+        if ($this->isDescendant($folder, $request->parent_id)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Cannot move folder into its own descendant.'
+            ], 422);
+        }
+
+        $newPath = $this->resolveFolderPath($newParent) . '/' . $folder->name;
+
+        if (File::exists($newPath)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'A folder with the same name already exists in the target location.'
+            ], 422);
+        }
+
+        Storage::disk('public')->makeDirectory(dirname($newPath));
+        Storage::disk('public')->move($oldPath, $newPath);
+
+        $folder->update([
+            'parent_id' => $request->parent_id,
+        ]);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Folder moved successfully.',
+        ]);
+    }
+
+    protected function moveFile(Request $request)
+    {
+        $validated = $request->validate([
+            'parent_id' => ['nullable', 'exists:media_folders,id'],
+        ]);
+        $validated['parent_id'] = $validated['parent_id'] ?: null;
+
+        $file = Media::findOrFail($request->id);
+        $oldPath = $file->url;
+
+        // Generate new relative path
+        $newParentFolder = $request->parent_id ? MediaFolder::findOrFail($request->parent_id) : null;
+        $newDir = $this->resolveFolderPath($newParentFolder);
+        $newPath = $newDir . '/' . basename($oldPath);
+
+        if (Storage::disk('public')->exists($newPath)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'A file with the same name already exists in the target folder.',
+            ], 422);
+        }
+
+        // Ensure the destination directory exists
+        Storage::disk('public')->makeDirectory($newDir);
+
+        // Move the file
+        Storage::disk('public')->move($oldPath, $newPath);
+
+        // Update DB record
+        $file->update([
+            'folder_id' => $request->parent_id,
+            'url' => $newPath,
+        ]);
+
+        return response()->json([
+            'success' => 'success',
+            'message' => 'File moved successfully.',
+        ]);
+    }
+    protected function resolveFolderPath(?MediaFolder $folder)
+    {
+        if (!$folder) {
+            return 'media';
+        }
+
+        $segments = [];
+        while ($folder) {
+            array_unshift($segments, $folder->name);
+            $folder = $folder->parent;
+        }
+
+        return 'media/' . implode('/', $segments);
+    }
+    protected function isDescendant(MediaFolder $folder, $parentId): bool
+    {
+        while ($parentId) {
+            if ($folder->id == $parentId) {
+                return true;
+            }
+            $parent = MediaFolder::find($parentId);
+            $parentId = $parent?->parent_id;
+        }
+
+        return false;
+    }
+
+    public function deleteFolder($id)
+    {
+        $folder = MediaFolder::findOrFail($id);
+
+        // Prevent deletion if it has subfolders or files
+        if ($folder->children()->exists() || $folder->files()->exists()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Folder is not empty. Delete its contents first.',
+            ], 422);
+        }
+
+        $folderPath = $this->resolveFolderPath($folder);
+
+        // Delete folder from filesystem
+        if (Storage::disk('public')->exists($folderPath)) {
+            Storage::disk('public')->deleteDirectory($folderPath);
+        }
+
+        // Delete folder from DB
+        $folder->delete();
+
+        return response()->json([
+            'success' => 'success',
+            'message' => 'Folder deleted successfully.',
+        ]);
     }
 }

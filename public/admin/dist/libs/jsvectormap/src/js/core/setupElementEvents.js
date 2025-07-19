@@ -51,8 +51,10 @@ export default function setupElementEvents() {
 
       if (showTooltip) {
         map._tooltip.text(data.tooltipText)
-        map._tooltip.show()
         map._emit(data.event, [event, map._tooltip, data.code])
+        if (!event.defaultPrevented) {
+          map._tooltip.show()
+        }
       }
     } else {
       data.element.hover(false)
@@ -79,7 +81,7 @@ export default function setupElementEvents() {
 
       // We're checking if regions/markers|SelectableOne option is presented
       if (map.params[`${data.type}sSelectableOne`]) {
-        map._clearSelected(`${data.type}s`)
+        data.type === 'region' ? map.clearSelectedRegions() : map.clearSelectedMarkers()
       }
 
       if (data.element.isSelected) {
@@ -91,7 +93,9 @@ export default function setupElementEvents() {
       map._emit(data.event, [
         data.code,
         element.isSelected,
-        map._getSelected(`${data.type}s`)
+        data.type === 'region'
+          ? map.getSelectedRegions()
+          : map.getSelectedMarkers()
       ])
     }
   })

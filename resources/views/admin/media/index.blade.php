@@ -1,30 +1,7 @@
 @extends('admin.layouts.app')
 @section('title', 'Media')
 @section('content')
-@push('styles')
-    <style>
-        .image-container {
-            position: relative;
-        }
-        .view {
-            padding: 0;
-            width: 40px;
-            height: 40px;
-            position: absolute;
-            top: 14px;
-            right: -15px;
-            -webkit-transform: translate(-50%, -50%);
-            transform: translate(-50%, -50%);
-            box-shadow: 0 4px 8px rgb(0 0 0 / 3%);
-            z-index: 999;
-            opacity: 0;
-        }
 
-        .image-container:hover .view {
-            opacity: 1;
-        }
-    </style>
-@endpush
     <!-- Page header -->
     <div class="page-header d-print-none">
         <div class="container-fluid">
@@ -98,7 +75,7 @@
                                         enctype="multipart/form-data" novalidate>
                                         @csrf
                                         <input type="file" name="images[]" id="media" multiple />
-                                        <input type="text" name="parent_id" value="{{ request()->folder_id }}">
+                                        <input type="hidden" name="parent_id" value="{{ request()->parent_id }}">
                                         <button class="btn btn-primary ajax-btn" type="submit">Upload</button>
                                         </form>
                                         <button type="button" class="btn btn-danger delete-btn" style="display: none">Delete
@@ -106,6 +83,7 @@
                                         <form class="d-flex align-items-center gap-2 ajax-form" action="{{ route('admin.media.store.folder') }}" method="post">
                                             @csrf
                                             <input type="text" name="name" class="form-control">
+                                            <input type="hidden" name="parent_id" value="{{ request()->parent_id }}">
                                             <button class="btn btn-success" id="add-folder" type="submit">Add Folder</button>
                                         </form>
                                     </div>

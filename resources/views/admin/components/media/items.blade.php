@@ -31,8 +31,9 @@
 
     .media-item .context {
         position: absolute;
-        top: 0;
+        top: 5px;
         right: 0;
+        padding: 5px;
     }
 
     .form-imagecheck-figure {
@@ -129,7 +130,7 @@
                 </a>
             @endif
             <div class="dropdown context">
-                <a href="#" class="btn-action dropdown-toggle" data-bs-toggle="dropdown" aria-haspopup="true"
+                <a href="#" class="btn-action dropdown-toggle p-1" data-bs-toggle="dropdown" aria-haspopup="true"
                     aria-expanded="false"><!-- Download SVG icon from http://tabler.io/icons/icon/dots-vertical -->
                     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
                         fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
@@ -141,34 +142,30 @@
                 <div class="dropdown-menu dropdown-menu-end">
                     {{-- <button type="button" class="dropdown-item" id="folder-context-modal-btn"
                         data-id="{{ $folder->id }}">Move to</button> --}}
-                    <button
-                        type="button"
-                        class="dropdown-item"
-                        data-bs-toggle="modal"
+                    <button type="button" class="dropdown-item" data-bs-toggle="modal"
                         data-bs-target="#folder-context-{{ $folder->id }}"
                         id="folder-context-{{ $folder->id }}-btn">
                         Move to
                     </button>
-                    <a class="dropdown-item text-danger" href="#">Delete</a>
+                    <a class="dropdown-item text-danger delete-folder" href="#" data-url="{{ route('admin.media.folder.delete', $folder->id) }}" data-id="{{ $folder->id }}">Delete</a>
                 </div>
             </div>
         </div>
         @php $folders = \App\Models\MediaFolder::toBase()->whereNot('id', $folder->id)->select('name', 'id','parent_id')->get(); @endphp
-        <x-modal 
-            id="folder-context-{{ $folder->id }}" 
-            title="Move {{ $folder->name }} to" 
-            backdrop="false"
-            showFooter="false"
-            >
-            <label for="folder">Select folder</label>
+        <x-modal id="folder-context-{{ $folder->id }}" title="Move {{ $folder->name }} to"
+            backdrop="{{ $isModal ? 'false' : 'true' }}" showFooter="false">
+            <label for="folder_id">Select folder</label>
             <select name="folder_id" class="form-control mb-3">
-                <option value="">/</option>
+                @if(!empty($folder->parent_id))
+                    <option value="">/</option>
+                @endif
                 @foreach ($folders as $id => $item)
                     <option value="{{ $item->id }}" @selected($item->id == $folder->parent_id)>{{ $item->name }}</option>
                 @endforeach
             </select>
+            <input name="is_file" type="hidden" value="false">
             <input type="hidden" value="{{ $folder->id }}" name="id">
-            <button class="btn btn-primary move-folder">Save</button>
+            <button type="button" class="btn btn-primary move-folder">Save</button>
         </x-modal>
     @endforeach
 
@@ -186,13 +183,53 @@
                         class="form-imagecheck-image" />
                 </span>
             </label>
-            @if (!$isModal)
-                <span class="view btn btn-sm btn-primary m-2"
-                    data-created-at="{{ \Carbon\Carbon::parse($item->created_at)->isoFormat('LLL') }}"
-                    data-preview-url="{{ Storage::disk('public')->url($item->url) }}" data-url="{{ $item->url }}">
-                    View
-                </span>
-            @endif
+            
+              <div class="dropdown context">
+                <a href="#" class="btn-action dropdown-toggle p-1" data-bs-toggle="dropdown" aria-haspopup="true"
+                    aria-expanded="false"><!-- Download SVG icon from http://tabler.io/icons/icon/dots-vertical -->
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round" class="icon icon-1">
+                        <path d="M12 12m-1 0a1 1 0 1 0 2 0a1 1 0 1 0 -2 0"></path>
+                        <path d="M12 19m-1 0a1 1 0 1 0 2 0a1 1 0 1 0 -2 0"></path>
+                        <path d="M12 5m-1 0a1 1 0 1 0 2 0a1 1 0 1 0 -2 0"></path>
+                    </svg></a>
+                <div class="dropdown-menu dropdown-menu-end">
+                    {{-- <button type="button" class="dropdown-item" id="folder-context-modal-btn"
+                        data-id="{{ $folder->id }}">Move to</button> --}}
+                    @if (!$isModal)
+                    <button type="button" class="dropdown-item view" 
+                            data-created-at="{{ \Carbon\Carbon::parse($item->created_at)->isoFormat('LLL') }}"
+                            data-preview-url="{{ Storage::disk('public')->url($item->url) }}" data-url="{{ $item->url }}">
+                            View
+                    </button>
+                    @endif
+                    <button type="button" class="dropdown-item" data-bs-toggle="modal"
+                        data-bs-target="#file-context-{{ $item->id }}"
+                        id="file-context-{{ $item->id }}-btn">
+                        Move to
+                    </button>
+                    <a class="dropdown-item text-danger" href="#">Delete</a>
+                </div>
+            </div>
         </div>
+        
+        @php $folders = \App\Models\MediaFolder::toBase()->whereNot('id', $item->folder_id)->select('name', 'id','parent_id')->get(); @endphp
+        <x-modal id="file-context-{{ $item->id }}" title="Move {{ $item->url }} to"
+            backdrop="{{ $isModal ? 'false' : 'true' }}" showFooter="false">
+            <label for="folder_id">Select folder</label>
+            <select name="folder_id" class="form-control mb-3">
+                @if(!empty($item->folder_id))
+                    <option value="">/</option>
+                @endif
+                @foreach ($folders as $id => $folder)
+                    <option value="{{ $folder->id }}" @selected($folder->id == $item->folder_id)>{{ $folder->name }}</option>
+                @endforeach
+            </select>
+            <input type="hidden" value="{{ $item->id }}" name="id">
+            <input name="is_file" type="hidden" value="true">
+            <button type="button" class="btn btn-primary move-folder">Save</button>
+        </x-modal>
     @endforeach
 </form>
+

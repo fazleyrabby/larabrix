@@ -80,6 +80,7 @@ export default class SignaturePad extends SignatureEventTarget {
   private _lastVelocity = 0;
   private _lastWidth = 0;
   private _strokeMoveUpdate: (event: SignatureEvent) => void;
+  private _strokePointerId: number | undefined;
   /* tslint:enable: variable-name */
 
   constructor(
@@ -103,6 +104,17 @@ export default class SignaturePad extends SignatureEventTarget {
     this._strokeMoveUpdate = this.throttle
       ? throttle(SignaturePad.prototype._strokeUpdate, this.throttle)
       : SignaturePad.prototype._strokeUpdate;
+
+    this._handleMouseDown = this._handleMouseDown.bind(this);
+    this._handleMouseMove = this._handleMouseMove.bind(this);
+    this._handleMouseUp = this._handleMouseUp.bind(this);
+    this._handleTouchStart = this._handleTouchStart.bind(this);
+    this._handleTouchMove = this._handleTouchMove.bind(this);
+    this._handleTouchEnd = this._handleTouchEnd.bind(this);
+    this._handlePointerDown = this._handlePointerDown.bind(this);
+    this._handlePointerMove = this._handlePointerMove.bind(this);
+    this._handlePointerUp = this._handlePointerUp.bind(this);
+
     this._ctx = canvas.getContext(
       '2d',
       this.canvasContextOptions,
@@ -125,6 +137,7 @@ export default class SignaturePad extends SignatureEventTarget {
     this._data = [];
     this._reset(this._getPointGroupOptions());
     this._isEmpty = true;
+    this._strokePointerId = undefined;
   }
 
   public fromDataURL(
@@ -182,14 +195,18 @@ export default class SignaturePad extends SignatureEventTarget {
         if (typeof encoderOptions !== 'number') {
           encoderOptions = undefined;
         }
-        return this.canvas.toDataURL(type, encoderOptions);
+        return this.canvas.toDataURL(type, encoderOptions as number);
     }
   }
 
   public on(): void {
     // Disable panning/zooming when touching canvas element
     this.canvas.style.touchAction = 'none';
-    (this.canvas.style as CSSStyleDeclaration & { msTouchAction: string | null }).msTouchAction = 'none';
+    (
+      this.canvas.style as CSSStyleDeclaration & {
+        msTouchAction: string | null;
+      }
+    ).msTouchAction = 'none';
     this.canvas.style.userSelect = 'none';
 
     const isIOS =
@@ -213,7 +230,11 @@ export default class SignaturePad extends SignatureEventTarget {
   public off(): void {
     // Enable panning/zooming when touching canvas element
     this.canvas.style.touchAction = 'auto';
-    (this.canvas.style as CSSStyleDeclaration & { msTouchAction: string | null }).msTouchAction = 'auto';
+    (
+      this.canvas.style as CSSStyleDeclaration & {
+        msTouchAction: string | null;
+      }
+    ).msTouchAction = 'auto';
     this.canvas.style.userSelect = 'auto';
 
     this.canvas.removeEventListener('pointerdown', this._handlePointerDown);
@@ -227,7 +248,7 @@ export default class SignaturePad extends SignatureEventTarget {
     const canvasWindow =
       window.document === this.canvas.ownerDocument
         ? window
-        : this.canvas.ownerDocument.defaultView ?? this.canvas.ownerDocument;
+        : (this.canvas.ownerDocument.defaultView ?? this.canvas.ownerDocument);
 
     return {
       addEventListener: canvasWindow.addEventListener.bind(
@@ -276,7 +297,7 @@ export default class SignaturePad extends SignatureEventTarget {
     return this._data;
   }
 
-  public _isLeftButtonPressed(event: MouseEvent, only?: boolean): boolean {
+  private _isLeftButtonPressed(event: MouseEvent, only?: boolean): boolean {
     if (only) {
       return event.buttons === 1;
     }
@@ -307,14 +328,14 @@ export default class SignaturePad extends SignatureEventTarget {
   }
 
   // Event handlers
-  private _handleMouseDown = (event: MouseEvent): void => {
+  private _handleMouseDown(event: MouseEvent): void {
     if (!this._isLeftButtonPressed(event, true) || this._drawingStroke) {
       return;
     }
     this._strokeBegin(this._pointerEventToSignatureEvent(event));
   };
 
-  private _handleMouseMove = (event: MouseEvent): void => {
+  private _handleMouseMove(event: MouseEvent): void {
     if (!this._isLeftButtonPressed(event, true) || !this._drawingStroke) {
       // Stop when not pressing primary button or pressing multiple buttons
       this._strokeEnd(this._pointerEventToSignatureEvent(event), false);
@@ -324,7 +345,7 @@ export default class SignaturePad extends SignatureEventTarget {
     this._strokeMoveUpdate(this._pointerEventToSignatureEvent(event));
   };
 
-  private _handleMouseUp = (event: MouseEvent): void => {
+  private _handleMouseUp(event: MouseEvent): void {
     if (this._isLeftButtonPressed(event)) {
       return;
     }
@@ -332,7 +353,7 @@ export default class SignaturePad extends SignatureEventTarget {
     this._strokeEnd(this._pointerEventToSignatureEvent(event));
   };
 
-  private _handleTouchStart = (event: TouchEvent): void => {
+  private _handleTouchStart(event: TouchEvent): void {
     if (event.targetTouches.length !== 1 || this._drawingStroke) {
       return;
     }
@@ -345,7 +366,7 @@ export default class SignaturePad extends SignatureEventTarget {
     this._strokeBegin(this._touchEventToSignatureEvent(event));
   };
 
-  private _handleTouchMove = (event: TouchEvent): void => {
+  private _handleTouchMove(event: TouchEvent): void {
     if (event.targetTouches.length !== 1) {
       return;
     }
@@ -363,7 +384,7 @@ export default class SignaturePad extends SignatureEventTarget {
     this._strokeMoveUpdate(this._touchEventToSignatureEvent(event));
   };
 
-  private _handleTouchEnd = (event: TouchEvent): void => {
+  private _handleTouchEnd(event: TouchEvent): void {
     if (event.targetTouches.length !== 0) {
       return;
     }
@@ -372,23 +393,40 @@ export default class SignaturePad extends SignatureEventTarget {
       event.preventDefault();
     }
 
-    this.canvas.removeEventListener('touchmove', this._handleTouchMove);
-
     this._strokeEnd(this._touchEventToSignatureEvent(event));
   };
 
-  private _handlePointerDown = (event: PointerEvent): void => {
-    if (!event.isPrimary || !this._isLeftButtonPressed(event) || this._drawingStroke) {
+  private _getPointerId(event: PointerEvent) {
+    // @ts-expect-error persistentDeviceId is not available yet but we want to use it when it is available
+    return event.persistentDeviceId || event.pointerId;
+  }
+
+  private _allowPointerId(event: PointerEvent, allowUndefined = false): boolean {
+    if (typeof this._strokePointerId === 'undefined') {
+      return allowUndefined;
+    }
+
+    return this._getPointerId(event) === this._strokePointerId;
+  }
+
+  private _handlePointerDown(event: PointerEvent): void {
+    if (
+      this._drawingStroke ||
+      !this._isLeftButtonPressed(event) ||
+      !this._allowPointerId(event, true)
+    ) {
       return;
     }
+
+    this._strokePointerId = this._getPointerId(event);
 
     event.preventDefault();
 
     this._strokeBegin(this._pointerEventToSignatureEvent(event));
   };
 
-  private _handlePointerMove = (event: PointerEvent): void => {
-    if (!event.isPrimary) {
+  private _handlePointerMove(event: PointerEvent): void {
+    if (!this._allowPointerId(event)) {
       return;
     }
     if (!this._isLeftButtonPressed(event, true) || !this._drawingStroke) {
@@ -401,8 +439,11 @@ export default class SignaturePad extends SignatureEventTarget {
     this._strokeMoveUpdate(this._pointerEventToSignatureEvent(event));
   };
 
-  private _handlePointerUp = (event: PointerEvent): void => {
-    if (!event.isPrimary || this._isLeftButtonPressed(event)) {
+  private _handlePointerUp(event: PointerEvent): void {
+    if (
+      this._isLeftButtonPressed(event) ||
+      !this._allowPointerId(event)
+    ) {
       return;
     }
 
@@ -439,16 +480,24 @@ export default class SignaturePad extends SignatureEventTarget {
     const { addEventListener } = this._getListenerFunctions();
     switch (event.event.type) {
       case 'mousedown':
-        addEventListener('mousemove', this._handleMouseMove);
-        addEventListener('mouseup', this._handleMouseUp);
+        addEventListener('mousemove', this._handleMouseMove, {
+          passive: false,
+        });
+        addEventListener('mouseup', this._handleMouseUp, { passive: false });
         break;
       case 'touchstart':
-        addEventListener('touchmove', this._handleTouchMove);
-        addEventListener('touchend', this._handleTouchEnd);
+        addEventListener('touchmove', this._handleTouchMove, {
+          passive: false,
+        });
+        addEventListener('touchend', this._handleTouchEnd, { passive: false });
         break;
       case 'pointerdown':
-        addEventListener('pointermove', this._handlePointerMove);
-        addEventListener('pointerup', this._handlePointerUp);
+        addEventListener('pointermove', this._handlePointerMove, {
+          passive: false,
+        });
+        addEventListener('pointerup', this._handlePointerUp, {
+          passive: false,
+        });
         break;
       default:
       // do nothing
@@ -527,23 +576,30 @@ export default class SignaturePad extends SignatureEventTarget {
     }
 
     this._drawingStroke = false;
+    this._strokePointerId = undefined;
     this.dispatchEvent(new CustomEvent('endStroke', { detail: event }));
   }
 
   private _handlePointerEvents(): void {
     this._drawingStroke = false;
 
-    this.canvas.addEventListener('pointerdown', this._handlePointerDown);
+    this.canvas.addEventListener('pointerdown', this._handlePointerDown, {
+      passive: false,
+    });
   }
 
   private _handleMouseEvents(): void {
     this._drawingStroke = false;
 
-    this.canvas.addEventListener('mousedown', this._handleMouseDown);
+    this.canvas.addEventListener('mousedown', this._handleMouseDown, {
+      passive: false,
+    });
   }
 
   private _handleTouchEvents(): void {
-    this.canvas.addEventListener('touchstart', this._handleTouchStart);
+    this.canvas.addEventListener('touchstart', this._handleTouchStart, {
+      passive: false,
+    });
   }
 
   // Called when a new line is started

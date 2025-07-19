@@ -1,26 +1,30 @@
 export default function repositionLines() {
-  let point1 = false, point2 = false
+  const curvature = this.params.lineStyle.curvature
 
-  for (let index in this._lines) {
-    for (let mindex in this._markers) {
-      const marker = this._markers[mindex]
+  Object.values(this._lines).forEach((line) => {
+    const startMarker = Object.values(this._markers).find(
+      ({ config }) => config.name === line.getConfig().from
+    )
 
-      if (marker.config.name === this._lines[index].config.from) {
-        point1 = this.getMarkerPosition(marker.config)
-      }
+    const endMarker = Object.values(this._markers).find(
+      ({ config }) => config.name === line.getConfig().to
+    )
 
-      if (marker.config.name === this._lines[index].config.to) {
-        point2 = this.getMarkerPosition(marker.config)
-      }
-    }
+    if (startMarker && endMarker) {
+      const { x: x1, y: y1 } = this.getMarkerPosition(startMarker.config)
+      const { x: x2, y: y2 } = this.getMarkerPosition(endMarker.config)
+      const curvatureOption = line._options.curvature == 0
+        ? 0
+        : line._options.curvature || curvature
 
-    if (point1 !== false && point2 !== false) {
-      this._lines[index].setStyle({
-        x1: point1.x,
-        y1: point1.y,
-        x2: point2.x,
-        y2: point2.y,
+      const midX = (x1 + x2) / 2
+      const midY = (y1 + y2) / 2
+      const curveX = midX + curvatureOption * (y2 - y1)
+      const curveY = midY - curvatureOption * (x2 - x1)
+
+      line.setStyle({
+        d: `M${x1},${y1} Q${curveX},${curveY} ${x2},${y2}`,
       })
     }
-  }
+  })
 }

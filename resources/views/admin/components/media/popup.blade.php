@@ -45,7 +45,7 @@
                       data-refresh-target="#ajax-container-{{ $modalId }}">
                     @csrf
                     <input type="text" name="name" class="form-control" placeholder="Folder name">
-                    <input type="" name="parent_id" id="media-folder-folder-id-{{ $modalId }}"
+                    <input type="hidden" name="parent_id" id="media-folder-folder-id-{{ $modalId }}"
                            value="{{ request()->parent_id }}">
                     <button class="btn btn-success" id="add-folder" type="submit">Add Folder</button>
                 </form>

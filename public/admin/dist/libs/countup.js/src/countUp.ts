@@ -30,7 +30,7 @@ export declare interface CountUpPlugin {
 // playground: stackblitz.com/edit/countup-typescript
 export class CountUp {
 
-  version = '2.8.1';
+  version = '2.9.0';
   private defaults: CountUpOptions = {
     startVal: 0,
     decimalPlaces: 0,
@@ -66,7 +66,7 @@ export class CountUp {
 
   constructor(
     target: string | HTMLElement | HTMLInputElement,
-    private endVal: number,
+    private endVal?: number | null,
     public options?: CountUpOptions
   ) {
     this.options = {
@@ -78,6 +78,9 @@ export class CountUp {
     this.easingFn = (this.options.easingFn) ?
       this.options.easingFn : this.easeOutExpo;
 
+    this.el = (typeof target === 'string') ? document.getElementById(target) : target;
+    endVal = endVal == null ? this.parse(this.el.innerHTML) : endVal;
+
     this.startVal = this.validateValue(this.options.startVal);
     this.frameVal = this.startVal;
     this.endVal = this.validateValue(endVal);
@@ -88,7 +91,6 @@ export class CountUp {
     if (this.options.separator === '') {
       this.options.useGrouping = false;
     }
-    this.el = (typeof target === 'string') ? document.getElementById(target) : target;
     if (this.el) {
       this.printValue(this.startVal);
     } else {
@@ -335,4 +337,12 @@ export class CountUp {
   easeOutExpo = (t: number, b: number, c: number, d: number): number =>
     c * (-Math.pow(2, -10 * t / d) + 1) * 1024 / 1023 + b;
 
+  parse(number: string): number {
+    // eslint-disable-next-line no-irregular-whitespace
+    const escapeRegExp = (s: string) => s.replace(/([.,'  ])/g, '\\$1');
+    const sep = escapeRegExp(this.options.separator);
+    const dec = escapeRegExp(this.options.decimal);
+    const num = number.replace(new RegExp(sep, 'g'), '').replace(new RegExp(dec, 'g'), '.');
+    return parseFloat(num)
+  }
 }

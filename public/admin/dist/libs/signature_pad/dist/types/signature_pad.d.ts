@@ -66,6 +66,7 @@ export default class SignaturePad extends SignatureEventTarget {
     private _lastVelocity;
     private _lastWidth;
     private _strokeMoveUpdate;
+    private _strokePointerId;
     constructor(canvas: HTMLCanvasElement, options?: Options);
     clear(): void;
     fromDataURL(dataUrl: string, options?: {
@@ -84,7 +85,7 @@ export default class SignaturePad extends SignatureEventTarget {
     isEmpty(): boolean;
     fromData(pointGroups: PointGroup[], { clear }?: FromDataOptions): void;
     toData(): PointGroup[];
-    _isLeftButtonPressed(event: MouseEvent, only?: boolean): boolean;
+    private _isLeftButtonPressed;
     private _pointerEventToSignatureEvent;
     private _touchEventToSignatureEvent;
     private _handleMouseDown;
@@ -93,6 +94,8 @@ export default class SignaturePad extends SignatureEventTarget {
     private _handleTouchStart;
     private _handleTouchMove;
     private _handleTouchEnd;
+    private _getPointerId;
+    private _allowPointerId;
     private _handlePointerDown;
     private _handlePointerMove;
     private _handlePointerUp;
