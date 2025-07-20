@@ -19,10 +19,11 @@ return new class extends Migration
             $table->string('target')->nullable();
             $table->text('slug');
             $table->integer('parent_id')->default(0); // default no parent
-            $table->tinyInteger('status')->default(false);
+            $table->tinyInteger('status')->default(true);
             $table->string('icon')->nullable();
             $table->string('image')->nullable();
             $table->integer('position')->default(0);
+            $table->string('type')->default('header');
             // $table->text('language')->nullable(); // {"en": "", "bn": ""}
             $table->timestamps();
         });

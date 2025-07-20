@@ -8,7 +8,8 @@ use App\Models\Menu;
 class MenuService
 {
     public function getPaginatedItems($params){
-        $query = Menu::with('parent:id,title');
+        $type = $params['type'] ?? 'header';
+        $query = Menu::where('type', $type)->with('parent:id,title');
         $searchQuery = $params['q'] ?? null;
         $limit = $params['limit'] ?? config('app.pagination.limit');
         $query->when($searchQuery, fn($q) => $q->search($searchQuery));

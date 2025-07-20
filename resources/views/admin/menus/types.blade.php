@@ -15,10 +15,9 @@
                     </h2>
                 </div>
                 <!-- Page title actions -->
-                <div class="col-auto ms-auto d-print-none">
+                {{-- <div class="col-auto ms-auto d-print-none">
                     <div class="btn-list">
-                       
-                        <a href="{{ route('admin.menus.create', ['type'=> request()->get('type')]) }}" class="btn btn-primary">
+                        <a href="{{ route('admin.menus.create') }}" class="btn btn-primary">
                             <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="24" height="24"
                                 viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none"
                                 stroke-linecap="round" stroke-linejoin="round">
@@ -28,19 +27,12 @@
                             </svg>
                             Create new menu
                         </a>
-
-                        @if($menus->count())
-                        <a href="{{ route('admin.menus.sort', ['type'=> request()->get('type')]) }}" class="btn btn-outline-primary">
+                        <a href="{{ route('admin.menus.sort') }}" class="btn btn-outline-primary">
                             Sort Menu
                         </a>
-                        @endif
-                         <a href="{{ route('admin.menus.index') }}" class="btn btn-danger">
-                            <svg  xmlns="http://www.w3.org/2000/svg"  width="24"  height="24"  viewBox="0 0 24 24"  fill="none"  stroke="currentColor"  stroke-width="2"  stroke-linecap="round"  stroke-linejoin="round"  class="icon icon-tabler icons-tabler-outline icon-tabler-chevron-left"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M15 6l-6 6l6 6" /></svg>
-                            Back
-                        </a>
-                        {{-- <button data-route="{{ route('admin.menus.bulk_delete') }}" type="button" id="bulk-delete-btn" class="btn btn-danger" disabled>Delete Selected</button> --}}
+                        <button data-route="{{ route('admin.menus.bulk_delete') }}" type="button" id="bulk-delete-btn" class="btn btn-danger" disabled>Delete Selected</button>
                     </div>
-                </div>
+                </div> --}}
             </div>
         </div>
     </div>
@@ -50,9 +42,8 @@
             <div class="col-12">
               <div class="card">
                 <div class="card-body border-bottom py-3">
-
                   <div class="d-flex">
-                    <div class="text-secondary">
+                    {{-- <div class="text-secondary">
                       Show
                       <div class="mx-2 d-inline-block">
                         <select name="limit" onchange="updateData(this)" data-route="{{ route('admin.menus.index') }}">
@@ -62,7 +53,7 @@
                         </select>
                       </div>
                       products
-                    </div>
+                    </div> --}}
                     <div class="ms-auto text-secondary">
                       Search:
                       <div class="ms-2 d-inline-block">
@@ -80,40 +71,28 @@
                     <thead>
                       <tr>
                         <th class="w-1"><input class="form-check-input m-0 align-middle" id="select-all-items" type="checkbox" aria-label="Select all invoices"></th>
-                        <th class="w-1">ID
+                        <th class="w-1">#
                           <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-sm icon-thick" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M6 15l6 -6l6 6" /></svg>
                         </th>
                         <th>Title</th>
-                        <th>Parent</th>
-                        <th>Created at</th>
+                        {{-- <th>Parent</th> --}}
+                        {{-- <th>Created at</th> --}}
                         <th></th>
                       </tr>
                     </thead>
                     <tbody>
-                    @foreach ($menus as $menu)
+                    @foreach ($menuTypes as $key => $type)
                     <tr>
-                        <td><input class="form-check-input m-0 align-middle selected-item" type="checkbox" value="{{ $menu->id }}" aria-label="Select invoice"></td>
-                        <td><span class="text-secondary">{{ $menu->id }}</span></td>
-                        <td><a href="{{ route('admin.menus.show', $menu->id) }}" class="text-reset" tabindex="-1">{{ $menu->title }}</a></td>
-                        <td>{{ $menu->parent?->title ?? "-" }}</td>
-                        <td>{{ $menu->created_at->diffForHumans() }}</td>
+                        <td><input class="form-check-input m-0 align-middle selected-item" type="checkbox" value="{{ $type->value}}" aria-label="Select invoice"></td>
+                        <td><span class="text-secondary">{{ $key+1 }}</span></td>
+                        <td>{{ ucfirst($type->value) }}</td>
                         <td class="text-end">
                           <span class="dropdown">
                             <button class="btn dropdown-toggle align-text-top" data-bs-boundary="viewport" data-bs-toggle="dropdown">Actions</button>
                             <div class="dropdown-menu dropdown-menu-end">
-                              <a class="dropdown-item" href="{{ route('admin.menus.show', $menu->id) }}">
+                              <a class="dropdown-item" href="{{ route('admin.menus.index', ['type' => $type->value ]) }}">
                                 View
                               </a>
-                              <a class="dropdown-item" href="{{ route('admin.menus.edit', $menu->id) }}">
-                                Edit
-                              </a>
-                              <form onsubmit="return confirmDelete(event, this)"
-                                  action="{{ route('admin.menus.destroy', $menu->id) }}"
-                                  method="post">
-                                  @csrf
-                                  @method('delete')
-                                  <button type="submit" class="text-danger dropdown-item delete-btn">Delete</button>
-                              </form>
                             </div>
                           </span>
                         </td>
@@ -122,9 +101,9 @@
                     </tbody>
                   </table>
                 </div>
-                <div class="card-footer">
+                {{-- <div class="card-footer">
                   {{ $menus->links('pagination::bootstrap-5') }}
-                </div>
+                </div> --}}
               </div>
             </div>
           </div>

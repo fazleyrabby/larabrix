@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Enums\MenuType;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\MenuRequest;
 use App\Models\Menu;
@@ -17,8 +18,12 @@ class MenuController extends Controller
     }
     public function index(Request $request)
     {
-        $menus = $this->service->getPaginatedItems($request->all());
-        return view('admin.menus.index', compact('menus'));
+        if($request->get('type')){
+            $menus = $this->service->getPaginatedItems($request->all());
+            return view('admin.menus.index', compact('menus'));
+        }
+        $menuTypes = MenuType::cases();
+        return view('admin.menus.types', compact('menuTypes'));
     }
 
     public function create()
@@ -33,7 +38,7 @@ class MenuController extends Controller
         $data['slug'] = $request->has('slug') ? str_replace('-', '', $request->slug) : str()->slug($request->title);
         $data['parent_id'] = $request->input('parent_id', 0);
         Menu::create($data);
-        return redirect()->route('admin.menus.create')->with(['success' => 'Successfully created!']);
+        return redirect()->route('admin.menus.create', ['type' => $request->input('type')])->with(['success' => 'Successfully created!']);
     }
 
     public function show(Menu $menu)
@@ -53,14 +58,15 @@ class MenuController extends Controller
         $data['slug'] = $request->has('slug') ? str_replace('-', '', $request->slug) : str()->slug($request->title);
         $data['parent_id'] = $request->input('parent_id', 0);
         $menu->update($data);
-        return redirect()->route('admin.menus.index')->with(['success' => 'Successfully updated!']);
+        return redirect()->route('admin.menus.index',['type' => $request->input('type')])->with(['success' => 'Successfully updated!']);
     }
 
-    public function sort()
+    public function sort(Request $request)
     {
-        $menuWithoutChildren = Menu::toBase()->select('id','parent_id','position')->get();
+        $menuWithoutChildren = Menu::toBase()->where('type', $request->get('type'))->select('id','parent_id','position')->get();
         $menus = Menu::with('childrenRecursive')->where([
             ['status', 1],
+            ['type', $request->get('type')],
             ['parent_id', 0],
         ])->orderBy('position')->get();
         return view('admin.menus.sort', compact('menus','menuWithoutChildren'));

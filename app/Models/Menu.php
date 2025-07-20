@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enums\MenuType;
 use Illuminate\Database\Eloquent\Model;
 
 /**
@@ -17,6 +18,9 @@ use Illuminate\Database\Eloquent\Model;
  */
 class Menu extends Model
 {
+    protected $casts = [
+        'type' => MenuType::class,
+    ];
     public $guarded = [];
     public function children()
     {

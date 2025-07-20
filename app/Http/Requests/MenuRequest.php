@@ -2,7 +2,9 @@
 
 namespace App\Http\Requests;
 
+use App\Enums\MenuType;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rules\Enum;
 
 class MenuRequest extends FormRequest
 {
@@ -32,6 +34,7 @@ class MenuRequest extends FormRequest
             'icon'       => ['nullable', 'string', 'max:255'],
             'image'      => ['nullable', 'string', 'max:255'],
             'position'   => ['nullable', 'integer'],
+            'type'       => ['required', new Enum(MenuType::class)],
             // 'language' => ['nullable', 'json'],
         ];
     }
