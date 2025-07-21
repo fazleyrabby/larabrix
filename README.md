@@ -31,6 +31,7 @@
 | ✅ | Media Library (upload & manage)              | High     | ✅ Done    |
 | 🔄 | Blog / Posts with Categories & Tags          | Low      | Q3 2025    |
 | 🔄 | CMS (Page Builder / Static Pages)            | Medium   | Q4 2025    |
+| 🔄 | Custom CMS (Markdown / WYSIWIG / DnD)        | Medium   | Q4 2025    |
 | ❌ | Global Settings Panel                        | Medium   | Q3 2025    |
 | ❌ | Dashboard Widgets / Analytics Cards          | Medium   | Q3 2025    |
 | ❌ | Import/Export CSV for CRUD                   | Medium   | Q3 2025    |
@@ -39,7 +40,7 @@
 | ❌ | Reports Management                           | Medium   | Q4 2025    |
 | ❌ | Support Ticket Module                        | Low      | Q4 2025    |
 | ❌ | Notification Center                          | Low      | Q4 2025    |
-| ❌ | Custom CMS (Markdown / WYSIWIG / DnD)        | Medium   | Q4 2025    |
+
 ---
 
 ## 📸 Screenshots
