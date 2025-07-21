@@ -34,7 +34,8 @@ class DatabaseSeeder extends Seeder
             AttributeSeeder::class,
             AttributeValueSeeder::class,
             BlogSeeder::class,
-            FormSeeder::class
+            FormSeeder::class,
+            PageSeeder::class,
         ]);
     }
 }
