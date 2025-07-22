@@ -93,7 +93,7 @@
                                 <div class="card">
                                     <div class="card-body">
                                         <div class="d-flex space-x-1">
-                                            <button type="button" class="btn btn-dark w-100">Live View</button>
+                                            <a type="button" class="btn btn-dark w-100" href="{{ route('admin.pages.builder', ['page' => $page->id]) }}" target="_blank">Live View</a>
                                             <button type="button" class="btn btn-outline-dark w-100">Visit</button>
                                         </div>
                                     </div>

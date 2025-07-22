@@ -37,19 +37,23 @@
 </head>
 <body class="@yield('container-class')">
     <!-- Sidebar -->
-    @include('admin.partials.sidebar')
+    @if (empty($hideSidebar))
+        @include('admin.partials.sidebar')
+    @endif
 
     <!-- Main content -->
     <div class="page">
         <!-- Navbar -->
-        @include('admin.partials.navbar')
+        @if (empty($hideNavbar))
+            @include('admin.partials.navbar')
+        @endif
 
         <!-- Page content -->
         <div class="page-wrapper">
             @yield('content')
         </div>
 
-        @if (trim($__env->yieldContent('title')) !== 'Kanban Board')
+        @if (trim($__env->yieldContent('title')) !== 'Kanban Board' && empty($hideFooter))
             @include('admin.partials.footer')
         @endif
 

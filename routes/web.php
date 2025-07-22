@@ -10,7 +10,9 @@ use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\MediaController;
+use App\Http\Controllers\Admin\PageBuilderController;
 use App\Http\Controllers\Admin\PageController;
+use App\Http\Controllers\Frontend\PageController as FrontendPageController;
 use App\Http\Controllers\TestController;
 
 // use App\Http\Controllers\Admin\CrudController;
@@ -61,11 +63,20 @@ Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () 
     Route::post('forms/{form}/builder', [FormBuilderController::class, 'saveBuilder'])->name('forms.builder.save');
     Route::resource('blogs', BlogController::class)->names('blogs');
     Route::resource('pages', PageController::class);
+
+    // Page builder routes nested under pages:
+    Route::prefix('pages/{page}')->group(function () {
+        Route::get('builder', [PageBuilderController::class, 'index'])->name('pages.builder');
+        Route::post('builder/store', [PageBuilderController::class, 'store'])->name('pages.builder.store');
+    });
 });
 
 Route::get('/', function () {
     return view('welcome');
 });
+
+Route::get('/pages/{slug}', [FrontendPageController::class, 'show'])
+    ->name('frontend.pages.show');
 
 Route::get('/test', [TestController::class, 'index']);
 

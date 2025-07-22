@@ -47,6 +47,25 @@ class PageFactory extends Factory
                         ],
                     ],
                 ],
+                [
+                    'type' => 'attribute',
+                    'props' => [
+                        'heading' => 'Product Attributes',
+                        'items' => [
+                            ['label' => 'Color', 'value' => 'Red'],
+                            ['label' => 'Size', 'value' => 'Medium'],
+                            ['label' => 'Material', 'value' => 'Cotton'],
+                        ],
+                    ],
+                ],
+                [
+                    'type' => 'blogs',
+                    'props' => [
+                        'heading' => 'Latest Blog Posts',
+                        'limit' => 3,
+                        'sort' => 'desc', // or 'asc'
+                    ],
+                ],
             ]),
         ];
     }
