@@ -4,7 +4,7 @@
 ![PHP](https://img.shields.io/badge/php-^8.2-blue)
 ![Status](https://img.shields.io/badge/status-in--progress-yellow)
 
-**Larabrix** is a modular Laravel starter kit based on Tabler UI (v1.3.0) that helps you skip the boring parts of web development. It gives you ready-made building blocks — like product management, media uploads, menus, and task boards — so you can focus on building your app instead of repeating the same setup over and over.
+**Larabrix** is a modular Laravel starter kit based on Tabler UI (v1.4.0) that helps you skip the boring parts of web development. It gives you ready-made building blocks — like product management, media uploads, menus, and task boards — so you can focus on building your app instead of repeating the same setup over and over.
 
 > ⚠️ Larabrix is currently under development. Modules will be released incrementally.
 
