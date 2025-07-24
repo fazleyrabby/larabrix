@@ -95,15 +95,21 @@
                                 <div class="mb-3 row">
                                     <label class="col-3 col-form-label required">Media File Input</label>
                                     <div class="col">
-                                        <button data-modal-toggle="crud-modal" id="crud-modal-btn" class="btn btn-primary">Upload File</button>
-                                        <div id="crud-modal-wrapper"></div>
+                                        <button type="button" class="btn btn-primary" id="crud-offcanvas-btn"
+                                            data-bs-toggle="offcanvas" data-bs-target="#crud-offcanvas"
+                                            aria-controls="crud-offcanvas" aria-expanded="false">
+                                            Upload File
+                                        </button>
+
+                                        <div id="crud-offcanvas-wrapper">
+                                        </div>
                                     </div>
                                 </div>
                                 <div class="mb-3 row">
                                     <label class="col-3 col-form-label required">Custom Select</label>
                                     <div class="col">
-                                        <select type="text" class="form-select" name="custom_select" id="select-users"
-                                            value="">
+                                        <select type="text" class="form-select" name="custom_select"
+                                            id="select-users" value="">
                                             <option value="1">Chuck Tesla</option>
                                             <option value="2">Elon Musk</option>
                                             <option value="3">Paweł Kuna</option>
@@ -120,7 +126,8 @@
                             </div>
                             <div class="card-footer text-end">
                                 <button type="submit" class="btn btn-primary">Save</button>
-                                <button type="submit" name="action" value="save_and_create" class="btn btn-success">Save and create</button>
+                                <button type="submit" name="action" value="save_and_create"
+                                    class="btn btn-success">Save and create</button>
                             </div>
                         </form>
                     </div>
@@ -129,8 +136,8 @@
         </div>
     </div>
 
-    @include('admin.components.media.popup', [
-        'modalId' => 'crud-modal',
+     @include('admin.components.media.popup', [
+        'modalId' => 'crud-offcanvas',
         'inputType' => 'single',
         'imageInputName' => 'media_input'
     ])

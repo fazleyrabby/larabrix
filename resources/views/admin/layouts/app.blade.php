@@ -74,6 +74,11 @@
     <script src="{{ asset('admin/dist/js/tabler.min.js') }}"></script>
     <script src="{{ asset('admin/preview/js/demo.min.js') }}"></script>
 
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/1.11.0/axios.min.js"
+        integrity="sha512-h9644v03pHqrIHThkvXhB2PJ8zf5E9IyVnrSfZg8Yj8k4RsO4zldcQc4Bi9iVLUCCsqNY0b4WXVV4UB+wbWENA=="
+        crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+
     @include('admin.components.alerts')
     @include('admin.components.scripts')
     @include('admin.components.modal-scripts')

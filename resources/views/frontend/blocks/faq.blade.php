@@ -1,4 +1,4 @@
-<div class="mx-auto w-full max-w-screen-md px-4 lg:min-h-[400px] lg:grid lg:place-content-center py-3">
+<div class="mx-auto w-full max-w-screen-md px-4 lg:min-h-[400px] lg:grid lg:place-content-center py-3" id="{{ $index }}">
     <div class="space-y-4">
         @foreach ($data['items'] as $item)
             <details class="group [&_summary::-webkit-details-marker]:hidden" open>

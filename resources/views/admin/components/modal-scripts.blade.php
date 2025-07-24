@@ -62,21 +62,44 @@
                 const modalId = currentModalId;
                 const modal = document.getElementById(modalId);
                 const inputName = modal.dataset.imageInput;
+                const from = modal.dataset.from;
                 const imageWrapper = document.getElementById(`${modalId}-wrapper`);
                 const previewContainer = modal.querySelector(`.preview`);
                 const checkboxes = modal.querySelectorAll('.form-imagecheck-input:checked');
 
                 if (previewContainer) previewContainer.innerHTML = '';
+                if (from === 'builder') {
+                    checkboxes.forEach(cb => {
+                        const imgUrl = cb.dataset.url;
+                        const imgUrlFullPath = cb.dataset.fullpath;
+                        if (imgUrl) {
+                            Alpine.store('mediaManager').insertImage(imgUrl, imgUrlFullPath);
+                        }
+                    });
+                }
+
                 if (imageWrapper) {
                     imageWrapper.innerHTML = '<div class="my-3">Image Preview:</div>';
 
                     checkboxes.forEach(cb => {
                         const imgUrl = cb.dataset.url;
                         const imgUrlFullPath = cb.dataset.fullpath;
-                        imageWrapper.innerHTML +=
-                            `<div class="image-wrapper"><img src="${imgUrlFullPath}" class="mr-3 mb-3">
-                    <input type="hidden" name="${inputName}" value="${imgUrl}">
-                    <span type="button" class="remove-image"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-x"><path stroke="none" d="M0 0h24v24H0z" fill="none"></path><path d="M18 6l-12 12"></path><path d="M6 6l12 12"></path></svg></span></div>`;
+
+                        imageWrapper.innerHTML += `
+                        <div class="image-wrapper">
+                            <img src="${imgUrlFullPath}" class="mr-3 mb-3">
+                            <input type="hidden" name="${inputName}" value="${imgUrl}">
+                            <span type="button" class="remove-image">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24"
+                                    viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                                    class="icon icon-tabler icons-tabler-outline icon-tabler-x">
+                                    <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
+                                    <path d="M18 6l-12 12"></path>
+                                    <path d="M6 6l12 12"></path>
+                                </svg>
+                            </span>
+                        </div>`;
                     });
                 }
             });
@@ -280,7 +303,8 @@
                             isFile: isFile === 'true'
                         }, {
                             headers: {
-                                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+                                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')
+                                    .content
                             }
                         })
                         .then(response => {
@@ -293,48 +317,50 @@
             });
 
             document.addEventListener('click', function(e) {
-            // Handle delete-folder click
-            const deleteBtn = e.target.closest('.delete-folder');
-            if (deleteBtn) {
-                e.preventDefault();
+                // Handle delete-folder click
+                const deleteBtn = e.target.closest('.delete-folder');
+                if (deleteBtn) {
+                    e.preventDefault();
 
-                const folderId = deleteBtn.dataset.id;
-                const url = deleteBtn.dataset.url;
-                if (!folderId) return;
+                    const folderId = deleteBtn.dataset.id;
+                    const url = deleteBtn.dataset.url;
+                    if (!folderId) return;
 
-                if (!confirm('Are you sure you want to delete this folder?')) return;
+                    if (!confirm('Are you sure you want to delete this folder?')) return;
 
-                axios.delete(url, {
-                    headers: {
-                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
-                    }
-                })
-                .then(response => {
-                    // Optionally refresh modal or UI
-                    reloadParentModal(deleteBtn);
-                })
-                .catch(error => {
-                    alert(error?.response?.data?.message || "Error deleting folder.");
-                    console.error(error);
-                });
+                    axios.delete(url, {
+                            headers: {
+                                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')
+                                    .content
+                            }
+                        })
+                        .then(response => {
+                            // Optionally refresh modal or UI
+                            reloadParentModal(deleteBtn);
+                        })
+                        .catch(error => {
+                            alert(error?.response?.data?.message || "Error deleting folder.");
+                            console.error(error);
+                        });
+                }
+            });
+
+            function reloadParentModal(triggerEl) {
+                const parentModal = triggerEl.closest('.offcanvas');
+                if (!parentModal) {
+                    location.reload(true);
+                    return;
+                }
+
+                const parentModalId = parentModal.getAttribute('id');
+                const parentModalRoute = parentModal.dataset.route;
+                const folderInput = parentModal.querySelector(
+                    `form.ajaxform-file-upload input#media-folder-id-${parentModalId}`);
+                const folderId = folderInput?.value || null;
+
+                loadMedia(parentModalRoute, parentModalId, 1, folderId);
             }
-        });
 
-        function reloadParentModal(triggerEl) {
-            const parentModal = triggerEl.closest('.offcanvas');
-            if (!parentModal) {
-                location.reload(true);
-                return;
-            }
-
-            const parentModalId = parentModal.getAttribute('id');
-            const parentModalRoute = parentModal.dataset.route;
-            const folderInput = parentModal.querySelector(`form.ajaxform-file-upload input#media-folder-id-${parentModalId}`);
-            const folderId = folderInput?.value || null;
-
-            loadMedia(parentModalRoute, parentModalId, 1, folderId);
-        }
-           
             // old load more function
             // function loadMedia(url, modalId, page = 1) {
             //     const loader = document.querySelector('.loader');

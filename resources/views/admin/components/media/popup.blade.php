@@ -1,3 +1,9 @@
+@php
+    $modalId = $modalId ?? 'mediaModal';
+    $inputType = $inputType ?? 'single';
+    $imageInputName = $imageInputName ?? 'media_input';
+    $from = $from ?? 'form';
+@endphp
 @push('styles')
 <style>
     .custom.loader {
@@ -16,6 +22,7 @@
 
 <div class="offcanvas offcanvas-end custom-offcanvas" tabindex="-1" id="{{ $modalId }}" aria-labelledby="{{ $modalId }}Label" 
      data-type="{{ $inputType }}"
+     data-from="{{ $from }}"
      data-route="{{ route('admin.media.index') }}?type=modal&inputType={{ $inputType }}"
      data-image-input="{{ $imageInputName }}">
     <div class="offcanvas-header">
