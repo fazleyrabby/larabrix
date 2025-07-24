@@ -18,7 +18,7 @@
 </div> --}}
 
 
-<section class="bg-white lg:grid lg:h-[400px] lg:place-content-center">
+<section class="bg-white lg:grid lg:h-[400px] h-screen place-content-center">
   <div class="mx-auto w-screen max-w-screen-xl px-4 h-[100px] sm:px-6 lg:px-8">
     <div class="mx-auto max-w-prose text-center">
       <h1 class="text-4xl font-bold text-gray-900 sm:text-5xl">

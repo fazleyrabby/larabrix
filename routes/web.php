@@ -77,6 +77,8 @@ Route::get('/', function () {
 
 Route::get('/pages/{slug}', [FrontendPageController::class, 'show'])
     ->name('frontend.pages.show');
+Route::get('/blogs/{slug}', [FrontendPageController::class, 'blog'])
+    ->name('frontend.blog.show');
 
 Route::get('/test', [TestController::class, 'index']);
 

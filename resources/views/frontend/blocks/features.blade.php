@@ -1,4 +1,4 @@
-<section class="py-10">
+<section class="py-10 min-h-[400px]">
   <div class="max-w-6xl mx-auto px-4">
     @if (!empty($data['heading']))
       <h2 class="text-3xl font-semibold text-center mb-10">{{ $data['heading'] }}</h2>

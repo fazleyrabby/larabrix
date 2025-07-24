@@ -15,20 +15,19 @@ class PageController extends Controller
     public function show(Request $request, $slug){
         $page = Page::where('slug', $slug)->firstOrFail();
         $builder = json_decode($page->builder, true);
-
-        $blocks = collect($builder ?? [])->map(function ($block) {
+        $blocks = collect($builder ?? [])->map(function ($block) use ($slug) {
             if ($block['type'] === 'blogs') {
                 $limit = $block['props']['limit'] ?? 3;
 
                 $block['props']['posts'] = Blog::latest()
                     ->take($limit)
                     ->get()
-                    ->map(function ($blog) {
+                    ->map(function ($blog) use ($slug) {
                         return [
                             'title' => $blog->title,
                             'excerpt' => Str::limit(strip_tags(Markdown::parse($blog->content ?? '')), 100),
-                            'url' => "",// route('blog.show', $blog->slug),
-                            'published_at' => optional($blog->published_at)->format('M d, Y'),
+                            'url' => route('frontend.blog.show', $blog->slug) . "?pageSlug=". $slug,
+                            'published_at' => optional($blog->created_at)->format('M d, Y'),
                         ];
                     })
                     ->toArray();
@@ -38,5 +37,11 @@ class PageController extends Controller
         })->filter();
 
         return view('frontend.pages.show', compact('page', 'blocks'));
+    }
+
+    public function blog($slug){
+        $pageSlug = request()->get('pageSlug');
+        $blog = Blog::toBase()->where('slug', $slug)->first();
+        return view('frontend.pages.blog', compact('blog','pageSlug'));
     }
 }
