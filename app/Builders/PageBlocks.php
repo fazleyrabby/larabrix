@@ -24,6 +24,7 @@ class PageBlocks
                 'props' => [
                     'heading' => 'About Us',
                     'content' => 'We provide scalable Laravel components for developers.',
+                    'image' => null,
                 ],
             ],
             'features' => [

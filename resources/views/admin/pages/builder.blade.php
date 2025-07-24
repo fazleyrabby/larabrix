@@ -37,7 +37,7 @@
                         <div>
                             <template x-for="(value, key) in blocks[selected].props" :key="key">
                                 <div class="mb-4">
-                                    <template x-if="key === 'background_image'">
+                                    <template x-if="key === 'background_image' || key === 'image'">
                                         <div class="mb-3">
                                             <label class="form-label fw-bold">Background Image</label>
 
@@ -93,7 +93,7 @@
 
                                     <!-- Normal field (not array of objects) -->
                                     <template
-                                        x-if="key !== 'background_image' && (!Array.isArray(value) || typeof value[0] !== 'object')">
+                                        x-if="(key !== 'background_image' && key !== 'image') && (!Array.isArray(value) || typeof value[0] !== 'object')">
                                         <div>
                                             <label class="form-label fw-bold mb-1" x-text="key"></label>
                                             <input type="text" class="form-control"
