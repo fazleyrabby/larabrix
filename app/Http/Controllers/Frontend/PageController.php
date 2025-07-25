@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Frontend;
 use App\Builders\PageBlocks;
 use App\Http\Controllers\Controller;
 use App\Models\Blog;
+use App\Models\Form;
 use App\Models\Page;
 use Illuminate\Http\Request;
 use Illuminate\Mail\Markdown;
@@ -31,6 +32,10 @@ class PageController extends Controller
                         ];
                     })
                     ->toArray();
+            }
+
+            if($block['type'] === 'form'){
+                $block['props']['form'] = Form::with('formFields')->find($block['props']['form_id']);
             }
 
             return PageBlocks::make($block);

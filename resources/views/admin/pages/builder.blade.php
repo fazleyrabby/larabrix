@@ -1,5 +1,12 @@
 @extends('admin.layouts.app')
 @section('title', 'Page Builder')
+@push('styles')
+    <style>
+        .block {
+            cursor: grab;
+        }
+    </style>
+@endpush
 @section('content')
     <div class="container-fluid components" style="display: flex; height: 100vh;">
         <div id="sidebar" class="p-3"
@@ -7,30 +14,55 @@
             <!-- sidebar content -->
             <div class="d-flex justify-content-between mb-2">
                 <a href="{{ route('admin.pages.edit', $page->id) }}" class="btn btn-danger btn-sm">
-                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
-                    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
-                    class="icon icon-tabler icons-tabler-outline icon-tabler-chevron-left">
-                    <path stroke="none" d="M0 0h24v24H0z" fill="none" />
-                    <path d="M15 6l-6 6l6 6" />
-                </svg>
-                Back
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                        class="icon icon-tabler icons-tabler-outline icon-tabler-chevron-left">
+                        <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                        <path d="M15 6l-6 6l6 6" />
+                    </svg>
+                    Back
                 </a>
 
                 <a class="btn btn-info btn-sm" href="{{ route('frontend.pages.show', $page->slug) }}">View Page</a>
             </div>
 
             @php
-                $baseUrl = url('/'); 
+                $baseUrl = url('/');
             @endphp
 
             <div x-data="builder" class="w-1/3 p-4 border-r" x-init="route = $el.dataset.route"
                 data-route="{{ route('admin.pages.builder.store', $page->id) }}">
-                <template x-for="(block, index) in blocks" :key="index">
-                    <button class="block w-full mb-2 p-2 border rounded"
-                        :class="{ 'bg-black text-white': index === selected }" @click="selectBlock(index)">
-                        <span x-text="(block.label || 'Block') + ' ' + (index + 1)"></span>
+                <div x-ref="sortableContainer" class="block-sortable">
+                    <template x-for="(block, index) in blocks" :key="block.id">
+                        <div class="block-item position-relative d-flex align-items-center mb-2" :data-id="block.id"
+                            style="min-height: 42px;">
+                            <button class="block w-full p-2 border rounded"
+                                :class="{ 'bg-black text-white': index === selected }" @click="selectBlock(index)">
+                                <span x-text="(block.label || 'Block') + ' ' + (index + 1)"></span>
+                            </button>
+                            <button type="button" class="btn-close position-absolute top-50 end-0 translate-middle-y me-2"
+                                :class="{ ' text-white': index === selected }" aria-label="Remove"
+                                @click.stop="removeBlock(index)">
+                            </button>
+                        </div>
+                    </template>
+                </div>
+
+                <div class="dropdown my-4">
+                    <button class="btn btn-outline-secondary dropdown-toggle w-100" type="button"
+                        data-bs-toggle="dropdown">
+                        ➕ Add Block
                     </button>
-                </template>
+                    <ul class="dropdown-menu w-100">
+                        <template x-for="(block, type) in blockOptions" :key="type">
+                            <li>
+                                <a class="dropdown-item" href="#" @click.prevent="addBlock(type)"
+                                    x-text="block.label">
+                                </a>
+                            </li>
+                        </template>
+                    </ul>
+                </div>
 
                 <div x-show="selected !== null" class="mt-4 space-y-2">
                     <template x-if="blocks[selected]?.props">
@@ -43,7 +75,8 @@
 
                                             <!-- Image Preview -->
                                             <div class="mb-2">
-                                                <img :src="blocks[selected].props[key] ? '{{ $baseUrl }}/' + blocks[selected].props[key] : 'https://placehold.co/400'" 
+                                                <img :src="blocks[selected].props[key] ? '{{ $baseUrl }}/' + blocks[selected]
+                                                    .props[key] : 'https://placehold.co/400'"
                                                     class="img-fluid rounded border" style="max-height: 150px;"
                                                     alt="Preview">
                                             </div>
@@ -93,11 +126,23 @@
 
                                     <!-- Normal field (not array of objects) -->
                                     <template
-                                        x-if="(key !== 'background_image' && key !== 'image') && (!Array.isArray(value) || typeof value[0] !== 'object')">
+                                        x-if="(key !== 'background_image' && key !== 'image' && key !== 'form_id') && (!Array.isArray(value) || typeof value[0] !== 'object')">
                                         <div>
                                             <label class="form-label fw-bold mb-1" x-text="key"></label>
                                             <input type="text" class="form-control"
                                                 x-model="blocks[selected].props[key]">
+                                        </div>
+                                    </template>
+
+                                    <template x-if="key === 'form_id'">
+                                        <div class="mb-4">
+                                            <label class="form-label fw-bold">Select Form</label>
+                                            <select class="form-control" x-model="blocks[selected].props.form_id">
+                                                <option value=""> -- Select a Form -- </option>
+                                               <template x-for="[id, name] in Object.entries(forms)" :key="id">
+                                                    <option :value="String(id)" x-text="name"></option>
+                                                </template>
+                                            </select>
                                         </div>
                                     </template>
 
@@ -111,7 +156,6 @@
                     'modalId' => 'builder-offcanvas',
                     'inputType' => 'single',
                     'from' => 'builder',
-                    // 'imageInputName' => 'media_input'
                 ])
 
                 <button @click="save()" class="btn btn-primary w-100">Save</button>
@@ -136,42 +180,113 @@
 
 
 @push('scripts')
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.15.6/Sortable.min.js"
+        integrity="sha512-csIng5zcB+XpulRUa+ev1zKo7zRNGpEaVfNB9On1no9KYTEY/rLGAEEpvgdw6nim1WdTuihZY1eqZ31K7/fZjw=="
+        crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+
     <script>
         axios.defaults.headers.common['X-CSRF-TOKEN'] = '{{ csrf_token() }}';
-
+        const availableBlocks = @json($pageBlocks);
         document.addEventListener('alpine:init', () => {
             // Alpine data for the builder
             Alpine.data('builder', () => ({
                 blocks: [],
+                forms: @json($forms),
                 route: '{{ route('admin.pages.builder.store', $page) }}', // adjust if needed
                 selected: null,
+                blockOptions: availableBlocks,
+                sortedIds: [],
 
                 init() {
-                    this.blocks = JSON.parse(@json($page->builder ?? '[]'));
+                    this.blocks = JSON.parse(@json($page->builder ?? '[]')).map(block => ({
+                        ...block,
+                        id: block.id ||
+                            `${block.type}-${Date.now()}-${Math.floor(Math.random() * 1000)}`
+                    }));
+
+                    this.$nextTick(() => {
+                        this.initSortable();
+                    });
                 },
+
+                initSortable() {
+                    const self = this;
+
+                    if (self.sortableInstance) {
+                        self.sortableInstance.destroy();
+                    }
+
+                    self.sortableInstance = Sortable.create(self.$refs.sortableContainer, {
+                        animation: 150,
+                        handle: '.block-item',
+                        onEnd: () => { // use arrow function here
+                            this.sortedIds = Array.from(self.$refs.sortableContainer
+                                    .querySelectorAll('[data-id]'))
+                                .map(el => el.getAttribute('data-id'));
+                        }
+                    });
+                },
+
 
                 selectBlock(index) {
                     this.selected = index;
                 },
 
-                // openImagePicker(propKey = 'image') {
-                //     if (this.selected === null || !this.blocks[this.selected]) return;
+                getReorderedBlocks(blocks, sortedIds) {
+                    if (!sortedIds || !sortedIds.length) {
+                        // If no sorted IDs, return all blocks without their IDs
+                        return blocks.map(({
+                            id,
+                            ...rest
+                        }) => rest);
+                    }
 
-                //     Alpine.store('mediaManager').targetKey = propKey;
+                    const map = Object.fromEntries(blocks.map(block => [block.id, block]));
 
-                //     const modalId = 'builder-offcanvas';
-                //     const modal = document.getElementById(modalId);
+                    return sortedIds
+                        .map(id => {
+                            const block = map[id];
+                            if (!block) return null;
 
-                //     if (modal) {
-                //         modal.setAttribute('data-route', '{{ route('admin.media.index') }}');
-                //         modal.setAttribute('data-type', 'single');
-                //         new tabler.bootstrap.Offcanvas(modal).show();
-                //     }
-                // },
+                            const {
+                                id: _,
+                                ...rest
+                            } = block; // remove `id`
+                            return rest;
+                        })
+                        .filter(Boolean);
+                },
+
+                addBlock(type) {
+                    const template = JSON.parse(JSON.stringify(this.blockOptions[type]));
+                    const id = `${type}-${Date.now()}-${Math.floor(Math.random() * 1000)}`; // unique ID
+
+                    this.blocks.push({
+                        id,
+                        type,
+                        label: template.label || type,
+                        props: template.props || {}
+                    });
+
+                    this.selected = this.blocks.length - 1;
+                },
+
+                removeBlock(index) {
+                    if (confirm('Are you sure you want to delete this block?')) {
+                        this.blocks.splice(index, 1);
+                        if (this.selected === index) {
+                            this.selected = null;
+                        } else if (this.selected > index) {
+                            this.selected--;
+                        }
+                    }
+                },
 
                 save() {
+                    const sortedBlocks = this.getReorderedBlocks(this.blocks, this.sortedIds);
+                    console.log(sortedBlocks)
                     axios.post(this.route, {
-                            builder: this.blocks
+                            builder: sortedBlocks
                         })
                         .then(() => {
                             const iframe = document.querySelector('iframe');
@@ -204,7 +319,9 @@
             Alpine.store('mediaManager', {
                 targetKey: null,
                 insertImage(url, fullPath) {
-                    const builderComponent = document.querySelector('[x-data="builder"]')?._x_dataStack?.[0];
+                    const builderComponent = document.querySelector('[x-data="builder"]')?._x_dataStack?.[
+                        0
+                    ];
                     if (!builderComponent || builderComponent.selected === null || !this.targetKey) return;
 
                     const block = builderComponent.blocks[builderComponent.selected];
