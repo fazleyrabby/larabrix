@@ -36,6 +36,7 @@ class DatabaseSeeder extends Seeder
             BlogSeeder::class,
             FormSeeder::class,
             PageSeeder::class,
+            PaymentGatewaySeeder::class,
         ]);
     }
 }

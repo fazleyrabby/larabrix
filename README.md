@@ -32,6 +32,7 @@
 | 🔄 | Blog / Posts with Categories & Tags          | Low      | Q3 2025    |
 | 🔄 | CMS (Page Builder / Static Pages)            | Medium   | Q4 2025    |
 | 🔄 | Custom CMS (Markdown / WYSIWIG / DnD)        | Medium   | Q4 2025    |
+| 🔄 | Payment Gateway Management                   | High     | Q4 2025    |
 | ❌ | Global Settings Panel                        | Medium   | Q3 2025    |
 | ❌ | Dashboard Widgets / Analytics Cards          | Medium   | Q3 2025    |
 | ❌ | Import/Export CSV for CRUD                   | Medium   | Q3 2025    |

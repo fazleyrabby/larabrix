@@ -128,7 +128,7 @@ class FormBuilderController extends Controller
             'label' => $fieldData['label'],
             'name' => $fieldData['name'],
             'placeholder' => $fieldData['placeholder'],
-            'options' => $fieldData['options'] ?? null,
+            'options' => json_decode($fieldData['options']) ?? null,
             'validation' => $fieldData['validation'] ?? null,
             'order' => $fieldData['order'],
         ];

@@ -14,7 +14,6 @@
         </label>
 
         @switch($field->type)
-
           @case('text')
             <input
               type="text"
@@ -34,7 +33,7 @@
             @break
 
           @case('radio')
-            @foreach ($field->options ? json_decode($field->options, true) : [] as $option)
+            @foreach ($field->options ?? [] as $option)
               <label class="inline-flex items-center mr-4">
                 <input type="radio" name="{{ $field->name }}" value="{{ $option['key'] }}" class="form-radio text-blue-600" />
                 <span class="ml-2">{{ $option['value'] }}</span>
@@ -43,7 +42,7 @@
             @break
 
           @case('checkbox')
-            @foreach ($field->options ? json_decode($field->options, true) : [] as $option)
+            @foreach ($field->options ?? [] as $option)
               <label class="inline-flex items-center mr-4">
                 <input type="checkbox" name="{{ $field->name }}[]" value="{{ $option['key'] }}" class="form-checkbox text-blue-600" />
                 <span class="ml-2">{{ $option['value'] }}</span>
@@ -56,7 +55,7 @@
               name="{{ $field->name }}"
               class="w-full border border-gray-300 px-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
               <option disabled selected>Select an option</option>
-              @foreach ($field->options ? json_decode($field->options, true) : [] as $option)
+              @foreach ($field->options ?? [] as $option)
                 <option value="{{ $option['key'] }}">{{ $option['value'] }}</option>
               @endforeach
             </select>

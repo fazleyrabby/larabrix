@@ -8,10 +8,6 @@ class Form extends Model
 {
     protected $fillable = ['name', 'slug', 'fields'];
 
-    // protected $casts = [
-    //     'fields' => 'array',
-    // ];
-
     public function submissions()
     {
         return $this->hasMany(FormSubmission::class);

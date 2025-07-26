@@ -222,7 +222,7 @@
             </div>
         </div>
     </div>
-
+    
 <input type="hidden" id="existingFields" value="{{ json_encode($fields) }}">
 @endsection
 

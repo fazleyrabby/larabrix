@@ -12,6 +12,7 @@ use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\MediaController;
 use App\Http\Controllers\Admin\PageBuilderController;
 use App\Http\Controllers\Admin\PageController;
+use App\Http\Controllers\Admin\PaymentGatewayController;
 use App\Http\Controllers\Frontend\PageController as FrontendPageController;
 use App\Http\Controllers\TestController;
 
@@ -69,6 +70,8 @@ Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () 
         Route::get('builder', [PageBuilderController::class, 'index'])->name('pages.builder');
         Route::post('builder/store', [PageBuilderController::class, 'store'])->name('pages.builder.store');
     });
+
+    Route::resource('payment-gateways', PaymentGatewayController::class);
 });
 
 Route::get('/', function () {

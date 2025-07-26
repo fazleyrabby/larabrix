@@ -19,8 +19,8 @@ class FormSeeder extends Seeder
                 'label' => 'Full Name',
                 'name' => 'full_name',
                 'placeholder' => 'Enter your full name',
-                'options' => null,
-                'validation' => implode(",", ['required']),
+                'options' => [], // No options needed
+                'validation' => ['required'],
                 'order' => 1,
             ],
             [
@@ -28,8 +28,8 @@ class FormSeeder extends Seeder
                 'label' => 'Email',
                 'name' => 'email',
                 'placeholder' => 'you@example.com',
-                'options' => null,
-                'validation' => implode(",", ['required', 'email']),
+                'options' => [],
+                'validation' => ['required', 'email'],
                 'order' => 2,
             ],
             [
@@ -37,8 +37,8 @@ class FormSeeder extends Seeder
                 'label' => 'Message',
                 'name' => 'message',
                 'placeholder' => 'Write your message...',
-                'options' => null,
-                'validation' => implode(",", ['required']),
+                'options' => [],
+                'validation' => ['required'],
                 'order' => 3,
             ],
         ]);
@@ -52,8 +52,8 @@ class FormSeeder extends Seeder
                 'label' => 'Name',
                 'name' => 'name',
                 'placeholder' => 'Your name',
-                'options' => null,
-                'validation' => implode(",", []),
+                'options' => [],
+                'validation' => [],
                 'order' => 1,
             ],
             [
@@ -61,12 +61,12 @@ class FormSeeder extends Seeder
                 'label' => 'How satisfied are you?',
                 'name' => 'satisfaction',
                 'placeholder' => '',
-                'options' => json_encode([
+                'options' => [
                     ['key' => '1', 'value' => 'Not Satisfied'],
                     ['key' => '2', 'value' => 'Neutral'],
                     ['key' => '3', 'value' => 'Very Satisfied'],
-                ]),
-                'validation' => implode(",", ['required']),
+                ],
+                'validation' => ['required'],
                 'order' => 2,
             ],
             [
@@ -74,8 +74,8 @@ class FormSeeder extends Seeder
                 'label' => 'Additional Comments',
                 'name' => 'comments',
                 'placeholder' => 'Share your thoughts...',
-                'options' => null,
-                'validation' => implode(",", []),
+                'options' => [],
+                'validation' => [],
                 'order' => 3,
             ],
         ]);
