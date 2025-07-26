@@ -29,7 +29,7 @@ services:
         MYSQL_DATABASE: '${DB_DATABASE}'
         MYSQL_USER: '${DB_USERNAME}'
         MYSQL_PASSWORD: '${DB_PASSWORD}'
-        MYSQL_ALLOW_EMPTY_PASSWORD: 'yes'
+        # MYSQL_ALLOW_EMPTY_PASSWORD: 'yes'
     healthcheck:
       test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
       interval: 10s
