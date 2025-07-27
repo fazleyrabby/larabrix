@@ -12,7 +12,6 @@
         @yield('content')
     </main>
     @include('frontend.partials.footer') {{-- optional --}}
-
     @stack('scripts')
 </body>
 </html>

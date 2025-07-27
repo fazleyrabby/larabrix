@@ -80,6 +80,8 @@ Route::get('/', function () {
 
 Route::get('/pages/{slug}', [FrontendPageController::class, 'show'])
     ->name('frontend.pages.show');
+Route::middleware(['auth'])->get('/page-preview/{slug}', [FrontendPageController::class, 'preview'])
+    ->name('frontend.pages.preview');
 Route::get('/blogs/{slug}', [FrontendPageController::class, 'blog'])
     ->name('frontend.blog.show');
 

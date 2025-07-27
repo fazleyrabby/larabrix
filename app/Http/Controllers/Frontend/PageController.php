@@ -14,9 +14,23 @@ use Illuminate\Support\Str;
 class PageController extends Controller
 {
     public function show(Request $request, $slug){
-        $page = Page::where('slug', $slug)->firstOrFail();
-        $builder = json_decode($page->builder, true);
-        $blocks = collect($builder ?? [])->map(function ($block) use ($slug) {
+        $pageData = $this->getPage($request, $slug);
+        $page = $pageData['page'];
+        $blocks = $pageData['blocks'];
+        return view('frontend.pages.show', compact('page', 'blocks'));
+    }
+
+    public function preview(Request $request, $slug){
+        $pageData = $this->getPage($request, $slug);
+        $page = $pageData['page'];
+        $blocks = $pageData['blocks'];
+        return view('frontend.pages.preview', compact('page', 'blocks'));
+    }
+
+    private function getPage($request, $slug){
+        $data['page'] = Page::where('slug', $slug)->firstOrFail();
+        $builder = json_decode($data['page']->builder, true);
+        $data['blocks'] = collect($builder ?? [])->map(function ($block) use ($slug) {
             if ($block['type'] === 'blogs') {
                 $limit = $block['props']['limit'] ?? 3;
 
@@ -40,8 +54,7 @@ class PageController extends Controller
 
             return PageBlocks::make($block);
         })->filter();
-
-        return view('frontend.pages.show', compact('page', 'blocks'));
+        return $data;
     }
 
     public function blog($slug){

@@ -49,7 +49,7 @@
                 </div>
 
                 <div class="dropdown my-4">
-                    <button class="btn btn-outline-secondary dropdown-toggle w-100" type="button"
+                    <button class="btn btn-outline-secondary dropdown-toggle w-100 btn-append" type="button"
                         data-bs-toggle="dropdown">
                         ➕ Add Block
                     </button>
@@ -139,7 +139,8 @@
                                             <label class="form-label fw-bold">Select Form</label>
                                             <select class="form-control" x-model="blocks[selected].props.form_id">
                                                 <option value=""> -- Select a Form -- </option>
-                                               <template x-for="[id, name] in Object.entries(forms)" :key="id">
+                                                <template x-for="[id, name] in Object.entries(forms)"
+                                                    :key="id">
                                                     <option :value="String(id)" x-text="name"></option>
                                                 </template>
                                             </select>
@@ -164,14 +165,12 @@
         <div id="resizer" style="width: 5px; cursor: ew-resize; background: #ccc;"></div>
         <div id="main" style="flex-grow: 1; background: #fff;height: 100vh;">
             <!-- main content -->
-            <iframe src="{{ route('frontend.pages.show', $page->slug) }}" width="100%" height="100%"
-                style="border: none;"></iframe>
-            <!-- Preview -->
-            {{-- <div id="preview" class="">
-                <template x-for="block in blocks" :key="block.type + Math.random()">
-                    <div class="mb-6 border rounded p-4" x-html="renderBlock(block)" x-data=''></div>
-                </template>
-            </div> --}}
+            {{-- <iframe src="{{ route('frontend.pages.preview', $page->slug) }}?builderPreview=1" width="100%" height="100%"
+                style="border: none;"></iframe> --}}
+
+            <iframe id="page-builder-preview" src="{{ route('frontend.pages.preview', $page->slug) }}?builderPreview=1"
+                width="100%" height="100%" class="border rounded"></iframe>
+
         </div>
     </div>
 
@@ -183,11 +182,66 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.15.6/Sortable.min.js"
         integrity="sha512-csIng5zcB+XpulRUa+ev1zKo7zRNGpEaVfNB9On1no9KYTEY/rLGAEEpvgdw6nim1WdTuihZY1eqZ31K7/fZjw=="
         crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <script>
+        // document.addEventListener('DOMContentLoaded', () => {
+        //     const iframe = document.getElementById('page-builder-preview');
 
+        //     iframe.addEventListener('load', () => {
+        //         const iframeDoc = iframe.contentDocument || iframe.contentWindow.document;
+        //         const allBlocks = iframeDoc.querySelectorAll('.block-wrapper');
+
+        //         allBlocks.forEach((blockEl, index) => {
+        //             console.log('Block ID:', blockEl.dataset.blockId);
+        //         });
+        //     });
+        // });
+
+        document.addEventListener('click', function (e) {
+            const btn = e.target.closest('.btn-insert, .btn-append');
+            
+            if (btn) {
+                const isAppend = btn.classList.contains('btn-append');
+                window.postMessage({
+                    type: isAppend ? 'block-append' : 'block-insert',
+                    position: btn.dataset.position,
+                    targetId: btn.dataset.blockId,
+                }, '*');
+            }
+        });
+    </script>
     <script>
         axios.defaults.headers.common['X-CSRF-TOKEN'] = '{{ csrf_token() }}';
         const availableBlocks = @json($pageBlocks);
         document.addEventListener('alpine:init', () => {
+            window.addEventListener('message', (e) => {
+                if (!e.data) return;
+
+                const { type, position, targetId } = e.data;
+
+                if (type === 'block-insert' || type === 'block-append') {
+                    const blockType = prompt("Enter block type to " + (type === 'block-append' ? 'append' : 'insert') + ":");
+                    if (!this.blockOptions[blockType]) return;
+
+                    const template = JSON.parse(JSON.stringify(this.blockOptions[blockType]));
+                    const newBlock = {
+                        id: `${blockType}-${Date.now()}-${Math.floor(Math.random() * 1000)}`,
+                        type: blockType,
+                        label: template.label || blockType,
+                        props: template.props || {}
+                    };
+
+                    let insertIndex = this.blocks.length; // default for append
+
+                    if (type === 'block-insert') {
+                        const targetIndex = this.blocks.findIndex(b => b.id === targetId);
+                        if (targetIndex === -1) return;
+                        insertIndex = position === 'before' ? targetIndex : targetIndex + 1;
+                    }
+
+                    this.blocks.splice(insertIndex, 0, newBlock);
+                    this.selected = insertIndex;
+                }
+            });
             // Alpine data for the builder
             Alpine.data('builder', () => ({
                 blocks: [],
