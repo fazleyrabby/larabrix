@@ -28,7 +28,7 @@ class PaymentGatewayController extends Controller
     public function store(PaymentGatewayRequest $request)
     {
         PaymentGateway::create($request->validated());
-        return redirect()->route('admin.payment_gateways.index')->with('success', 'Payment gateway added.');
+        return redirect()->route('admin.payment-gateways.index')->with('success', 'Payment gateway added.');
     }
 
     public function edit(PaymentGateway $paymentGateway)
@@ -39,7 +39,7 @@ class PaymentGatewayController extends Controller
     public function update(PaymentGatewayRequest $request, PaymentGateway $paymentGateway)
     {
         $paymentGateway->update($request->validated());
-        return redirect()->route('admin.payment_gateways.index')->with('success', 'Payment gateway updated.');
+        return redirect()->route('admin.payment-gateways.index')->with('success', 'Payment gateway updated.');
     }
 
     public function destroy(PaymentGateway $paymentGateway)

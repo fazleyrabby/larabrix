@@ -107,6 +107,7 @@ class PageBlocks
         }
 
         return (object)[
+            'id' => $block['id'] ?? $block['type'] . '-' . now()->timestamp . '-' . rand(0, 999),
             'type' => $block['type'],
             'label' => $definition['label'],
             'description' => $definition['description'],

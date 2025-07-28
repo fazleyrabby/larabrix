@@ -5,258 +5,234 @@
         .block {
             cursor: grab;
         }
+
+        #sidebar-left,
+        #sidebar-right {
+            background: #eee;
+            overflow-y: auto;
+            height: 100vh;
+            padding: 1rem;
+        }
+
+        #sidebar-left {
+            width: 300px;
+            min-width: 150px;
+            max-width: 400px;
+            border-right: 1px solid #ccc;
+        }
+
+        #sidebar-right {
+            width: 400px;
+            min-width: 300px;
+            max-width: 500px;
+            border-left: 1px solid #ccc;
+        }
+
+        #main {
+            flex-grow: 1;
+            background: #fff;
+            height: 100vh;
+        }
+
+        #resizer-left,
+        #resizer-right {
+            width: 5px;
+            cursor: ew-resize;
+            background: #ccc;
+            height: 100vh;
+        }
     </style>
 @endpush
-@section('content')
-    <div class="container-fluid components" style="display: flex; height: 100vh;">
-        <div id="sidebar" class="p-3"
-            style="width: 350px; min-width: 150px; max-width: 500px; background: #eee; overflow-y:scroll">
-            <!-- sidebar content -->
-            <div class="d-flex justify-content-between mb-2">
-                <a href="{{ route('admin.pages.edit', $page->id) }}" class="btn btn-danger btn-sm">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
-                        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
-                        class="icon icon-tabler icons-tabler-outline icon-tabler-chevron-left">
-                        <path stroke="none" d="M0 0h24v24H0z" fill="none" />
-                        <path d="M15 6l-6 6l6 6" />
-                    </svg>
-                    Back
-                </a>
 
-                <a class="btn btn-info btn-sm" href="{{ route('frontend.pages.show', $page->slug) }}">View Page</a>
+@section('content')
+    <div class="container-fluid components" x-data="builder" x-init="init()"
+        style="display: flex; height: 100vh;">
+        {{-- LEFT SIDEBAR: Block list --}}
+        <div id="sidebar-left" data-route="{{ route('admin.pages.builder.store', $page->id) }}">
+            <div class="d-flex justify-content-between mb-2">
+                <a href="{{ route('admin.pages.edit', $page->id) }}" class="btn btn-danger btn-sm">Back</a>
+                <a class="btn btn-info btn-sm" href="{{ route('frontend.pages.show', $page->slug) }}" target="_blank">View
+                    Page</a>
             </div>
 
-            @php
-                $baseUrl = url('/');
-            @endphp
-
-            <div x-data="builder" class="w-1/3 p-4 border-r" x-init="route = $el.dataset.route"
-                data-route="{{ route('admin.pages.builder.store', $page->id) }}">
-                <div x-ref="sortableContainer" class="block-sortable">
-                    <template x-for="(block, index) in blocks" :key="block.id">
-                        <div class="block-item position-relative d-flex align-items-center mb-2" :data-id="block.id"
-                            style="min-height: 42px;">
-                            <button class="block w-full p-2 border rounded"
-                                :class="{ 'bg-black text-white': index === selected }" @click="selectBlock(index)">
-                                <span x-text="(block.label || 'Block') + ' ' + (index + 1)"></span>
-                            </button>
-                            <button type="button" class="btn-close position-absolute top-50 end-0 translate-middle-y me-2"
-                                :class="{ ' text-white': index === selected }" aria-label="Remove"
-                                @click.stop="removeBlock(index)">
-                            </button>
-                        </div>
+            <div x-ref="sortableContainer" class="block-sortable">
+                <template x-for="(block, index) in blocks" :key="block.id">
+                    <div class="block-item position-relative d-flex align-items-center mb-2" :data-id="block.id"
+                        style="min-height: 42px;">
+                        <button class="block w-full p-2 border rounded"
+                            :class="{ 'bg-black text-white': index === selected }" @click="selectBlock(index)">
+                            <span x-text="(block.label || 'Block') + ' ' + (index + 1)"></span>
+                        </button>
+                        <button type="button" class="btn-close position-absolute top-50 end-0 translate-middle-y me-2"
+                            :class="{ ' text-white': index === selected }" aria-label="Remove"
+                            @click.stop="removeBlock(index)">
+                        </button>
+                    </div>
+                </template>
+            </div>
+            <div class="dropdown my-4">
+                <button class="btn btn-outline-secondary dropdown-toggle w-100 btn-append" type="button"
+                    data-bs-toggle="dropdown">
+                    ➕ Add Block
+                </button>
+                <ul class="dropdown-menu w-100">
+                    <template x-for="(block, type) in blockOptions" :key="type">
+                        <li>
+                            <a class="dropdown-item" href="#" @click.prevent="addBlock(type)"
+                                x-text="block.label"></a>
+                        </li>
                     </template>
-                </div>
+                </ul>
+            </div>
 
-                <div class="dropdown my-4">
-                    <button class="btn btn-outline-secondary dropdown-toggle w-100 btn-append" type="button"
-                        data-bs-toggle="dropdown">
-                        ➕ Add Block
-                    </button>
-                    <ul class="dropdown-menu w-100">
-                        <template x-for="(block, type) in blockOptions" :key="type">
-                            <li>
-                                <a class="dropdown-item" href="#" @click.prevent="addBlock(type)"
-                                    x-text="block.label">
-                                </a>
-                            </li>
-                        </template>
-                    </ul>
-                </div>
+            <button @click="save()" class="btn btn-primary w-100">Save</button>
+        </div>
 
-                <div x-show="selected !== null" class="mt-4 space-y-2">
-                    <template x-if="blocks[selected]?.props">
-                        <div>
-                            <template x-for="(value, key) in blocks[selected].props" :key="key">
-                                <div class="mb-4">
-                                    <template x-if="key === 'background_image' || key === 'image'">
-                                        <div class="mb-3">
-                                            <label class="form-label fw-bold">Background Image</label>
 
-                                            <!-- Image Preview -->
-                                            <div class="mb-2">
-                                                <img :src="blocks[selected].props[key] ? '{{ $baseUrl }}/' + blocks[selected]
-                                                    .props[key] : 'https://placehold.co/400'"
-                                                    class="img-fluid rounded border" style="max-height: 150px;"
-                                                    alt="Preview">
-                                            </div>
+        {{-- RESIZER BETWEEN LEFT SIDEBAR AND MAIN --}}
+        <div id="resizer-left"></div>
 
-                                            <!-- Hidden field or just direct model binding -->
-                                            <input type="text" class="form-control mb-2" placeholder="Image URL"
-                                                x-model="blocks[selected].props[key]">
+        {{-- MAIN IFRAME PREVIEW --}}
+        <div id="main">
+            <iframe id="page-builder-preview" src="{{ route('frontend.pages.preview', $page->slug) }}?builderPreview=1"
+                width="100%" height="100%" class="border rounded"></iframe>
+        </div>
 
-                                            <!-- Your custom popup trigger -->
-                                            {{-- <button type="button" class="btn btn-outline-primary btn-sm"
-                                                @click="openImagePicker('background_image')">Choose Image</button> --}}
-                                            <button type="button" class="btn btn-primary" data-bs-toggle="offcanvas"
-                                                data-bs-target="#builder-offcanvas" data-type="builder"
-                                                :data-key="key" @click="$store.mediaManager.targetKey = key">
-                                                Upload File
-                                            </button>
-                                        </div>
-                                    </template>
-                                    <!-- If value is an array of objects (like testimonials or faq items) -->
-                                    <template x-if="Array.isArray(value) && typeof value[0] === 'object'">
-                                        <div>
-                                            <label class="form-label fw-bold mb-1" x-text="key"></label>
+        {{-- RESIZER BETWEEN MAIN AND RIGHT SIDEBAR --}}
+        <div id="resizer-right"></div>
 
-                                            <template x-for="(item, idx) in value" :key="idx">
-                                                <div class="p-3 mb-3 border rounded bg-light">
-                                                    <template x-for="(fieldVal, fieldKey) in item" :key="fieldKey">
-                                                        <div class="mb-2">
-                                                            <label class="form-label" x-text="fieldKey"></label>
-                                                            <input type="text" class="form-control"
-                                                                x-model="blocks[selected].props[key][idx][fieldKey]">
-                                                        </div>
-                                                    </template>
+        {{-- RIGHT SIDEBAR: Block editing form --}}
+        <div id="sidebar-right" style="width: 350px; overflow-y: auto; border-left: 1px solid #ddd; padding: 1rem;">
+            <template x-if="selected !== null && blocks[selected]">
+                <div class="space-y-3">
+                    <h5>Edit Block: <span x-text="blocks[selected].label || blocks[selected].type"></span></h5>
+                    @php
+                        $baseUrl = url('/');
+                    @endphp
+                    <template x-for="(value, key) in blocks[selected].props" :key="key">
+                        <div class="mb-3">
+                            <template x-if="key === 'background_image' || key === 'image'">
+                                <div>
+                                    <label class="form-label fw-bold" x-text="key"></label>
 
-                                                    <!-- Remove button -->
-                                                    <button type="button" class="btn btn-sm btn-danger mt-2"
-                                                        @click="blocks[selected].props[key].splice(idx, 1)">Remove</button>
+                                    <!-- Image Preview -->
+                                    <div class="mb-2">
+                                        <img :src="blocks[selected].props[key] ? '{{ $baseUrl }}/' + blocks[selected].props[
+                                            key].replace(/^\/+/, '') : 'https://placehold.co/400'"
+                                            class="img-fluid rounded border" style="max-height: 150px;" alt="Preview">
+                                    </div>
+
+                                    <!-- Image URL input -->
+                                    <input type="text" class="form-control mb-2" placeholder="Image URL"
+                                        x-model="blocks[selected].props[key]">
+
+                                    <!-- Media Manager Trigger -->
+                                    <button type="button" class="btn btn-primary" data-bs-toggle="offcanvas"
+                                        data-bs-target="#builder-offcanvas" data-type="builder" :data-key="key"
+                                        @click="$store.mediaManager.targetKey = key">
+                                        Upload File
+                                    </button>
+                                </div>
+                            </template>
+
+                            <!-- If value is an array of objects (like testimonials or faq items) -->
+                            <template x-if="Array.isArray(value) && typeof value[0] === 'object'">
+                                <div>
+                                    <label class="form-label fw-bold mb-1" x-text="key"></label>
+
+                                    <template x-for="(item, idx) in value" :key="idx">
+                                        <div class="p-3 mb-3 border rounded bg-light">
+                                            <template x-for="(fieldVal, fieldKey) in item" :key="fieldKey">
+                                                <div class="mb-2">
+                                                    <label class="form-label" x-text="fieldKey"></label>
+                                                    <input type="text" class="form-control"
+                                                        x-model="blocks[selected].props[key][idx][fieldKey]">
                                                 </div>
                                             </template>
 
-                                            <!-- Add New Item -->
-                                            <button type="button" class="btn btn-sm btn-primary mt-2"
-                                                @click="blocks[selected].props[key].push(Object.fromEntries(Object.keys(value[0]).map(k => [k, ''])))">
-                                                + Add New
-                                            </button>
+                                            <!-- Remove button -->
+                                            <button type="button" class="btn btn-sm btn-danger mt-2"
+                                                @click="blocks[selected].props[key].splice(idx, 1)">Remove</button>
                                         </div>
                                     </template>
 
-                                    <!-- Normal field (not array of objects) -->
-                                    <template
-                                        x-if="(key !== 'background_image' && key !== 'image' && key !== 'form_id') && (!Array.isArray(value) || typeof value[0] !== 'object')">
-                                        <div>
-                                            <label class="form-label fw-bold mb-1" x-text="key"></label>
-                                            <input type="text" class="form-control"
-                                                x-model="blocks[selected].props[key]">
-                                        </div>
-                                    </template>
+                                    <!-- Add New Item -->
+                                    <button type="button" class="btn btn-sm btn-primary mt-2"
+                                        @click="blocks[selected].props[key].push(Object.fromEntries(Object.keys(value[0]).map(k => [k, ''])))">
+                                        + Add New
+                                    </button>
+                                </div>
+                            </template>
 
-                                    <template x-if="key === 'form_id'">
-                                        <div class="mb-4">
-                                            <label class="form-label fw-bold">Select Form</label>
-                                            <select class="form-control" x-model="blocks[selected].props.form_id">
-                                                <option value=""> -- Select a Form -- </option>
-                                                <template x-for="[id, name] in Object.entries(forms)"
-                                                    :key="id">
-                                                    <option :value="String(id)" x-text="name"></option>
-                                                </template>
-                                            </select>
-                                        </div>
-                                    </template>
+                            <!-- Normal field (not array of objects) -->
+                            <template
+                                x-if="(key !== 'background_image' && key !== 'image' && key !== 'form_id') && (!Array.isArray(value) || typeof value[0] !== 'object')">
+                                <div>
+                                    <label class="form-label fw-bold mb-1" x-text="key"></label>
+                                    <input type="text" class="form-control" x-model="blocks[selected].props[key]">
+                                </div>
+                            </template>
 
+                            <template x-if="key === 'form_id'">
+                                <div class="mb-4">
+                                    <label class="form-label fw-bold">Select Form</label>
+                                    <select class="form-control" x-model="blocks[selected].props.form_id">
+                                        <option value=""> -- Select a Form -- </option>
+                                        <template x-for="[id, name] in Object.entries(forms)" :key="id">
+                                            <option :value="String(id)" x-text="name"></option>
+                                        </template>
+                                    </select>
                                 </div>
                             </template>
                         </div>
                     </template>
                 </div>
-                <!-- Shared Offcanvas -->
-                @include('admin.components.media.popup', [
-                    'modalId' => 'builder-offcanvas',
-                    'inputType' => 'single',
-                    'from' => 'builder',
-                ])
+            </template>
 
-                <button @click="save()" class="btn btn-primary w-100">Save</button>
-            </div>
-        </div>
-        <div id="resizer" style="width: 5px; cursor: ew-resize; background: #ccc;"></div>
-        <div id="main" style="flex-grow: 1; background: #fff;height: 100vh;">
-            <!-- main content -->
-            {{-- <iframe src="{{ route('frontend.pages.preview', $page->slug) }}?builderPreview=1" width="100%" height="100%"
-                style="border: none;"></iframe> --}}
+            @include('admin.components.media.popup', [
+                'modalId' => 'builder-offcanvas',
+                'inputType' => 'single',
+                'from' => 'builder',
+            ])
 
-            <iframe id="page-builder-preview" src="{{ route('frontend.pages.preview', $page->slug) }}?builderPreview=1"
-                width="100%" height="100%" class="border rounded"></iframe>
-
+            <template x-if="selected === null">
+                <div class="text-muted">Select a block on the left to edit its properties.</div>
+            </template>
         </div>
     </div>
 
-
 @endsection
-
 
 @push('scripts')
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.15.6/Sortable.min.js"
         integrity="sha512-csIng5zcB+XpulRUa+ev1zKo7zRNGpEaVfNB9On1no9KYTEY/rLGAEEpvgdw6nim1WdTuihZY1eqZ31K7/fZjw=="
         crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+
     <script>
-        // document.addEventListener('DOMContentLoaded', () => {
-        //     const iframe = document.getElementById('page-builder-preview');
-
-        //     iframe.addEventListener('load', () => {
-        //         const iframeDoc = iframe.contentDocument || iframe.contentWindow.document;
-        //         const allBlocks = iframeDoc.querySelectorAll('.block-wrapper');
-
-        //         allBlocks.forEach((blockEl, index) => {
-        //             console.log('Block ID:', blockEl.dataset.blockId);
-        //         });
-        //     });
-        // });
-
-        document.addEventListener('click', function (e) {
-            const btn = e.target.closest('.btn-insert, .btn-append');
-            
-            if (btn) {
-                const isAppend = btn.classList.contains('btn-append');
-                window.postMessage({
-                    type: isAppend ? 'block-append' : 'block-insert',
-                    position: btn.dataset.position,
-                    targetId: btn.dataset.blockId,
-                }, '*');
-            }
-        });
-    </script>
-    <script>
-        axios.defaults.headers.common['X-CSRF-TOKEN'] = '{{ csrf_token() }}';
-        const availableBlocks = @json($pageBlocks);
         document.addEventListener('alpine:init', () => {
-            window.addEventListener('message', (e) => {
-                if (!e.data) return;
-
-                const { type, position, targetId } = e.data;
-
-                if (type === 'block-insert' || type === 'block-append') {
-                    const blockType = prompt("Enter block type to " + (type === 'block-append' ? 'append' : 'insert') + ":");
-                    if (!this.blockOptions[blockType]) return;
-
-                    const template = JSON.parse(JSON.stringify(this.blockOptions[blockType]));
-                    const newBlock = {
-                        id: `${blockType}-${Date.now()}-${Math.floor(Math.random() * 1000)}`,
-                        type: blockType,
-                        label: template.label || blockType,
-                        props: template.props || {}
-                    };
-
-                    let insertIndex = this.blocks.length; // default for append
-
-                    if (type === 'block-insert') {
-                        const targetIndex = this.blocks.findIndex(b => b.id === targetId);
-                        if (targetIndex === -1) return;
-                        insertIndex = position === 'before' ? targetIndex : targetIndex + 1;
-                    }
-
-                    this.blocks.splice(insertIndex, 0, newBlock);
-                    this.selected = insertIndex;
-                }
-            });
-            // Alpine data for the builder
             Alpine.data('builder', () => ({
-                blocks: [],
-                forms: @json($forms),
-                route: '{{ route('admin.pages.builder.store', $page) }}', // adjust if needed
+                blocks: JSON.parse(@json($page->builder ?? '[]')).map(block => ({
+                    ...block,
+                    id: block.id ||
+                        `${block.type}-${Date.now()}-${Math.floor(Math.random() * 1000)}`
+                })),
                 selected: null,
-                blockOptions: availableBlocks,
+                blockOptions: @json($pageBlocks),
+                sortableInstance: null,
                 sortedIds: [],
 
                 init() {
-                    this.blocks = JSON.parse(@json($page->builder ?? '[]')).map(block => ({
-                        ...block,
-                        id: block.id ||
-                            `${block.type}-${Date.now()}-${Math.floor(Math.random() * 1000)}`
-                    }));
+                    this.initSortable();
+                    window.addEventListener('message', (event) => {
+                        if (event.data && event.data.type === 'select-block' && event.data.id) {
+                            console.log(event.data.id, this.blocks)
+                            const blockIndex = this.blocks.findIndex(b => b.id === event.data
+                                .id);
+                            if (blockIndex !== -1) {
+                                this.selected = blockIndex;
+                            }
+                        }
+                    });
 
                     this.$nextTick(() => {
                         this.initSortable();
@@ -281,101 +257,68 @@
                     });
                 },
 
-
                 selectBlock(index) {
                     this.selected = index;
                 },
 
-                getReorderedBlocks(blocks, sortedIds) {
-                    if (!sortedIds || !sortedIds.length) {
-                        // If no sorted IDs, return all blocks without their IDs
-                        return blocks.map(({
-                            id,
-                            ...rest
-                        }) => rest);
-                    }
-
-                    const map = Object.fromEntries(blocks.map(block => [block.id, block]));
-
-                    return sortedIds
-                        .map(id => {
-                            const block = map[id];
-                            if (!block) return null;
-
-                            const {
-                                id: _,
-                                ...rest
-                            } = block; // remove `id`
-                            return rest;
-                        })
-                        .filter(Boolean);
-                },
-
                 addBlock(type) {
-                    const template = JSON.parse(JSON.stringify(this.blockOptions[type]));
-                    const id = `${type}-${Date.now()}-${Math.floor(Math.random() * 1000)}`; // unique ID
-
+                    const template = JSON.parse(JSON.stringify(this.blockOptions[type] || {}));
+                    const id = `${type}-${Date.now()}-${Math.floor(Math.random() * 1000)}`;
                     this.blocks.push({
                         id,
                         type,
                         label: template.label || type,
                         props: template.props || {}
                     });
-
                     this.selected = this.blocks.length - 1;
+                },
+
+                getReorderedBlocks(blocks, sortedIds) {
+                    if (!sortedIds || !sortedIds.length) {
+                        // If no sorted IDs, return all blocks with their IDs intact
+                        return blocks;
+                    }
+
+                    const map = Object.fromEntries(blocks.map(block => [block.id, block]));
+
+                    return sortedIds
+                        .map(id => map[id])
+                        .filter(Boolean); // remove any nulls if id not found
                 },
 
                 removeBlock(index) {
                     if (confirm('Are you sure you want to delete this block?')) {
                         this.blocks.splice(index, 1);
-                        if (this.selected === index) {
-                            this.selected = null;
-                        } else if (this.selected > index) {
-                            this.selected--;
-                        }
+                        if (this.selected === index) this.selected = null;
+                        else if (this.selected > index) this.selected--;
                     }
                 },
 
                 save() {
                     const sortedBlocks = this.getReorderedBlocks(this.blocks, this.sortedIds);
-                    console.log(sortedBlocks)
-                    axios.post(this.route, {
+                    axios.post('{{ route('admin.pages.builder.store', $page->id) }}', {
                             builder: sortedBlocks
                         })
                         .then(() => {
-                            const iframe = document.querySelector('iframe');
-                            iframe?.contentWindow?.location.reload();
-
-                            setTimeout(() => {
-                                const iframeDoc = iframe?.contentDocument || iframe
-                                    ?.contentWindow?.document;
-                                const blockId = this.blocks[this.selected]?.type + this
-                                    .selected;
-                                const target = iframeDoc?.getElementById(blockId);
-
-                                if (target) {
-                                    target.scrollIntoView({
-                                        behavior: 'smooth',
-                                        block: 'start'
-                                    });
-                                } else {
-                                    console.warn('Element not found:', blockId);
-                                }
-                            }, 500);
+                            alert('Page saved!');
+                            document.getElementById('page-builder-preview').contentWindow.location
+                                .reload();
                         })
-                        .catch(error => {
-                            console.error('Save failed:', error);
+                        .catch(e => {
+                            alert('Failed to save');
+                            console.error(e);
                         });
                 }
             }));
-
             // Alpine store for media manager
             Alpine.store('mediaManager', {
                 targetKey: null,
                 insertImage(url, fullPath) {
+                    console.log(fullPath)
                     const builderComponent = document.querySelector('[x-data="builder"]')?._x_dataStack?.[
                         0
                     ];
+                    console.log(builderComponent)
                     if (!builderComponent || builderComponent.selected === null || !this.targetKey) return;
 
                     const block = builderComponent.blocks[builderComponent.selected];
@@ -388,40 +331,56 @@
                 }
             });
         });
-    </script>
-    <script>
-        const resizer = document.getElementById('resizer');
-        const sidebar = document.getElementById('sidebar');
+
+        // Resizer for left sidebar
+        const resizerLeft = document.getElementById('resizer-left');
+        const sidebarLeft = document.getElementById('sidebar-left');
         const container = document.querySelector('.components');
+        let isResizingLeft = false;
 
-        let isResizing = false;
-
-        const startResize = (e) => {
-            isResizing = true;
+        resizerLeft.addEventListener('mousedown', e => {
+            isResizingLeft = true;
             document.body.style.cursor = 'col-resize';
-
-            // Prevent text selection while resizing
             document.body.style.userSelect = 'none';
-        };
+        });
 
-        const stopResize = () => {
-            isResizing = false;
+        document.addEventListener('mouseup', e => {
+            isResizingLeft = false;
             document.body.style.cursor = '';
             document.body.style.userSelect = '';
-        };
+        });
 
-        const handleMouseMove = (e) => {
-            if (!isResizing) return;
-
+        document.addEventListener('mousemove', e => {
+            if (!isResizingLeft) return;
             const containerLeft = container.getBoundingClientRect().left;
             let newWidth = e.clientX - containerLeft;
-            newWidth = Math.max(150, Math.min(newWidth, 700));
+            newWidth = Math.max(150, Math.min(newWidth, 500));
+            sidebarLeft.style.width = newWidth + 'px';
+        });
 
-            sidebar.style.width = newWidth + 'px';
-        };
+        // Resizer for right sidebar
+        const resizerRight = document.getElementById('resizer-right');
+        const sidebarRight = document.getElementById('sidebar-right');
+        let isResizingRight = false;
 
-        resizer.addEventListener('mousedown', startResize);
-        document.addEventListener('mousemove', handleMouseMove);
-        document.addEventListener('mouseup', stopResize);
+        resizerRight.addEventListener('mousedown', e => {
+            isResizingRight = true;
+            document.body.style.cursor = 'col-resize';
+            document.body.style.userSelect = 'none';
+        });
+
+        document.addEventListener('mouseup', e => {
+            isResizingRight = false;
+            document.body.style.cursor = '';
+            document.body.style.userSelect = '';
+        });
+
+        document.addEventListener('mousemove', e => {
+            if (!isResizingRight) return;
+            const containerRight = container.getBoundingClientRect().right;
+            let newWidth = containerRight - e.clientX;
+            newWidth = Math.max(150, Math.min(newWidth, 600));
+            sidebarRight.style.width = newWidth + 'px';
+        });
     </script>
 @endpush

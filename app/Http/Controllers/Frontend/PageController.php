@@ -24,7 +24,8 @@ class PageController extends Controller
         $pageData = $this->getPage($request, $slug);
         $page = $pageData['page'];
         $blocks = $pageData['blocks'];
-        return view('frontend.pages.preview', compact('page', 'blocks'));
+        $availableBlocks = PageBlocks::all();
+        return view('frontend.pages.preview', compact('page', 'blocks','availableBlocks'));
     }
 
     private function getPage($request, $slug){

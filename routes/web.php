@@ -69,6 +69,8 @@ Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () 
     Route::prefix('pages/{page}')->group(function () {
         Route::get('builder', [PageBuilderController::class, 'index'])->name('pages.builder');
         Route::post('builder/store', [PageBuilderController::class, 'store'])->name('pages.builder.store');
+        Route::post('add-block', [PageBuilderController::class, 'addBlock'])->name('pages.builder.add.block');
+        Route::post('builder/save', [PageBuilderController::class, 'save'])->name('pages.builder.save');
     });
 
     Route::resource('payment-gateways', PaymentGatewayController::class);

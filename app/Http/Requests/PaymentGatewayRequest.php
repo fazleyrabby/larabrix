@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests;
 
+use App\Models\PaymentGateway;
 use Illuminate\Foundation\Http\FormRequest;
 
 class PaymentGatewayRequest extends FormRequest
@@ -21,9 +22,12 @@ class PaymentGatewayRequest extends FormRequest
      */
     public function rules(): array
     {
+        $paymentGateway = $this->route('payment_gateway') ?? $this->payment_gateway;
+        $id = $paymentGateway instanceof PaymentGateway ? $paymentGateway->id : (is_string($paymentGateway) ? $paymentGateway : null);
+
         return [
             'name' => 'required|string',
-            'slug' => 'required|string|unique:payment_gateways,slug,' . $this->id,
+            'slug' => 'required|string|unique:payment_gateways,slug,' . $id,
             'namespace' => 'required|string',
             'config' => 'nullable|array',
             'enabled' => 'boolean',
