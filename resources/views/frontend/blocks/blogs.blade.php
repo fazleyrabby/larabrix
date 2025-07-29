@@ -1,5 +1,5 @@
 <div class="bg-white min-h-[300px] px-6 py-10" id="{{ $index }}">
-    <h2 class="text-3xl font-bold text-center text-gray-900 mb-8">{{ $data['heading'] }}</h2>
+    <h2 class="text-3xl font-bold text-center text-gray-900 mb-8">{{ $data['heading']['value'] }}</h2>
     <div class="flex flex-wrap justify-center items-start gap-6">
         @foreach ($data['posts'] ?? [] as $post)
             <article class="w-full max-w-sm overflow-hidden rounded-lg shadow-sm transition hover:shadow-lg">

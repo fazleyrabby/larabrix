@@ -1,9 +1,9 @@
 <div class="flex justify-center px-4" id="{{ $index }}">
   <form class="bg-white p-6 rounded-xl shadow-lg w-full max-w-2xl space-y-5" method="POST">
     @csrf
-    <h2 class="text-xl font-semibold text-center text-gray-800">{{ $data['title'] }}</h2>
-
-    @foreach ($data['form']['formFields'] ?? [] as $field)
+    <h2 class="text-xl font-semibold text-center text-gray-800">{{ $data['title']['value'] ?? '' }}</h2>
+    @foreach ($data['form'][0]['formFields'] ?? [] as $field)
+    
       {{-- @php $field->options = $field->options ? json_decode($field->options) : [] @endphp --}}
       <div>
         <label class="block text-sm font-medium text-gray-700 mb-1">

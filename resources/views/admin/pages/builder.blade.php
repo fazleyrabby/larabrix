@@ -1,6 +1,7 @@
 @extends('admin.layouts.app')
 @section('title', 'Page Builder')
 @push('styles')
+    <link href="https://cdn.jsdelivr.net/npm/quill@2.0.3/dist/quill.snow.css" rel="stylesheet" />
     <style>
         .block {
             cursor: grab;
@@ -111,20 +112,21 @@
                     @endphp
                     <template x-for="(value, key) in blocks[selected].props" :key="key">
                         <div class="mb-3">
-                            <template x-if="key === 'background_image' || key === 'image'">
+                            <template x-if="value.type == 'image'">
                                 <div>
                                     <label class="form-label fw-bold" x-text="key"></label>
 
                                     <!-- Image Preview -->
                                     <div class="mb-2">
-                                        <img :src="blocks[selected].props[key] ? '{{ $baseUrl }}/' + blocks[selected].props[
-                                            key].replace(/^\/+/, '') : 'https://placehold.co/400'"
+                                        <img :src="blocks[selected].props[key].value ? '{{ $baseUrl }}/' + blocks[selected]
+                                            .props[
+                                                key].value.replace(/^\/+/, '') : 'https://placehold.co/400'"
                                             class="img-fluid rounded border" style="max-height: 150px;" alt="Preview">
                                     </div>
 
                                     <!-- Image URL input -->
                                     <input type="text" class="form-control mb-2" placeholder="Image URL"
-                                        x-model="blocks[selected].props[key]">
+                                        x-model="blocks[selected].props[key].value">
 
                                     <!-- Media Manager Trigger -->
                                     <button type="button" class="btn btn-primary" data-bs-toggle="offcanvas"
@@ -135,49 +137,70 @@
                                 </div>
                             </template>
 
-                            <!-- If value is an array of objects (like testimonials or faq items) -->
-                            <template x-if="Array.isArray(value) && typeof value[0] === 'object'">
+                            <template
+                                x-if="blocks[selected].props[key]?.type === 'repeater' && Array.isArray(blocks[selected].props[key].value)">
                                 <div>
                                     <label class="form-label fw-bold mb-1" x-text="key"></label>
 
-                                    <template x-for="(item, idx) in value" :key="idx">
+                                    <template x-for="(item, idx) in blocks[selected].props[key].value"
+                                        :key="idx">
                                         <div class="p-3 mb-3 border rounded bg-light">
-                                            <template x-for="(fieldVal, fieldKey) in item" :key="fieldKey">
+                                            <template x-for="(fieldSchema, fieldKey) in blocks[selected].props[key].fields"
+                                                :key="fieldKey">
                                                 <div class="mb-2">
                                                     <label class="form-label" x-text="fieldKey"></label>
                                                     <input type="text" class="form-control"
-                                                        x-model="blocks[selected].props[key][idx][fieldKey]">
+                                                        x-model="blocks[selected].props[key].value[idx][fieldKey]">
                                                 </div>
                                             </template>
 
                                             <!-- Remove button -->
                                             <button type="button" class="btn btn-sm btn-danger mt-2"
-                                                @click="blocks[selected].props[key].splice(idx, 1)">Remove</button>
+                                                @click="blocks[selected].props[key].value.splice(idx, 1)">Remove</button>
                                         </div>
                                     </template>
 
                                     <!-- Add New Item -->
                                     <button type="button" class="btn btn-sm btn-primary mt-2"
-                                        @click="blocks[selected].props[key].push(Object.fromEntries(Object.keys(value[0]).map(k => [k, ''])))">
+                                        @click="blocks[selected].props[key].value.push(
+                                                Object.fromEntries(Object.keys(blocks[selected].props[key].fields).map(k => [k, '']))
+                                            )">
                                         + Add New
                                     </button>
                                 </div>
                             </template>
 
-                            <!-- Normal field (not array of objects) -->
+                            <!-- Normal field (non-array, non-object) -->
                             <template
-                                x-if="(key !== 'background_image' && key !== 'image' && key !== 'form_id') && (!Array.isArray(value) || typeof value[0] !== 'object')">
+                                x-if="(key !== 'background_image' && key !== 'image' && key !== 'form_id') && (!Array.isArray(value?.value) || typeof value?.value[0] !== 'object') && typeof value?.value !== 'object'">
                                 <div>
-                                    <label class="form-label fw-bold mb-1" x-text="key"></label>
-                                    <input type="text" class="form-control" x-model="blocks[selected].props[key]">
+                                    <label class="form-label fw-bold" x-text='key'></label>
+                                    <template x-if="value.type === 'textarea'">
+                                        <div x-data x-init="() => {
+                                            const quill = new Quill($refs.editor, { theme: 'snow' });
+                                            quill.on('text-change', () => {
+                                                blocks[selected].props[key].value = quill.root.innerHTML;
+                                            });
+                                            quill.root.innerHTML = blocks[selected].props[key].value || '';
+                                        }">
+                                            <div x-ref="editor" class="bg-white border rounded" style="min-height: 150px;">
+                                            </div>
+                                        </div>
+                                    </template>
+
+                                    <template x-if="value.type !== 'textarea'">
+                                        <input type="text" class="form-control"
+                                            x-model="blocks[selected].props[key].value" />
+                                    </template>
                                 </div>
                             </template>
 
+                            <!-- Special: form_id dropdown -->
                             <template x-if="key === 'form_id'">
-                                <div class="mb-4">
+                                <div>
                                     <label class="form-label fw-bold">Select Form</label>
-                                    <select class="form-control" x-model="blocks[selected].props.form_id">
-                                        <option value=""> -- Select a Form -- </option>
+                                    <select class="form-control" x-model="blocks[selected].props[key].value">
+                                        <option value="">-- Select a Form --</option>
                                         <template x-for="[id, name] in Object.entries(forms)" :key="id">
                                             <option :value="String(id)" x-text="name"></option>
                                         </template>
@@ -204,6 +227,7 @@
 @endsection
 
 @push('scripts')
+    <script src="https://cdn.jsdelivr.net/npm/quill@2.0.3/dist/quill.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.15.6/Sortable.min.js"
         integrity="sha512-csIng5zcB+XpulRUa+ev1zKo7zRNGpEaVfNB9On1no9KYTEY/rLGAEEpvgdw6nim1WdTuihZY1eqZ31K7/fZjw=="
         crossorigin="anonymous" referrerpolicy="no-referrer"></script>
@@ -220,12 +244,18 @@
                 blockOptions: @json($pageBlocks),
                 sortableInstance: null,
                 sortedIds: [],
+                forms: @json($forms),
 
                 init() {
+                    if (this.blocks.length > 0 && this.selected === null) {
+                        this.selected = 0;
+                    }
                     this.initSortable();
                     window.addEventListener('message', (event) => {
+                        if (event.data?.type === 'refresh-builder') {
+                            location.reload();
+                        }
                         if (event.data && event.data.type === 'select-block' && event.data.id) {
-                            console.log(event.data.id, this.blocks)
                             const blockIndex = this.blocks.findIndex(b => b.id === event.data
                                 .id);
                             if (blockIndex !== -1) {
@@ -271,6 +301,7 @@
                         props: template.props || {}
                     });
                     this.selected = this.blocks.length - 1;
+                    console.log(this.blocks)
                 },
 
                 getReorderedBlocks(blocks, sortedIds) {
@@ -314,19 +345,23 @@
             Alpine.store('mediaManager', {
                 targetKey: null,
                 insertImage(url, fullPath) {
-                    console.log(fullPath)
+                    // console.log(fullPath)
                     const builderComponent = document.querySelector('[x-data="builder"]')?._x_dataStack?.[
                         0
                     ];
-                    console.log(builderComponent)
+                    // console.log(builderComponent)
                     if (!builderComponent || builderComponent.selected === null || !this.targetKey) return;
 
                     const block = builderComponent.blocks[builderComponent.selected];
+                    console.log(this.targetKey)
                     if (!block.props) block.props = {};
 
                     // Just store the relative path like "storage/images/example.jpg"
-                    block.props[this.targetKey] = url;
-
+                    block.props[this.targetKey] = {
+                        type: 'image',
+                        value: url
+                    };
+                    console.log(block.props)
                     this.targetKey = null;
                 }
             });

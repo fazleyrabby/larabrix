@@ -1,5 +1,16 @@
 @extends('frontend.app')
 
+@push('styles')
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/default.min.css">
+@endpush
+@push('scripts')
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+    <script>
+        hljs.highlightAll();
+    </script>
+@endpush
+
+
 @section('content')
     <section class="min-h-screen bg-white py-12">
         <div class="max-w-3xl mx-auto px-4">
@@ -24,8 +35,7 @@
 
             <!-- Blog Content -->
             <article class="prose prose-lg max-w-none text-gray-800">
-                {!! $blog->content ??
-                    '<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam convallis purus vel orci placerat, ac porttitor elit luctus.</p>' !!}
+                {!! $blog->body !!}
             </article>
 
             <!-- Optional Tags or Categories -->

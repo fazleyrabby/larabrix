@@ -15,48 +15,12 @@
 
             <div class="md:flex md:items-center md:gap-12">
                 <nav aria-label="Global" class="hidden md:block">
+                    @php
+                    $menu = \App\Models\Menu::with('childrenRecursive')->where('type', 'header')->get();
+                    @endphp
+
                     <ul class="flex items-center gap-6 text-sm">
-                        <li>
-                            <a class="text-gray-500 transition hover:text-gray-500/75 dark:text-white dark:hover:text-white/75"
-                                href="#">
-                                About
-                            </a>
-                        </li>
-
-                        <li>
-                            <a class="text-gray-500 transition hover:text-gray-500/75 dark:text-white dark:hover:text-white/75"
-                                href="#">
-                                Careers
-                            </a>
-                        </li>
-
-                        <li>
-                            <a class="text-gray-500 transition hover:text-gray-500/75 dark:text-white dark:hover:text-white/75"
-                                href="#">
-                                History
-                            </a>
-                        </li>
-
-                        <li>
-                            <a class="text-gray-500 transition hover:text-gray-500/75 dark:text-white dark:hover:text-white/75"
-                                href="#">
-                                Services
-                            </a>
-                        </li>
-
-                        <li>
-                            <a class="text-gray-500 transition hover:text-gray-500/75 dark:text-white dark:hover:text-white/75"
-                                href="#">
-                                Projects
-                            </a>
-                        </li>
-
-                        <li>
-                            <a class="text-gray-500 transition hover:text-gray-500/75 dark:text-white dark:hover:text-white/75"
-                                href="#">
-                                Blog
-                            </a>
-                        </li>
+                        @include('frontend.partials.menu-item', ['items' => $menu])
                     </ul>
                 </nav>
 

@@ -1,46 +1,6 @@
 @extends('frontend.app')
 
 @section('content')
-    {{-- @foreach ($blocks as $index => $block)
-        <div class="block-wrapper relative group border border-dashed border-transparent hover:border-blue-400 rounded-md my-4"
-            data-block-id="{{ $index }}" id="{{ $block->type . $index }}">
-
-            @if (request()->has('builderPreview') && auth()->user()->role == 'admin')
-                <div class="absolute -top-3 left-1/2 -translate-x-1/2 hidden group-hover:flex space-x-2 z-10">
-                    <button data-insert="before" data-block-id="{{ $index }}"
-                        onclick="window.parent.postMessage({
-                            type: 'block-insert',
-                            position: 'before',
-                            targetId: '{{ $index }}'
-                        }, '*')"
-                        class="btn-insert text-sm px-2 py-1 bg-white border border-gray-300 rounded shadow hover:bg-gray-100">
-                        ➕ Add Above
-                    </button>
-                    
-                </div>
-            @endif
-
-            @includeIf('frontend.blocks.' . $block->type, [
-                'data' => $block->props,
-                'index' => $block->type . $index,
-            ])
-
-            @if (request()->has('builderPreview') && auth()->user()->role == 'admin')
-                <div class="absolute -bottom-3 left-1/2 -translate-x-1/2 hidden group-hover:flex space-x-2 z-10">
-                    <button data-insert="after" data-block-id="{{ $index }}"
-                        onclick="window.parent.postMessage({
-                            type: 'block-insert',
-                            position: 'after',
-                            targetId: '{{ $index }}'
-                        }, '*')"
-                        class="btn-insert text-sm px-2 py-1 bg-white border border-gray-300 rounded shadow hover:bg-gray-100">
-                        ➕ Add Below
-                    </button>
-                </div>
-            @endif
-        </div>
-    @endforeach --}}
-
     <div id="blocks-container" x-data="pageBuilder({{ $page->id }}, window.availableBlocks)"
         @add-block.window="openBlockPicker($event.detail.index, $event.detail.position)">
 
@@ -51,7 +11,7 @@
             ])
         @endforeach
 
-        <!-- Block Type Selector Modal -->
+        <!-- Block Picker Modal -->
         <template x-if="showBlockPicker">
             <div class="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
                 <div class="bg-white p-6 rounded-lg shadow-xl w-[30rem] max-h-[80vh] overflow-y-auto space-y-4">
@@ -74,9 +34,7 @@
                     </template>
 
                     <div class="text-center pt-2">
-                        <button @click="cancelPicker" class="text-sm text-gray-500 hover:underline">
-                            Cancel
-                        </button>
+                        <button @click="cancelPicker" class="text-sm text-gray-500 hover:underline">Cancel</button>
                     </div>
                 </div>
             </div>
@@ -84,13 +42,12 @@
     </div>
 @endsection
 
-
 @if (auth()->user()->role === 'admin')
     @push('scripts')
         <script>
             document.addEventListener('DOMContentLoaded', () => {
                 document.querySelectorAll('[data-block-id]').forEach(el => {
-                    el.style.cursor = 'pointer'; // optional: indicate clickable
+                    el.style.cursor = 'pointer';
 
                     el.addEventListener('click', e => {
                         e.preventDefault();
@@ -101,13 +58,12 @@
                             window.parent.postMessage({
                                 type: 'select-block',
                                 id: blockId
-                            }, '*'); // Use '*' or restrict origin in production
+                            }, '*');
                         }
                     });
                 });
             });
-        </script>
-        <script>
+
             window.availableBlocks = @json($availableBlocks);
 
             document.addEventListener('alpine:init', () => {
@@ -141,31 +97,32 @@
                     get showBlockPicker() {
                         return Alpine.store('builder').showBlockPicker;
                     },
-
                     get insertIndex() {
                         return Alpine.store('builder').insertIndex;
                     },
-
                     get insertPosition() {
                         return Alpine.store('builder').insertPosition;
                     },
-
                     pickBlock(type, position, index) {
                         Alpine.store('builder').pickBlock(type, position, index);
                     },
-
                     cancelPicker() {
                         Alpine.store('builder').cancelPicker();
                     },
 
                     async selectBlock(type) {
-                        const block = this.availableBlocks[type];
+                        const block = JSON.parse(JSON.stringify(this.availableBlocks[
+                        type])); // Deep copy to avoid mutating source
                         if (!block) return;
+
+                        // Assign unique ID to the block
+                        block.id = `${type}-${Date.now()}-${Math.floor(Math.random() * 1000)}`;
 
                         const res = await axios.post(`/admin/pages/${pageId}/add-block`, {
                             type,
                             position: this.insertPosition,
-                            targetIndex: this.insertIndex
+                            targetIndex: this.insertIndex,
+                            block: block // Send full block with ID to the backend
                         });
 
                         if (res.data.success && res.data.html) {
@@ -184,9 +141,10 @@
                                 document.getElementById('blocks-container').appendChild(newEl);
                             }
 
+                            window.parent.postMessage({
+                                type: 'refresh-builder',
+                            }, '*');
                             this.cancelPicker();
-                            // Update local blocks array (you might want to reload or update your blocks here)
-                            // For simplicity, reload page:
                             location.reload();
                         }
                     },
@@ -199,6 +157,9 @@
                             [this.blocks[index + 1], this.blocks[index]] = [this.blocks[index], this.blocks[index + 1]];
                             this.save();
                         }
+                        window.parent.postMessage({
+                            type: 'refresh-builder',
+                        }, '*');
                     },
 
                     async save() {
@@ -208,21 +169,33 @@
                                 blocks: this.blocks,
                             });
                             if (response.data.success) {
-                                console.log('Page saved successfully');
-                                location.reload(); // reload to reflect saved order
+                                location.reload();
                             } else {
-                                console.error('Failed to save page:', response.data.message || 'Unknown error');
+                                console.error('Save failed:', response.data.message || 'Unknown error');
                             }
                         } catch (error) {
-                            console.error('Error saving page:', error);
+                            console.error('Error during save:', error);
                         }
                     },
 
                     removeBlock({
                         index
                     }) {
-                        this.blocks.splice(index, 1);
-                        this.save();
+                        Swal.fire({
+                            title: 'Are you sure?',
+                            text: "This block will be permanently deleted!",
+                            icon: 'warning',
+                            showCancelButton: true,
+                            confirmButtonColor: '#d33',
+                            cancelButtonColor: '#3085d6',
+                            confirmButtonText: 'Yes, delete it!',
+                            cancelButtonText: 'Cancel'
+                        }).then((result) => {
+                            if (result.isConfirmed) {
+                                this.blocks.splice(index, 1);
+                                this.save();
+                            }
+                        });
                     }
                 }
             }

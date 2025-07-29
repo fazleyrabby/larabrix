@@ -2,21 +2,11 @@
 
 namespace Database\Factories;
 
-use App\Models\Page;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Str;
 
-/**
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\Page>
- */
 class PageFactory extends Factory
 {
-    protected $model = Page::class;
-    /**
-     * Define the model's default state.
-     *
-     * @return array<string, mixed>
-     */
     public function definition(): array
     {
         $title = $this->faker->sentence(3);
@@ -31,39 +21,40 @@ class PageFactory extends Factory
             'template'  => $this->faker->randomElement(['default', 'form', 'landing', 'blog-index', 'blog-single']),
             'builder'   => json_encode([
                 [
+                    'id' => 'hero' . '-' . now()->timestamp . '-' . rand(100, 999),
                     'type' => 'hero',
                     'props' => [
-                        'heading' => $this->faker->sentence(),
-                        'subheading' => $this->faker->sentence(),
-                        'button_text' => 'Get Started',
+                        'heading' => ['type' => 'text', 'value' => $this->faker->sentence()],
+                        'subheading' => ['type' => 'textarea', 'value' => $this->faker->sentence()],
+                        'button_text' => ['type' => 'text', 'value' => 'Get Started'],
+                        'background_image' => ['type' => 'image', 'value' => null],
                     ],
                 ],
                 [
+                    'id' => 'features' . '-' . now()->timestamp . '-' . rand(100, 999),
                     'type' => 'features',
                     'props' => [
                         'items' => [
-                            ['title' => 'Fast', 'description' => 'Super fast performance'],
-                            ['title' => 'Secure', 'description' => 'Built with security in mind'],
+                            'type' => 'repeater',
+                            'fields' => [
+                                'title' => ['type' => 'text'],
+                                'description' => ['type' => 'textarea'],
+                            ],
+                            'value' => [
+                                ['title' => 'Modular', 'description' => 'Use only what you need'],
+                                ['title' => 'Blade-based', 'description' => 'Lightweight and fast'],
+                                ['title' => 'Open Source', 'description' => 'MIT licensed'],
+                            ],
                         ],
                     ],
                 ],
                 [
-                    'type' => 'attribute',
-                    'props' => [
-                        'heading' => 'Product Attributes',
-                        'items' => [
-                            ['label' => 'Color', 'value' => 'Red'],
-                            ['label' => 'Size', 'value' => 'Medium'],
-                            ['label' => 'Material', 'value' => 'Cotton'],
-                        ],
-                    ],
-                ],
-                [
+                    'id' => 'blogs' . '-' . now()->timestamp . '-' . rand(100, 999),
                     'type' => 'blogs',
                     'props' => [
-                        'heading' => 'Latest Blog Posts',
-                        'limit' => 3,
-                        'sort' => 'desc', // or 'asc'
+                        'heading' => ['type' => 'text', 'value' => 'Latest Blog Posts'],
+                        'limit' => ['type' => 'number', 'value' => 3],
+                        'sort' => ['type' => 'select', 'value' => 'desc'],
                     ],
                 ],
             ]),

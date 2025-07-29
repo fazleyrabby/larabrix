@@ -3,12 +3,11 @@
     $block = (object) ($block ?? []);
     $props = $block->props ?? [];
     $type = $block->type ?? 'unknown';
-    $id = $type . '-' . now()->timestamp . '-' . rand(0, 999);
 @endphp
 
 <div
     class="group block-wrapper relative border border-dashed border-gray-300 rounded-lg mb-6 hover:border-blue-500"
-    id="block-{{ $index }}" data-block-id="{{ $block->id ?? $id }}"
+    id="block-{{ $index }}" data-block-id="{{ $block->id }}"
     {{-- Important: x-data must be on the outer container (e.g. blocks-container), not here --}}
 >
     @if(request()->has('builderPreview') && auth()->check() && auth()->user()->role === 'admin')
@@ -35,6 +34,11 @@
                 @click.prevent="moveBlock({{ $index }}, 'down')"
                 :disabled="{{ $index === (count($blocks) - 1) ? 'true' : 'false' }}"
             >⬇️ Down</button>
+
+            <button
+                class="text-xs px-2 py-1 bg-red-100 border border-red-300 rounded shadow text-red-700 hover:bg-red-200"
+                @click.prevent="removeBlock({ index: {{ $index }} })"
+            >🗑️ Delete</button>
         </div>
     @endif
 

@@ -41,19 +41,23 @@ class PageBuilderController extends Controller
         $blockType = $request->input('type');
         $position = $request->input('position');
         $targetIndex = $request->input('targetIndex');
+        $incomingBlock = $request->input('block'); // Optional
 
         $existingBlocks = json_decode($page->builder, true) ?? [];
 
-        // Get block definition
-        $newBlock = PageBlocks::get($blockType);
+        // Use client-provided block if available (with unique ID), fallback to default
+        $newBlock = $incomingBlock ?: PageBlocks::get($blockType);
 
         if (!$newBlock) {
             return response()->json(['error' => 'Invalid block type'], 400);
         }
 
-        // Ensure block has type and props
+        // Ensure type and props
         $newBlock['type'] ??= $blockType;
         $newBlock['props'] ??= [];
+
+        // If no ID (somehow), generate one here (failsafe)
+        $newBlock['id'] ??= $blockType . '-' . now()->timestamp . '-' . rand(100, 999);
 
         // Determine insertion index
         $insertIndex = (int) $targetIndex;
@@ -64,11 +68,10 @@ class PageBuilderController extends Controller
         // Insert the new block
         array_splice($existingBlocks, $insertIndex, 0, [$newBlock]);
 
-        // Save updated builder JSON
-        $page->builder = json_encode($existingBlocks, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
+        // Save
+        $page->builder = json_encode($existingBlocks);
         $page->save();
 
-        // Render the block preview HTML
         $block = (object) $newBlock;
         $index = $insertIndex;
 
@@ -81,14 +84,14 @@ class PageBuilderController extends Controller
         ]);
     }
 
-    public function save(Request $request,Page $page)
+    public function save(Request $request, Page $page)
     {
         $request->validate([
             'page_id' => 'required|integer|exists:pages,id',
-            'blocks' => 'required|array',
+            'blocks' => 'nullable|array',
         ]);
-        
-        $page->builder = json_encode($request->blocks, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
+
+        $page->builder = json_encode($request->blocks);
         $page->save();
 
         return response()->json([

@@ -1,6 +1,6 @@
 <footer class="bg-gray-100 dark:bg-gray-900">
     <div class="mx-auto max-w-5xl px-4 py-10">
-        <ul class="mt-12 flex flex-wrap justify-center gap-6 md:gap-8 lg:gap-12">
+        {{-- <ul class="mt-12 flex flex-wrap justify-center gap-6 md:gap-8 lg:gap-12">
             <li>
                 <a class="text-gray-700 transition hover:text-gray-700/75 dark:text-white dark:hover:text-white/75"
                     href="#">
@@ -42,6 +42,14 @@
                     Blog
                 </a>
             </li>
+        </ul> --}}
+
+        @php
+            $menu = \App\Models\Menu::with('childrenRecursive')->where('type', 'footer')->get();
+        @endphp
+
+        <ul class="mt-12 flex flex-wrap justify-center gap-6 md:gap-8 lg:gap-12">
+            @include('frontend.partials.menu-item', ['items' => $menu])
         </ul>
 
         <ul class="mt-12 flex justify-center gap-6 md:gap-8">

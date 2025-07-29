@@ -33,7 +33,7 @@ class PageController extends Controller
         $builder = json_decode($data['page']->builder, true);
         $data['blocks'] = collect($builder ?? [])->map(function ($block) use ($slug) {
             if ($block['type'] === 'blogs') {
-                $limit = $block['props']['limit'] ?? 3;
+                $limit = $block['props']['limit']['value'] ?? 6;
 
                 $block['props']['posts'] = Blog::latest()
                     ->take($limit)
@@ -52,7 +52,6 @@ class PageController extends Controller
             if($block['type'] === 'form'){
                 $block['props']['form'] = Form::with('formFields')->find($block['props']['form_id']);
             }
-
             return PageBlocks::make($block);
         })->filter();
         return $data;

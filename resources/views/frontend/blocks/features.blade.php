@@ -1,11 +1,11 @@
 <section class="py-10 min-h-[400px]" id="{{ $index }}">
   <div class="max-w-6xl mx-auto px-4">
     @if (!empty($data['heading']))
-      <h2 class="text-3xl font-semibold text-center mb-10">{{ $data['heading'] }}</h2>
+      <h2 class="text-3xl font-semibold text-center mb-10">{{ $data['heading']['value'] ?? '' }}</h2>
     @endif
 
     <div class="flex flex-wrap justify-center gap-8 text-center">
-      @foreach ($data['items'] ?? [] as $item)
+      @foreach ($data['items']['value'] ?? [] as $item)
         <div class="w-full max-w-sm flex flex-col items-center text-center">
           <div>
             <h3 class="text-xl font-semibold text-gray-800">{{ $item['title'] ?? 'Featured title' }}</h3>
