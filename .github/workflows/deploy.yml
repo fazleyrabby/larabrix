@@ -58,17 +58,27 @@ jobs:
       - name: ⚙️ SSH into Server and Deploy
         run: |
           ssh -p ${{ secrets.SSH_PORT }} ${{ secrets.SSH_USERNAME }}@${{ secrets.SSH_HOST }} << 'EOF'
-            cd /home/rhtechde/larabrix.rhtech.de
-
+            echo "Current directory: $(pwd)"
+            echo "Listing home directory contents:"
+            ls -la ~/
+            echo "Checking if target directory exists:"
+            if [ -d "/home/rhtechde/larabrix.rhtech.dev" ]; then
+              echo "Target directory exists"
+              cd /home/rhtechde/larabrix.rhtech.dev
+              echo "Changed to target directory"
+              echo "Current directory contents:"
+              ls -la
+            else
+              echo "Target directory does not exist"
+              exit 1
+            fi
             unzip -o ~/deploy.zip -d ./
             rm ~/deploy.zip
-
             php artisan migrate --force
             php artisan config:clear
             php artisan config:cache
             php artisan route:cache
             php artisan view:cache
-
             chmod -R 755 storage
             chmod -R 755 bootstrap/cache
           EOF
