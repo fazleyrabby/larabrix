@@ -210,7 +210,11 @@
                 urlObj.search = params.toString();
                 const parentId = urlObj.searchParams.get('parent_id') || '';
 
-                axios.get(urlObj.toString())
+                axios.get(urlObj.toString(), {
+                        headers: {
+                            'X-Requested-With': 'XMLHttpRequest'
+                        }
+                    })
                     .then(response => {
                         container.innerHTML = response.data.html;
                         const meta = response.data.meta;

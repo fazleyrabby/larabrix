@@ -14,7 +14,6 @@
     <link rel="stylesheet" href="{{ asset('admin/preview/css/demo.css') }}">
     <link rel="stylesheet" href="{{ asset('admin/dist/css/style.css') }}">
 
-    @vite(['resources/css/app.css','resources/js/app.js'])
     <style>
         /* @import url('https://rsms.me/inter/inter.css'); */
         /* :root {

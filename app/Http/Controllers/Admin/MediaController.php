@@ -30,6 +30,7 @@ class MediaController extends Controller
                 $query->where('status', $status);
             })->orderBy('created_at', 'desc')->paginate($limit);
 
+        
         if ($request->ajax()) {
             $html = view('admin.components.media.items', compact('media', 'folders'))->render();
             if ($request->get('type') == 'modal') {

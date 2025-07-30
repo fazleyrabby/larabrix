@@ -185,12 +185,10 @@
         let url = window.location.href;
         const target = document.querySelector(".media-container");
         const container = document.getElementById("ajax-container");
+        console.log(url, container, target)
         loadData(url, container, target)
         document.querySelector('.ajax-form').reset()
     }
-
-
-
 
 </script>
 @endpush
