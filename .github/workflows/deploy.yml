@@ -1,64 +1,60 @@
-name: 🚀 Deploy Laravel Project via FTP
+name: Deploy Laravel to cPanel via SSH
 
 on:
   push:
     branches:
-      - production # or change to your desired branch
+      - production  # Or your deployment branch
 
 jobs:
   deploy:
-    name: Upload via FTP
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout code
+      - name: ⬇️ Checkout Code
         uses: actions/checkout@v3
 
-      - name: Set up Node
-        uses: actions/setup-node@v4
-        with:
-          node-version: '20'
-
-      - name: Set up PHP
+      - name: 🧰 Set up PHP
         uses: shivammathur/setup-php@v2
         with:
           php-version: '8.2'
-          extensions: mbstring, bcmath, curl, intl, dom, fileinfo
-          tools: composer
 
-      - name: Install Composer dependencies
+      - name: 📦 Install Dependencies
         run: composer install --no-dev --optimize-autoloader --ignore-platform-reqs
 
-      - name: Install Node dependencies & build assets
+      - name: 🎯 (Optional) Build Frontend
         run: |
-          npm install
+          npm ci
           npm run build
 
-      - name: Create .env from secret
+      - name: 📄 Write .env file from Secret
         run: echo "${{ secrets.LARABRIX_ENV }}" > .env
 
-      - name: Set Laravel key
-        run: php artisan key:generate
+      - name: 🗜️ ZIP Files
+        run: |
+          zip -r deploy.zip . \
+            -x "**/node_modules/*" "**/.git*" "**/tests/*" "**/storage/logs/*" "**/vendor/composer/*"
 
-      - name: Link storage
-        run: php artisan storage:link
-
-      - name: Set directory permissions
-        run: chmod -R 775 storage bootstrap/cache
-
-      - name: Cache FTP Deploy state
-        uses: actions/cache@v3
+      - name: 🔐 Add SSH Key
+        uses: webfactory/ssh-agent@v0.7.0
         with:
-          path: .ftp-deploy-sync-state.json
-          key: ${{ runner.os }}-ftp-state-${{ github.sha }}
-          restore-keys: |
-            ${{ runner.os }}-ftp-state-
+          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
 
-      - name: Upload via FTP 🚀
-        uses: SamKirkland/FTP-Deploy-Action@4.0.0
-        with:
-          server: ${{ secrets.FTP_SERVER }}
-          username: ${{ secrets.FTP_USERNAME }}
-          password: ${{ secrets.FTP_PASSWORD }}
-          server-dir: /larabrix/ # adjust to your cPanel root directory
-          dangerous-clean-slate: false
+      - name: 📤 Upload ZIP
+        run: |
+          scp -P ${{ secrets.SSH_PORT }} deploy.zip ${{ secrets.SSH_USERNAME }}@${{ secrets.SSH_HOST }}:~/deploy.zip
+
+      - name: ⚙️ SSH Unzip & Deploy
+        run: |
+          ssh -p ${{ secrets.SSH_PORT }} ${{ secrets.SSH_USERNAME }}@${{ secrets.SSH_HOST }} << 'EOF'
+            cd /home/rhtechde/larabrix.rhtech.de
+            unzip -o ~/deploy.zip -d ./
+            rm ~/deploy.zip
+
+            php artisan migrate --force
+            php artisan config:cache
+            php artisan route:cache
+            php artisan view:cache
+
+            chmod -R 755 storage
+            chmod -R 755 bootstrap/cache
+          EOF
