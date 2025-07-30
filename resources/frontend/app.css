@@ -1,1 +1,22 @@
-@import 'tailwindcss';
+@import "tailwindcss";
+
+/* Frontend Blade views */
+@source "../views/frontend/**/*.blade.php";
+
+/* Frontend JS files */
+@source "../js/frontend/**/*.js";
+
+/* Laravel default pagination views (still used on frontend) */
+/* @source "../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php"; */
+
+/* Cached frontend views */
+@source "../../storage/framework/views/*.php";
+
+@plugin "daisyui" {
+  themes: light --default;
+  root: ":root";
+  include: ;
+  exclude: ;
+  prefix: ;
+  logs: true;
+}

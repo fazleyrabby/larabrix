@@ -82,8 +82,6 @@
     }
 </style>
 
-
-
 @if ($folderId)
     @php $parentFolder = \App\Models\MediaFolder::find($folderId); @endphp
     <div class="mb-3 d-flex align-items-center gap-2">
