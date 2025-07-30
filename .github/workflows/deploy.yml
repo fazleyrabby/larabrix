@@ -32,7 +32,7 @@ jobs:
           npm run build || echo "Skipping frontend build (optional)"
 
       - name: 📄 Write .env file from Secret
-        run: echo "${{ secrets.ENV }}" > .env
+        run: echo "${{ secrets.LARABRIX_ENV }}" > .env
 
       - name: 🗜️ ZIP Application
         run: |
