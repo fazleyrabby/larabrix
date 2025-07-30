@@ -55,25 +55,26 @@ jobs:
               deploy.zip \
               ${{ secrets.SSH_USERNAME }}@${{ secrets.SSH_HOST }}:~/deploy.zip
 
-      - name: ⚙️ SSH into Server and Deploy
+      - name: 🔐 SSH into server and deploy
         run: |
-          ssh -p ${{ secrets.SSH_PORT }} ${{ secrets.SSH_USERNAME }}@${{ secrets.SSH_HOST }} << 'EOF'
-            echo "Current directory: $(pwd)"
+          ssh -p "${{ secrets.SSH_PORT }}" ${{ secrets.SSH_USERNAME }}@${{ secrets.SSH_HOST }} <<EOF
+            echo "Current directory: \$(pwd)"
             echo "Listing home directory contents:"
             ls -la ~/
             echo "Checking if target directory exists:"
-            if [ -d "/home/rhtechde/larabrix.rhtech.dev" ]; then
+            if [ -d "~/larabrix.rhtech.dev" ]; then
               echo "Target directory exists"
-              cd /home/rhtechde/larabrix.rhtech.dev
-              echo "Changed to target directory"
-              echo "Current directory contents:"
-              ls -la
             else
-              echo "Target directory does not exist"
-              exit 1
+              echo "Target directory does not exist. Creating it..."
+              mkdir -p ~/larabrix.rhtech.dev
             fi
-            unzip -o ~/deploy.zip -d ./
+
+            echo "Unzipping into ~/larabrix.rhtech.dev"
+            unzip -o ~/deploy.zip -d ~/larabrix.rhtech.dev
             rm ~/deploy.zip
+
+            cd ~/larabrix.rhtech.dev
+
             php artisan migrate --force
             php artisan config:clear
             php artisan config:cache
