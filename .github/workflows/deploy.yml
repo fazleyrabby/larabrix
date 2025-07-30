@@ -1,0 +1,64 @@
+name: 🚀 Deploy Laravel Project via FTP
+
+on:
+  push:
+    branches:
+      - production # or change to your desired branch
+
+jobs:
+  deploy:
+    name: Upload via FTP
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Set up PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.2'
+          extensions: mbstring, bcmath, curl, intl, dom, fileinfo
+          tools: composer
+
+      - name: Install Composer dependencies
+        run: composer install --no-dev --optimize-autoloader --ignore-platform-reqs
+
+      - name: Install Node dependencies & build assets
+        run: |
+          npm install
+          npm run build
+
+      - name: Create .env from secret
+        run: echo "${{ secrets.LARABRIX_ENV }}" > .env
+
+      - name: Set Laravel key
+        run: php artisan key:generate
+
+      - name: Link storage
+        run: php artisan storage:link
+
+      - name: Set directory permissions
+        run: chmod -R 775 storage bootstrap/cache
+
+      - name: Cache FTP Deploy state
+        uses: actions/cache@v3
+        with:
+          path: .ftp-deploy-sync-state.json
+          key: ${{ runner.os }}-ftp-state-${{ github.sha }}
+          restore-keys: |
+            ${{ runner.os }}-ftp-state-
+
+      - name: Upload via FTP 🚀
+        uses: SamKirkland/FTP-Deploy-Action@4.0.0
+        with:
+          server: ${{ secrets.FTP_SERVER }}
+          username: ${{ secrets.FTP_USERNAME }}
+          password: ${{ secrets.FTP_PASSWORD }}
+          server-dir: /larabrix/ # adjust to your cPanel root directory
+          dangerous-clean-slate: false
