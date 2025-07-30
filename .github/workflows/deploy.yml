@@ -50,7 +50,10 @@ jobs:
 
       - name: 📤 Upload ZIP to Server
         run: |
-          scp -P ${{ secrets.SSH_PORT }} deploy.zip ${{ secrets.SSH_USERNAME }}@${{ secrets.SSH_HOST }}:~/deploy.zip
+          scp -P ${{ secrets.SSH_PORT }} \
+              -o StrictHostKeyChecking=no \
+              deploy.zip \
+              ${{ secrets.SSH_USERNAME }}@${{ secrets.SSH_HOST }}:~/deploy.zip
 
       - name: ⚙️ SSH into Server and Deploy
         run: |
