@@ -1,0 +1,60 @@
+name: Deploy Laravel to cPanel via SSH
+
+on:
+  push:
+    branches:
+      - production  # Or your deployment branch
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: ⬇️ Checkout Code
+        uses: actions/checkout@v3
+
+      - name: 🧰 Set up PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.2'
+
+      - name: 📦 Install Dependencies
+        run: composer install --no-dev --optimize-autoloader --ignore-platform-reqs
+
+      - name: 🎯 (Optional) Build Frontend
+        run: |
+          npm ci
+          npm run build
+
+      - name: 📄 Write .env file from Secret
+        run: echo "${{ secrets.LARABRIX_ENV }}" > .env
+
+      - name: 🗜️ ZIP Files
+        run: |
+          zip -r deploy.zip . \
+            -x "**/node_modules/*" "**/.git*" "**/tests/*" "**/storage/logs/*" "**/vendor/composer/*"
+
+      - name: 🔐 Add SSH Key
+        uses: webfactory/ssh-agent@v0.7.0
+        with:
+          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+
+      - name: 📤 Upload ZIP
+        run: |
+          scp -P ${{ secrets.SSH_PORT }} deploy.zip ${{ secrets.SSH_USERNAME }}@${{ secrets.SSH_HOST }}:~/deploy.zip
+
+      - name: ⚙️ SSH Unzip & Deploy
+        run: |
+          ssh -p ${{ secrets.SSH_PORT }} ${{ secrets.SSH_USERNAME }}@${{ secrets.SSH_HOST }} << 'EOF'
+            cd /home/rhtechde/larabrix.rhtech.de
+            unzip -o ~/deploy.zip -d ./
+            rm ~/deploy.zip
+
+            php artisan migrate --force
+            php artisan config:cache
+            php artisan route:cache
+            php artisan view:cache
+
+            chmod -R 755 storage
+            chmod -R 755 bootstrap/cache
+          EOF
