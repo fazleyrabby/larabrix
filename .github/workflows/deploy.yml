@@ -17,40 +17,51 @@ jobs:
         uses: shivammathur/setup-php@v2
         with:
           php-version: '8.2'
+          extensions: mbstring, bcmath, curl, zip, openssl, pdo, tokenizer, xml
 
-      - name: 📦 Install Dependencies
+      - name: 📦 Install Composer Dependencies
         run: composer install --no-dev --optimize-autoloader --ignore-platform-reqs
 
-      - name: 🎯 (Optional) Build Frontend
+      - name: 🧱 (Optional) Build Frontend
         run: |
-          npm ci
-          npm run build
+          if [ -f package-lock.json ]; then
+            npm ci
+          else
+            npm install
+          fi
+          npm run build || echo "Skipping frontend build (optional)"
 
       - name: 📄 Write .env file from Secret
-        run: echo "${{ secrets.LARABRIX_ENV }}" > .env
+        run: echo "${{ secrets.ENV }}" > .env
 
-      - name: 🗜️ ZIP Files
+      - name: 🗜️ ZIP Application
         run: |
           zip -r deploy.zip . \
-            -x "**/node_modules/*" "**/.git*" "**/tests/*" "**/storage/logs/*" "**/vendor/composer/*"
+            -x "node_modules/*" \
+               ".git/*" \
+               "tests/*" \
+               "storage/logs/*" \
+               "vendor/composer/*"
 
       - name: 🔐 Add SSH Key
         uses: webfactory/ssh-agent@v0.7.0
         with:
           ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
 
-      - name: 📤 Upload ZIP
+      - name: 📤 Upload ZIP to Server
         run: |
           scp -P ${{ secrets.SSH_PORT }} deploy.zip ${{ secrets.SSH_USERNAME }}@${{ secrets.SSH_HOST }}:~/deploy.zip
 
-      - name: ⚙️ SSH Unzip & Deploy
+      - name: ⚙️ SSH into Server and Deploy
         run: |
           ssh -p ${{ secrets.SSH_PORT }} ${{ secrets.SSH_USERNAME }}@${{ secrets.SSH_HOST }} << 'EOF'
             cd /home/rhtechde/larabrix.rhtech.de
+
             unzip -o ~/deploy.zip -d ./
             rm ~/deploy.zip
 
             php artisan migrate --force
+            php artisan config:clear
             php artisan config:cache
             php artisan route:cache
             php artisan view:cache
