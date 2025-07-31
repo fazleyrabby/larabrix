@@ -25,7 +25,33 @@ class CartService
                 'quantity' => $quantity,
             ];
         }
+        $cart = $this->updateTotal($cart);
+        session()->put('cart', $cart);
+    }
 
+    public function update($productId, $quantity){
+        $cart = session()->get('cart');
+        if (isset($cart['items'][$productId])) {
+            $cart['items'][$productId]['quantity'] = $quantity;
+        }
+        $cart = $this->updateTotal($cart);
+        session()->put('cart', $cart);
+        return $cart;
+    }
+
+    public function remove($productId)
+    {
+        $cart = session()->get('cart', []);
+        logger('Removing from cart:', ['productId' => $productId, 'cartKeys' => array_keys($cart['items'] ?? [])]);
+        if (isset($cart['items'][$productId])) {
+            unset($cart['items'][$productId]);
+        }
+        $cart = $this->updateTotal($cart);
+        session()->put('cart', $cart);
+        return $cart;
+    }
+
+    private function updateTotal($cart){
         $total = 0;
         foreach ($cart['items'] as $key => $item) {
             // Skip if key is 'total' itself to avoid issues
@@ -35,7 +61,6 @@ class CartService
             $total += $item['price'] * $item['quantity'];
         }
         $cart['attributes']['total'] = number_format($total, 2);
-        
-        session()->put('cart', $cart);
+        return $cart;
     }
 }

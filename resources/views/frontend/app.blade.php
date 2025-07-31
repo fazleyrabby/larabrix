@@ -30,8 +30,8 @@
     </main>
 
 
-    <div x-init="console.log($store.toast)" x-cloak x-show="$store.toast.visible" x-transition @click="$store.toast.visible = false"
-        class="toast fixed top-4 right-4 z-50 cursor-pointer">
+    <div x-init="console.log($store.toast)" x-cloak x-show="$store.toast.visible" x-transition
+        @click="$store.toast.visible = false" class="toast fixed bottom-4 right-4 z-50 cursor-pointer">
         <div :class="`alert ${$store.toast.type === 'success' ? 'alert-success' : 'alert-error'} text-white`">
             <span x-text="$store.toast.message"></span>
         </div>
@@ -52,13 +52,45 @@
             Alpine.store('cart', {
                 items: @json(session()->get('cart')['items'] ?? []),
                 attributes: @json(session()->get('cart')['attributes'] ?? []),
+                total: @json(session()->get('cart')['attributes']['total'] ?? 0),
                 reset(cart) {
+                    console.log(cart)
                     this.items = cart.items ?? [];
                     this.attributes = cart.attributes ?? [];
+                    this.total = cart.attributes.total ?? 0
+                },
+
+                updateQuantity(productId, quantity) {
+                    axios.post('/cart/update', {
+                            product_id: productId,
+                            quantity: quantity
+                        })
+                        .then(response => {
+                            this.reset(response.data.data);
+                            Alpine.store('toast').show(true, response.data.message || 'Cart updated!');
+                        })
+                        .catch(error => {
+                            Alpine.store('toast').show(false, error.response?.data?.message ||
+                                'Update failed.');
+                        });
+                },
+
+                removeItem(productId) {
+                    axios.post('/cart/remove', {
+                            product_id: productId
+                        })
+                        .then(response => {
+                            this.reset(response.data.data);
+                            Alpine.store('toast').show(true, response.data.message || 'Item removed!');
+                        })
+                        .catch(error => {
+                            Alpine.store('toast').show(false, error.response?.data?.message ||
+                                'Remove failed.');
+                        });
                 }
             });
 
-   
+
             Alpine.store('toast', {
                 visible: false,
                 message: '',
@@ -83,11 +115,6 @@
                         })
                         .then(response => {
                             Alpine.store('cart').reset(response.data.data);
-                            // Alpine.store('cart').addItem({
-                            //     id: productId,
-                            //     title: response.data.title || 'Product ' + productId,
-                            //     quantity: 1
-                            // });
                             Alpine.store('toast').show(true, response.data.message ||
                                 'Added to cart!');
                         })
