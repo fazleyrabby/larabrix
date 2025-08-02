@@ -52,15 +52,7 @@ jobs:
               -o StrictHostKeyChecking=no \
               deploy.zip \
               ${{ secrets.SSH_USERNAME }}@${{ secrets.SSH_HOST }}:~/deploy.zip
-
-      - name: 📤 Upload .env File
-        run: |
-          echo "${{ secrets.LARABRIX_ENV }}" > .env
-          scp -P ${{ secrets.SSH_PORT }} \
-              -o StrictHostKeyChecking=no \
-              .env \
-              ${{ secrets.SSH_USERNAME }}@${{ secrets.SSH_HOST }}:~/larabrix.rhtech.dev/.env
-
+              
       - name: 🚀 SSH into Server and Deploy
         run: |
           ssh -p "${{ secrets.SSH_PORT }}" ${{ secrets.SSH_USERNAME }}@${{ secrets.SSH_HOST }} <<'EOF'
@@ -75,7 +67,19 @@ jobs:
             echo "Unzipping into ~/larabrix.rhtech.dev"
             unzip -o ~/deploy.zip -d ~/larabrix.rhtech.dev
             rm ~/deploy.zip
+          EOF
 
+      - name: 📤 Upload .env File
+        run: |
+          echo "${{ secrets.LARABRIX_ENV }}" > .env
+          scp -P ${{ secrets.SSH_PORT }} \
+              -o StrictHostKeyChecking=no \
+              .env \
+              ${{ secrets.SSH_USERNAME }}@${{ secrets.SSH_HOST }}:~/larabrix.rhtech.dev/.env
+
+      - name: 🚀 Final Laravel Setup
+        run: |
+          ssh -p "${{ secrets.SSH_PORT }}" ${{ secrets.SSH_USERNAME }}@${{ secrets.SSH_HOST }} <<'EOF'
             cd ~/larabrix.rhtech.dev || exit 1
 
             echo "Running Laravel setup..."
