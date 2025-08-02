@@ -22,6 +22,7 @@ Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () 
 Route::get('/products', [FrontendProductController::class, 'index'])->name('frontend.pages.index');
 Route::get('/products/{slug}', [FrontendProductController::class, 'show'])->name('frontend.products.show');
 
+
 // Cart routes
 Route::prefix('cart')->group(function () {
     Route::get('/', [CartController::class, 'index'])->name('frontend.cart.index');
@@ -29,3 +30,5 @@ Route::prefix('cart')->group(function () {
     Route::post('remove', [CartController::class, 'remove'])->name('frontend.cart.remove');
     Route::post('update', [CartController::class, 'update'])->name('frontend.cart.update');
 });
+
+Route::get('/checkout', [CartController::class, 'checkout'])->name('frontend.checkout.index');

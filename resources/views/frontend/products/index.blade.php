@@ -1,7 +1,7 @@
 @extends('frontend.app')
 
 @section('content')
-    <section style="min-height: calc(100dvh - 280px)">
+    <section class="page-container">
         <div class="mx-auto max-w-screen-xl px-4 py-8 sm:px-6 sm:py-12 lg:px-8">
             <header>
                 <h2 class="text-xl font-bold text-gray-900 sm:text-3xl">Product Collection</h2>

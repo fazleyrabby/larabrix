@@ -44,4 +44,8 @@ class CartController extends Controller
             'data' => $cart,
         ]);
     }
+
+    public function checkout(){
+        return view('frontend.pages.checkout');
+    }
 }
