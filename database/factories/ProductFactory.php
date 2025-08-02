@@ -23,7 +23,7 @@ class ProductFactory extends Factory
             'type'         => 'variable',
             'sku'          => strtoupper(Str::random(10)),
             'price'        => null, // price comes from variants
-            'image'        => $this->faker->imageUrl(),
+            'image'        => null,
             'description'  => $this->faker->paragraph(),
             'category_id'  => \App\Models\Category::factory(),
         ];
@@ -39,7 +39,7 @@ class ProductFactory extends Factory
         return $this->state(fn () => [
             'type' => 'simple',
             'sku' => strtoupper(Str::random(10)),
-            'price' => $this->faker->randomFloat(2, 100, 999),
+            'price' => $this->faker->randomFloat(2, 5, 99),
         ]);
     }
 

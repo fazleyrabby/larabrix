@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Frontend;
 use Illuminate\Http\Request;
 use App\Services\CartService;
 use App\Http\Controllers\Controller;
+use App\Models\PaymentGateway;
 
 class CartController extends Controller
 {
@@ -46,6 +47,7 @@ class CartController extends Controller
     }
 
     public function checkout(){
-        return view('frontend.pages.checkout');
+        $stripe = PaymentGateway::where('slug','stripe')->value('config');
+        return view('frontend.pages.checkout', compact('stripe'));
     }
 }

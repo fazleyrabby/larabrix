@@ -23,6 +23,7 @@ class CartService
                 'image' => $product->image ? asset($product->image) : 'https://placehold.co/400', 
                 'sku' => $product->sku,  
                 'quantity' => $quantity,
+                'attributes' => [],
             ];
         }
         $cart = $this->updateTotal($cart);
@@ -60,7 +61,7 @@ class CartService
             }
             $total += $item['price'] * $item['quantity'];
         }
-        $cart['attributes']['total'] = number_format($total, 2);
+        $cart['total'] = number_format($total, 2);
         return $cart;
     }
 }

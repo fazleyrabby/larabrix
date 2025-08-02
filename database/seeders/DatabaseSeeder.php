@@ -16,14 +16,24 @@ class DatabaseSeeder extends Seeder
     {
         // User::factory(10)->create();
         $super = User::create([
-            'name' => 'Test user',
+            'name' => 'Admin',
             'password' => bcrypt('123456'),
             'email' => 'test@gmail.com',
             'role' => 'admin',
-          ]);
+        ]);
 
         $roleSuperAdmin = Role::create(['name' => 'admin']);
         $super->assignRole(['admin']);
+
+        $super = User::create([
+            'name' => 'Test user',
+            'password' => bcrypt('123456'),
+            'email' => 'user@gmail.com',
+            'role' => 'user',
+        ]);
+
+        $roleSuperAdmin = Role::create(['name' => 'user']);
+        $super->assignRole(['user']);
 
         $this->call([
             CrudSeeder::class,

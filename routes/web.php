@@ -13,7 +13,9 @@ use App\Http\Controllers\Admin\MediaController;
 use App\Http\Controllers\Admin\PageBuilderController;
 use App\Http\Controllers\Admin\PageController;
 use App\Http\Controllers\Admin\PaymentGatewayController;
+use App\Http\Controllers\Frontend\CheckoutController;
 use App\Http\Controllers\Frontend\DashboardController as FrontendDashboardController;
+use App\Http\Controllers\Frontend\OrderController;
 use App\Http\Controllers\Frontend\PageController as FrontendPageController;
 use App\Http\Controllers\TestController;
 
@@ -22,25 +24,40 @@ use App\Http\Controllers\TestController;
 // Route::get('/', [LoginController::class, 'loginForm'])->name('login');
 
 // Customer
-Route::prefix('user')->group(function () {
+Route::middleware('redirect.role')->prefix('user')->group(function () {
     Route::get('login', [LoginController::class, 'showCustomerLogin'])->name('user.login');
     Route::post('login', [LoginController::class, 'customerLogin']);
 });
 
-Route::middleware(['auth','role:user'])->prefix('user')->name('user.')->group(function () {
-    Route::get('/dashboard', [FrontendDashboardController::class, 'index'])->name('dashboard');
-    Route::get('logout', [LoginController::class, 'userlogout'])->name('logout');
-});
+Route::middleware(['auth', 'role:user'])
+    ->prefix('user')
+    ->name('user.')
+    ->group(function () {
+        Route::get('/dashboard', [FrontendDashboardController::class, 'index'])->name('dashboard');
+        Route::get('logout', [LoginController::class, 'userlogout'])->name('logout');
+    });
 
+Route::middleware(['auth', 'role:user'])
+    ->prefix('checkout')
+    ->name('checkout.')
+    ->group(function () {
+        Route::post('/create-order', [CheckoutController::class, 'createOrder']);
+        Route::post('/payment-intent', [CheckoutController::class, 'createStripeIntent']);
+        Route::post('/confirm', [CheckoutController::class, 'confirmPayment']);
+    });
+
+Route::middleware(['auth', 'role:user'])
+    ->get('/orders', [OrderController::class, 'index'])->name('orders.index');
 
 // Admin
-Route::prefix('admin')->group(function () {
+Route::prefix('admin')->middleware('redirect.role')->group(function () {
     Route::get('register', [RegisterController::class, 'registerForm'])->name('register');
     Route::post('register', [RegisterController::class, 'register']);
     Route::get('login', [LoginController::class, 'loginForm'])->name('login');
     Route::post('login', [LoginController::class, 'authenticate']);
-    Route::post('logout', [LoginController::class, 'logout'])->name('logout');
 });
+
+Route::post('admin/logout', [LoginController::class, 'logout'])->name('logout');
 
 
 

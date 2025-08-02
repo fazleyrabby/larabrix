@@ -13,6 +13,7 @@ return Application::configure(basePath: dirname(__DIR__))
     ->withMiddleware(function (Middleware $middleware) {
         $middleware->alias([
             'role' => \App\Http\Middleware\RoleMiddleware::class,
+            'redirect.role' => \App\Http\Middleware\RedirectIfAuthenticatedWithRole::class,
             // Add more aliases if needed
         ]);
     })

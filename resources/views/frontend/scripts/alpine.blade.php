@@ -4,11 +4,11 @@
             Alpine.store('cart', {
                 items: @json(session()->get('cart')['items'] ?? []),
                 attributes: @json(session()->get('cart')['attributes'] ?? []),
-                total: @json(session()->get('cart')['attributes']['total'] ?? 0),
+                total: @json(session()->get('cart')['total'] ?? 0),
                 reset(cart) {
                     this.items = cart.items ?? [];
                     this.attributes = cart.attributes ?? [];
-                    this.total = cart.attributes.total ?? 0
+                    this.total = cart.total ?? 0
                 },
 
                 updateQuantity(productId, quantity) {

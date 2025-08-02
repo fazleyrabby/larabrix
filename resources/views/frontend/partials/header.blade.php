@@ -44,7 +44,7 @@
                         <div x-data="{ isCartOpen: false }" x-transition x-cloak class="relative">
                             <!-- 🛍️ Cart Button -->
                             <button type="button" @click="isCartOpen = true"
-                                class="relative text-gray-500 transition hover:text-gray-500/75 dark:text-white dark:hover:text-white/75">
+                                class="relative text-gray-500 transition hover:text-gray-500/75 dark:text-white dark:hover:text-white/75 cursor-pointer">
 
                                 <!-- Cart Icon -->
                                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="size-4">
