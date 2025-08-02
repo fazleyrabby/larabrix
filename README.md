@@ -2,8 +2,9 @@
 
 ![Laravel](https://img.shields.io/badge/laravel-12.x-red)
 ![PHP](https://img.shields.io/badge/php-^8.2-blue)
-![Status](https://img.shields.io/badge/status-in--progress-yellow)
-[![Deploy to cPanel](https://github.com/fazleyrabby/larabrix/actions/workflows/deploy.yml/badge.svg?branch=production)](https://github.com/fazleyrabby/larabrix/actions/workflows/deploy.yml)
+![Project Status](https://img.shields.io/badge/project-active-blue)
+[![Deploy Status](https://img.shields.io/github/actions/workflow/status/fazleyrabby/larabrix/deploy.yml?branch=production&label=Deploy)](https://github.com/fazleyrabby/larabrix/actions/workflows/deploy.yml)
+
 
 **Larabrix** is a modular Laravel starter kit based on Tabler UI (v1.4.0) that helps you skip the boring parts of web development. It gives you ready-made building blocks — like product management, media uploads, menus, and task boards — so you can focus on building your app instead of repeating the same setup over and over.
 
