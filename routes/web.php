@@ -13,6 +13,7 @@ use App\Http\Controllers\Admin\MediaController;
 use App\Http\Controllers\Admin\PageBuilderController;
 use App\Http\Controllers\Admin\PageController;
 use App\Http\Controllers\Admin\PaymentGatewayController;
+use App\Http\Controllers\Frontend\DashboardController as FrontendDashboardController;
 use App\Http\Controllers\Frontend\PageController as FrontendPageController;
 use App\Http\Controllers\TestController;
 
@@ -20,13 +21,30 @@ use App\Http\Controllers\TestController;
 
 // Route::get('/', [LoginController::class, 'loginForm'])->name('login');
 
-Route::get('register', [RegisterController::class, 'registerForm'])->name('register');
-Route::post('register', [RegisterController::class, 'register']);
-Route::get('login', [LoginController::class, 'loginForm'])->name('login');
-Route::post('login', [LoginController::class, 'authenticate']);
-Route::post('logout', [LoginController::class, 'logout'])->name('logout');
+// Customer
+Route::prefix('user')->group(function () {
+    Route::get('login', [LoginController::class, 'showCustomerLogin'])->name('user.login');
+    Route::post('login', [LoginController::class, 'customerLogin']);
+});
 
-Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () {
+Route::middleware(['auth','role:user'])->prefix('user')->name('user.')->group(function () {
+    Route::get('/dashboard', [FrontendDashboardController::class, 'index'])->name('dashboard');
+    Route::get('logout', [LoginController::class, 'userlogout'])->name('logout');
+});
+
+
+// Admin
+Route::prefix('admin')->group(function () {
+    Route::get('register', [RegisterController::class, 'registerForm'])->name('register');
+    Route::post('register', [RegisterController::class, 'register']);
+    Route::get('login', [LoginController::class, 'loginForm'])->name('login');
+    Route::post('login', [LoginController::class, 'authenticate']);
+    Route::post('logout', [LoginController::class, 'logout'])->name('logout');
+});
+
+
+
+Route::middleware(['auth','role:admin'])->prefix('admin')->name('admin.')->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
     Route::resource('/cruds', CrudController::class)->names('cruds');
     Route::get('/menus/sort', [MenuController::class, 'sort'])->name('menus.sort');

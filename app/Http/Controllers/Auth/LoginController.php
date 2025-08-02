@@ -9,6 +9,40 @@ use Illuminate\Support\Facades\Auth;
 
 class LoginController extends Controller
 {
+    public function showCustomerLogin()
+    {
+        if (auth()->check() && auth()->user()->role === 'user') {
+            return redirect()->route('user.dashboard');
+        }
+        $user = (object)[];
+        if(config('app.env') === 'local'){
+            $user->email = 'user@gmail.com';
+            $user->password = '123456';
+        }
+        return view('auth.customer-login', compact('user'));
+    }
+
+    public function userLogout()
+    {
+        Auth::logout();
+        return redirect()->route('user.login')->with('success', 'You have been logged out.');
+    }
+
+    public function customerLogin(Request $request)
+    {
+        $credentials = $request->only('email', 'password');
+
+        if (Auth::attempt($credentials)) {
+            if (Auth::user()->role === 'user') {
+                return redirect()->intended('/user/dashboard');
+            }
+
+            Auth::logout();
+            return back()->withErrors(['email' => 'Not a customer']);
+        }
+
+        return back()->withErrors(['email' => 'Invalid credentials']);
+    }
     public function loginForm()
     {
         $user = (object)[];
