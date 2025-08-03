@@ -145,9 +145,10 @@
                 <!-- Stripe Card -->
                 <div x-show="showPayment" x-cloak class="mt-6">
                     <div x-ref="card" id="card-element" class="border p-4 rounded"></div>
-                    <button type="button" @click="pay"
-                        class="mt-4 rounded bg-green-600 px-4 py-2 text-white hover:bg-green-500">
-                        Pay Now
+                    <button type="button" @click="pay" :disabled="isProcessing" class="mt-4 rounded px-4 py-2 text-white"
+                        :class="isProcessing ? 'bg-gray-400 cursor-not-allowed' : 'bg-green-600 hover:bg-green-500'">
+                        <span x-show="!isProcessing">Pay Now</span>
+                        <span x-show="isProcessing">Processing...</span>
                     </button>
                 </div>
             </div>
@@ -167,6 +168,7 @@
                 showPayment: false,
                 orderId: null,
                 transactionId: null,
+                isProcessing: false,
                 shipping: {
                     name: '{{ auth()?->user()?->name ?? '' }}',
                     address: '',
@@ -180,48 +182,41 @@
                 },
 
                 async submitShipping() {
-                    try {
-                        const res = await axios.post('/checkout/create-order', {
-                            shipping: this.shipping
+                    // Validate shipping form, then show Stripe payment form
+                    this.showShipping = false;
+                    this.showPayment = true;
+
+                    // Wait for DOM update, then mount Stripe card
+                    this.$nextTick(() => {
+                        const style = {
+                            base: {
+                                fontSize: '16px',
+                                color: '#32325d'
+                            }
+                        };
+                        this.card = this.elements.create('card', {
+                            style
                         });
-
-                        this.orderId = res.data.order_id;
-
-                        // Show payment form
-                        this.showShipping = false;
-                        this.showPayment = true;
-
-                        // Wait for DOM to update, then mount Stripe card element
-                        this.$nextTick(() => {
-                            const style = {
-                                base: {
-                                    fontSize: '16px',
-                                    color: '#32325d'
-                                }
-                            };
-                            this.card = this.elements.create('card', {
-                                style
-                            });
-                            this.card.mount(this.$refs.card);
-                        });
-                    } catch (error) {
-                        console.error(error);
-                        alert("Shipping failed.");
-                    }
+                        this.card.mount(this.$refs.card);
+                    });
                 },
 
                 async pay() {
+                    this.isProcessing = true;
+
                     try {
-                        const res = await axios.post('/checkout/payment-intent', {
-                            order_id: this.orderId
+                        // 1. Create a PaymentIntent (with amount from cart and shipping)
+                        const paymentIntentRes = await axios.post('/checkout/payment-intent', {
+                            shipping: this.shipping,
+                            total: this.$store.cart.total,
                         });
 
-                        const clientSecret = res.data.client_secret;
-                        this.transactionId = res.data.transaction_id;
+                        const clientSecret = paymentIntentRes.data.client_secret;
 
+                        // 2. Confirm the payment
                         const result = await this.stripe.confirmCardPayment(clientSecret, {
                             payment_method: {
-                                card: this.card, // use this.card here
+                                card: this.card,
                                 billing_details: {
                                     name: this.shipping.name
                                 }
@@ -230,19 +225,22 @@
 
                         if (result.error) {
                             alert(result.error.message);
+                            this.isProcessing = false;
                             return;
                         }
 
+                        // 3. On success, create order + transaction
                         if (result.paymentIntent.status === 'succeeded') {
-                            await axios.post('/checkout/confirm', {
-                                transaction_id: this.transactionId
+                            const confirmRes = await axios.post('/checkout/confirm', {
+                                transaction_id: result.paymentIntent.id,
                             });
 
-                            window.location.href = '/thank-you';
+                            window.location.href = '/payment-complete';
                         }
                     } catch (error) {
                         console.error(error);
                         alert("Payment failed.");
+                        this.isProcessing = false;
                     }
                 }
             }

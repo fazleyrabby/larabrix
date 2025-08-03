@@ -50,4 +50,5 @@ class CartController extends Controller
         $stripe = PaymentGateway::where('slug','stripe')->value('config');
         return view('frontend.pages.checkout', compact('stripe'));
     }
+    
 }

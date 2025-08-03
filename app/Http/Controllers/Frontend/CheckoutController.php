@@ -9,111 +9,147 @@ use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Services\PaymentGatewayService;
 use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Log;
+use Exception;
 
 class CheckoutController extends Controller
 {
-    public function createOrder(Request $request)
-    {
-        $cart = session()->get('cart');
-        // Generate unique order number (e.g. ORD-xxxx)
-        $orderNumber = 'ORD-' . strtoupper(Str::random(10));
+    // public function createOrder(Request $request)
+    // {
+    //     try {
+    //         $cart = session()->get('cart');
 
-        $order = Order::create([
-            'user_id' => auth()->id(),
-            'order_number' => $orderNumber,
-            'status' => 'pending',
-            'payment_status' => 'pending',
+    //         if (!$cart || empty($cart['items'])) {
+    //             return response()->json(['error' => 'Cart is empty.'], 400);
+    //         }
 
-            'subtotal' => $cart['subtotal'] ?? $cart['total'], // if you store subtotal separately
-            'discount' => $cart['discount'] ?? 0,
-            'tax' => $cart['tax'] ?? 0,
-            'shipping_cost' => $cart['shipping_cost'] ?? 0,
-            'total' => $cart['total'],
-            'currency' => 'USD', // Or dynamic based on your store
-            'payment_gateway' => 'stripe',
-            'shipping_address' => json_encode([
-                'name' => $request->shipping['name'],
-                'address' => $request->shipping['address'],
-                'city' => $request->shipping['city'],
-                'phone' => $request->shipping['phone'],
-            ]),
+    //         $orderNumber = 'ORD-' . strtoupper(Str::random(10));
 
-            // Optionally billing address as well if available
-            'billing_address' => json_encode($request->billing ?? null),
-        ]);
+    //         $order = Order::create([
+    //             'user_id' => auth()->id(),
+    //             'order_number' => $orderNumber,
+    //             'status' => 'pending',
+    //             'payment_status' => 'pending',
+    //             'subtotal' => $cart['subtotal'] ?? $cart['total'],
+    //             'discount' => $cart['discount'] ?? 0,
+    //             'tax' => $cart['tax'] ?? 0,
+    //             'shipping_cost' => $cart['shipping_cost'] ?? 0,
+    //             'total' => $cart['total'],
+    //             'currency' => 'USD',
+    //             'payment_gateway' => 'stripe',
+    //             'shipping_address' => json_encode($request->shipping ?? []),
+    //             'billing_address' => json_encode($request->billing ?? null),
+    //         ]);
 
-        foreach ($cart['items'] as $item) {
-            OrderItem::create([
-                'order_id' => $order->id,
-                'product_id' => $item['product_id'],
-                'name' => $item['title'],
-                'quantity' => $item['quantity'],
-                'price' => $item['price'],
-                'total' => $item['price'] * $item['quantity'],
-                'meta' => json_encode($item['meta'] ?? null),
-            ]);
-        }
+    //         foreach ($cart['items'] as $item) {
+    //             OrderItem::create([
+    //                 'order_id' => $order->id,
+    //                 'product_id' => $item['product_id'],
+    //                 'name' => $item['title'],
+    //                 'quantity' => $item['quantity'],
+    //                 'price' => $item['price'],
+    //                 'total' => $item['price'] * $item['quantity'],
+    //                 'meta' => json_encode($item['meta'] ?? null),
+    //             ]);
+    //         }
 
-        return response()->json(['order_id' => $order->id]);
-    }
+    //         return response()->json(['order_id' => $order->id]);
+    //     } catch (Exception $e) {
+    //         Log::error('Order creation failed', ['error' => $e->getMessage()]);
+    //         return response()->json(['error' => 'Failed to create order.'], 500);
+    //     }
+    // }
 
     public function createStripeIntent(Request $request)
     {
-        $order = Order::findOrFail($request->order_id);
-        $gateway = app(PaymentGatewayService::class)->driver('stripe');
+        try {
+            $cart = session()->get('cart');
+            $currency = 'usd';
 
-        // Check if a pending transaction for this order already exists
-        $existingTransaction = Transaction::where('order_id', $order->id)
-            ->where('status', 'pending')
-            ->first();
+            $gateway = app(PaymentGatewayService::class)->driver('stripe');
 
-        if ($existingTransaction) {
-            // Return the existing client_secret and transaction_id
-            return response()->json([
-                'client_secret' => $existingTransaction->meta['client_secret'] ?? null,
-                'transaction_id' => $existingTransaction->transaction_id,
+            $charge = $gateway->charge($cart['total'], $currency, [
+                'shipping' => json_encode($request->shipping),
             ]);
+
+            $transaction = Transaction::create([
+                'user_id' => auth()->id(),
+                'type' => 'payment',
+                'transaction_id' => $charge['transaction_id'] ?? null,
+                'amount' => $charge['amount'],
+                'currency' => $charge['currency'],
+                'status' => 'pending',
+                'gateway' => 'stripe',
+                'meta' => json_encode($charge['meta'] ?? []),
+            ]);
+
+            return response()->json([
+                'client_secret' => $charge['client_secret'],
+                'transaction_id' => $transaction->transaction_id,
+            ]);
+        } catch (\Exception $e) {
+            Log::error('Stripe intent creation failed', ['error' => $e->getMessage()]);
+            return response()->json(['error' => 'Failed to create payment intent.'], 500);
         }
-
-        // Create new charge
-        $charge = $gateway->charge($order->total, $order->currency ?? 'usd', ['order_id' => $order->id]);
-
-        // Store transaction with initial status pending
-        $transaction = Transaction::create([
-            'user_id' => $order->user_id,
-            'order_id' => $order->id,
-            'type' => 'payment',
-            'transaction_id' => $charge['transaction_id'] ?? null,
-            'amount' => $charge['amount'],
-            'currency' => $charge['currency'] ?? $order->currency,
-            'status' => 'pending',
-            'gateway' => 'stripe',
-            'meta' => json_encode($charge['meta'] ?? []),
-        ]);
-
-        return response()->json([
-            'client_secret' => $charge['client_secret'] ?? null,
-            'transaction_id' => $transaction->transaction_id,
-        ]);
     }
 
     public function confirmPayment(Request $request)
     {
-        $transaction = Transaction::where('transaction_id', $request->transaction_id)->firstOrFail();
+        try {
+            $transaction = Transaction::where('transaction_id', $request->transaction_id)
+                ->where('status', 'pending')
+                ->firstOrFail();
 
-        $transaction->update([
-            'status' => 'paid',
-        ]);
+            $meta = json_decode($transaction->meta, true);
+            $cart = session()->get('cart');
 
-        $order = $transaction->order;
-        $order?->update([
-            'status' => 'paid',
-            'payment_status' => 'paid',
-        ]);
+            if (!$cart || empty($cart['items'])) {
+                return response()->json(['error' => 'Cart is empty.'], 400);
+            }
 
-        // Optionally clear cart
-        session()->forget('cart');
+            $order = Order::create([
+                'user_id' => $transaction->user_id,
+                'order_number' => 'ORD-' . strtoupper(Str::random(10)),
+                'status' => 'processing',
+                'payment_status' => 'paid',
+                'subtotal' => $cart['subtotal'] ?? $cart['total'],
+                'discount' => $cart['discount'] ?? 0,
+                'tax' => $cart['tax'] ?? 0,
+                'shipping_cost' => $cart['shipping_cost'] ?? 0,
+                'total' => $cart['total'],
+                'currency' => $transaction->currency,
+                'payment_gateway' => 'stripe',
+                'shipping_address' => json_encode($meta['shipping'] ?? []),
+                'billing_address' => json_encode($meta['billing'] ?? null),
+            ]);
 
-        return response()->json(['success' => true]);
+            foreach ($cart['items'] as $item) {
+                OrderItem::create([
+                    'order_id' => $order->id,
+                    'product_id' => $item['product_id'],
+                    'name' => $item['title'],
+                    'quantity' => $item['quantity'],
+                    'price' => $item['price'],
+                    'total' => $item['price'] * $item['quantity'],
+                    'meta' => json_encode($item['meta'] ?? null),
+                ]);
+            }
+
+            $transaction->update([
+                'order_id' => $order->id,
+                'status' => 'paid',
+            ]);
+
+            return response()->json(['success' => true]);
+        } catch (\Exception $e) {
+            Log::error('Payment confirmation failed', ['error' => $e->getMessage()]);
+            return response()->json(['error' => 'Failed to confirm order.'], 500);
+        }
+    }
+
+    public function complete(Request $request)
+    {
+        // $trxId = $request->get('transaction_id');
+        return view('frontend.pages.payment-complete');
     }
 }

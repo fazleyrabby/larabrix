@@ -6,6 +6,7 @@ use App\Http\Controllers\Admin\CategoryController;
 use App\Http\Controllers\Admin\ProductController;
 use App\Http\Controllers\Admin\ProductVariantController;
 use App\Http\Controllers\Frontend\CartController;
+use App\Http\Controllers\Frontend\CheckoutController;
 use App\Http\Controllers\Frontend\ProductController as FrontendProductController;
 
 Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () {
@@ -32,3 +33,4 @@ Route::prefix('cart')->group(function () {
 });
 
 Route::get('/checkout', [CartController::class, 'checkout'])->name('frontend.checkout.index');
+Route::get('/payment-complete', [CheckoutController::class, 'complete'])->name('frontend.payment.complete');
