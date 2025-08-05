@@ -139,6 +139,8 @@ class CheckoutController extends Controller
                 'order_id' => $order->id,
                 'status' => 'paid',
             ]);
+            session()->forget('cart');
+
 
             return response()->json(['success' => true]);
         } catch (\Exception $e) {

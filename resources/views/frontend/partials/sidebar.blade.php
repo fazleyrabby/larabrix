@@ -1,5 +1,5 @@
 <div class="space-y-4 lg:block">
-                    <div class="flex h-screen flex-col justify-between border-e border-gray-100 bg-white">
+                    <div class="flex h-full flex-col justify-between border-e border-gray-100 bg-white">
                         <div class="px-4 py-6">
                             {{-- <span class="grid h-10 w-32 place-content-center rounded-lg bg-gray-100 text-xs text-gray-600">
                                 Logo

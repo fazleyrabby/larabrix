@@ -2,7 +2,7 @@
 
 @section('content')
     <section class="page-container">
-        <div class="mx-auto max-w-screen-xl px-4 py-8 sm:px-6 sm:py-12 lg:px-8">
+        <div class="mx-auto max-w-fit px-4 py-8 sm:px-6 sm:py-12 lg:px-8">
             <header>
                 <h2 class="text-xl font-bold text-gray-900 sm:text-3xl">Dashboard</h2>
             </header>
@@ -12,7 +12,7 @@
                     <div class="flex items-center justify-between">
                         <div>
                             <p class="text-sm text-gray-500">Orders</p>
-                            <p class="text-2xl font-medium text-gray-900">{{ \App\Models\Order::where('user_id',auth()->user()->id)->count() }}</p>
+                            <p class="text-2xl font-medium text-gray-900">{{ $orderCount }}</p>
                         </div>
 
                         <span class="rounded-full bg-blue-100 p-3 text-blue-600">
@@ -41,8 +41,8 @@
                 <article class="w-1/2 rounded-lg border border-gray-100 bg-white p-6">
                     <div class="flex items-center justify-between">
                         <div>
-                            <p class="text-sm text-gray-500">Unit Sold</p>
-                            <p class="text-2xl font-medium text-gray-900">$240.94</p>
+                            <p class="text-sm text-gray-500">Total Units Sold</p>
+                            <p class="text-2xl font-medium text-gray-900">{{ $itemCount }}</p>
                         </div>
 
                         <span class="rounded-full bg-blue-100 p-3 text-blue-600">
@@ -71,8 +71,8 @@
                 <article class="w-1/2 rounded-lg border border-gray-100 bg-white p-6">
                     <div class="flex items-center justify-between">
                         <div>
-                            <p class="text-sm text-gray-500">Profit</p>
-                            <p class="text-2xl font-medium text-gray-900">$240.94</p>
+                            <p class="text-sm text-gray-500">Total Spent</p>
+                            <p class="text-2xl font-medium text-gray-900">${{ $total }}</p>
                         </div>
 
                         <span class="rounded-full bg-blue-100 p-3 text-blue-600">
@@ -99,12 +99,12 @@
                 </article>
             </div>
 
-            <div class="mt-4 lg:mt-8 lg:grid lg:grid-cols-4 lg:items-start lg:gap-8">
+            <div class="mt-4 lg:mt-8 lg:grid lg:grid-cols-4 lg:items-stretch lg:gap-8">
                 @include('frontend.partials.sidebar')
 
-                <div class="lg:col-span-3">
+                {{-- <div class="lg:col-span-3"> --}}
                     @include('frontend.dashboard.orders')
-                </div>
+                {{-- </div> --}}
             </div>
         </div>
     </section>

@@ -2,154 +2,113 @@
 @section('content')
     <section class="page-container">
         <div class="mx-auto max-w-screen-xl px-4 py-8 sm:px-6 sm:py-12 lg:px-8">
-            <div class="mx-auto max-w-3xl" x-data="checkoutComponent()" x-init="init()">
+            <div class="mx-auto max-w-6xl" x-data="checkoutComponent()" x-init="init()">
                 <header class="text-center">
-                    <h1 class="text-xl font-bold text-gray-900 sm:text-3xl"
-                        x-html="`Cart (${Object.keys($store.cart.items).length})`"></h1>
+                    <h1 class="text-xl font-bold text-gray-900 sm:text-3xl">Checkout</h1>
                 </header>
-                <div class="mt-8">
-                    <ul class="space-y-4">
-                        <template x-if="Object.keys($store.cart.items).length === 0">
-                            <li class="text-gray-500 text-sm">Your cart is empty.</li>
-                        </template>
-                        <template x-for="(item, key) in $store.cart.items" :key="key">
-                            <li class="flex items-center gap-4">
-                                <img :src="item.image" alt="" class="size-16 rounded-sm object-cover" />
+
+                <div class="mt-8 max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-3 gap-8">
+
+                    <!-- Left: Shipping Form + Payment (2/3) -->
+                    <div class="lg:col-span-2">
+                        <!-- Shipping Form -->
+                        <div class="bg-white p-6 rounded-lg shadow">
+                            <h2 class="text-2xl font-semibold mb-6 text-gray-800">Shipping Information</h2>
+                            <form @submit.prevent="submitShipping" class="space-y-4">
                                 <div>
-                                    <h3 class="text-sm text-gray-900" x-text="item.title"></h3>
+                                    <label class="label"><span class="label-text">Full Name</span></label>
+                                    <input type="text" x-model="shipping.name" required placeholder="John Doe"
+                                        class="input input-bordered w-full" />
                                 </div>
-                                <div class="flex flex-1 items-center justify-end gap-2">
-                                    <form>
-                                        <label for="Line1Qty" class="sr-only"> Quantity </label>
 
-                                        <select @change="$store.cart.updateQuantity(key, +$event.target.value)"
-                                            class="h-8 w-14 rounded-sm border-gray-200 bg-gray-50 p-0 text-center text-xs text-gray-600">
-                                            <template x-for="qty in 10" :key="qty">
-                                                <option :value="qty" x-text="qty"
-                                                    :selected="qty === item.quantity"></option>
-                                            </template>
-                                        </select>
-                                    </form>
-
-                                    <button class="text-gray-600 transition hover:text-red-600 cursor-pointer"
-                                        @click="$store.cart.removeItem(key)">
-                                        <span class="sr-only">Remove item</span>
-
-                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-                                            stroke-width="1.5" stroke="currentColor" class="size-4">
-                                            <path stroke-linecap="round" stroke-linejoin="round"
-                                                d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0" />
-                                        </svg>
-                                    </button>
+                                <div>
+                                    <label class="label"><span class="label-text">Address</span></label>
+                                    <input type="text" x-model="shipping.address" required placeholder="123 Main St"
+                                        class="input input-bordered w-full" />
                                 </div>
-                            </li>
-                        </template>
-                    </ul>
 
-                    <div class="mt-8 flex justify-end border-t border-gray-100 pt-8">
-                        <div class="w-screen max-w-lg space-y-4">
-                            <template x-if="Object.keys($store.cart.items).length > 0">
-                                <dl class="space-y-0.5 text-sm text-gray-700">
-                                    <div class="flex justify-between">
-                                        <dt>Subtotal</dt>
-                                        <dd x-text="$store.cart.total"></dd>
-                                    </div>
-
-                                    {{-- <div class="flex justify-between">
-                                    <dt>VAT</dt>
-                                    <dd>£25</dd>
-                                </div> --}}
-
-                                    {{-- <div class="flex justify-between">
-                                    <dt>Discount</dt>
-                                    <dd>-£20</dd>
-                                </div> --}}
-
-                                    <div class="flex justify-between !text-base font-medium">
-                                        <dt>Total</dt>
-                                        <dd x-text="$store.cart.total"></dd>
-                                    </div>
-                                </dl>
-                            </template>
-
-                            {{-- <div class="flex justify-end">
-                                <span
-                                    class="inline-flex items-center justify-center rounded-full bg-indigo-100 px-2.5 py-0.5 text-indigo-700">
-                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-                                        stroke-width="1.5" stroke="currentColor" class="-ms-1 me-1.5 size-4">
-                                        <path stroke-linecap="round" stroke-linejoin="round"
-                                            d="M16.5 6v.75m0 3v.75m0 3v.75m0 3V18m-9-5.25h5.25M7.5 15h3M3.375 5.25c-.621 0-1.125.504-1.125 1.125v3.026a2.999 2.999 0 010 5.198v3.026c0 .621.504 1.125 1.125 1.125h17.25c.621 0 1.125-.504 1.125-1.125v-3.026a2.999 2.999 0 010-5.198V6.375c0-.621-.504-1.125-1.125-1.125H3.375z" />
-                                    </svg>
-
-                                    <p class="text-xs whitespace-nowrap">2 Discounts Applied</p>
-                                </span>
-                            </div> --}}
-
-                            <template x-if="Object.keys($store.cart.items).length > 0">
-                                <div class="flex justify-end">
-                                    <button @click="showShipping = true"
-                                        class="block rounded-sm bg-gray-700 px-5 py-3 text-sm text-gray-100 transition hover:bg-gray-600">
-                                        Place Order
-                                    </button>
+                                <div>
+                                    <label class="label"><span class="label-text">City</span></label>
+                                    <input type="text" x-model="shipping.city" required placeholder="New York"
+                                        class="input input-bordered w-full" />
                                 </div>
-                            </template>
-                        </div>
-                    </div>
-                </div>
 
+                                <div>
+                                    <label class="label"><span class="label-text">Phone</span></label>
+                                    <input type="text" x-model="shipping.phone" required placeholder="+1 555 123 4567"
+                                        class="input input-bordered w-full" />
+                                </div>
 
-                <!-- Alpine.js Shipping Modal/Form -->
-                <div x-show="showShipping" class="mt-8 max-w-xl mx-auto bg-white p-6 rounded-lg shadow">
-                    <h2 class="text-2xl font-semibold mb-6 text-gray-800">Shipping Information</h2>
-                    <form @submit.prevent="submitShipping" class="space-y-4">
-                        <div>
-                            <label class="label">
-                                <span class="label-text">Full Name</span>
-                            </label>
-                            <input type="text" x-model="shipping.name" required placeholder="John Doe"
-                                class="input input-bordered w-full" />
+                                <div class="pt-4">
+                                    <button type="submit" class="btn btn-primary w-full">Continue to Payment</button>
+                                </div>
+                            </form>
                         </div>
 
-                        <div>
-                            <label class="label">
-                                <span class="label-text">Address</span>
-                            </label>
-                            <input type="text" x-model="shipping.address" required placeholder="123 Main St"
-                                class="input input-bordered w-full" />
-                        </div>
-
-                        <div>
-                            <label class="label">
-                                <span class="label-text">City</span>
-                            </label>
-                            <input type="text" x-model="shipping.city" required placeholder="New York"
-                                class="input input-bordered w-full" />
-                        </div>
-
-                        <div>
-                            <label class="label">
-                                <span class="label-text">Phone</span>
-                            </label>
-                            <input type="text" x-model="shipping.phone" required placeholder="+1 555 123 4567"
-                                class="input input-bordered w-full" />
-                        </div>
-
-                        <div class="pt-4">
-                            <button type="submit" class="btn btn-primary w-full">
-                                Continue to Payment
+                        <!-- Stripe Payment -->
+                        <div x-show="showPayment" x-cloak class="mt-6">
+                            <div x-ref="card" id="card-element" class="border p-4 rounded"></div>
+                            <button type="button" @click="pay" :disabled="isProcessing"
+                                class="mt-4 rounded px-4 py-2 text-white w-full"
+                                :class="isProcessing ? 'bg-gray-400 cursor-not-allowed' : 'bg-green-600 hover:bg-green-500'">
+                                <span x-show="!isProcessing">Pay Now</span>
+                                <span x-show="isProcessing">Processing...</span>
                             </button>
                         </div>
-                    </form>
-                </div>
+                    </div>
 
-                <!-- Stripe Card -->
-                <div x-show="showPayment" x-cloak class="mt-6">
-                    <div x-ref="card" id="card-element" class="border p-4 rounded"></div>
-                    <button type="button" @click="pay" :disabled="isProcessing" class="mt-4 rounded px-4 py-2 text-white"
-                        :class="isProcessing ? 'bg-gray-400 cursor-not-allowed' : 'bg-green-600 hover:bg-green-500'">
-                        <span x-show="!isProcessing">Pay Now</span>
-                        <span x-show="isProcessing">Processing...</span>
-                    </button>
+                    <!-- Right: Cart Summary Table (1/3) -->
+                    <div x-data x-init class="overflow-x-auto rounded border border-gray-200 h-max">
+                        <h2 class="text-lg font-semibold mb-4 px-4">Summary</h2>
+                        <table class="min-w-full divide-y divide-gray-200 text-sm">
+                            <thead class="bg-gray-100 text-gray-700">
+                                <tr>
+                                    <th class="px-4 py-2 text-left">Image</th>
+                                    <th class="px-4 py-2 text-left">Title</th>
+                                    <th class="px-4 py-2 text-center">Qty</th>
+                                    <th class="px-4 py-2 text-center">Price</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-gray-100">
+                                <template x-if="Object.keys($store.cart.items).length === 0">
+                                    <tr>
+                                        <td colspan="4" class="text-center text-gray-500 py-4">Your cart is empty.</td>
+                                    </tr>
+                                </template>
+
+                                <template x-for="(item, key) in $store.cart.items" :key="key">
+                                    <tr>
+                                        <td class="px-4 py-2">
+                                            <img :src="item.image" alt=""
+                                                class="h-12 w-12 object-cover rounded" />
+                                        </td>
+                                        <td class="px-4 py-2 text-gray-900" x-text="item.title"></td>
+                                        <td class="px-4 py-2 text-center text-gray-700" x-text="item.quantity"></td>
+                                        <td class="px-4 py-2 text-center text-gray-700" x-text="item.price * item.quantity">
+                                        </td>
+                                    </tr>
+                                </template>
+
+                                <!-- Subtotal -->
+                                <template x-if="Object.keys($store.cart.items).length > 0">
+                                    <tr class="bg-gray-50">
+                                        <td colspan="3" class="px-4 py-3 text-right font-medium text-gray-700">Subtotal
+                                        </td>
+                                        <td class="px-4 py-3 text-center font-medium text-gray-700"
+                                            x-text="$store.cart.total"></td>
+                                    </tr>
+                                </template>
+
+                                <!-- Total -->
+                                <template x-if="Object.keys($store.cart.items).length > 0">
+                                    <tr class="bg-gray-100 font-semibold text-gray-900">
+                                        <td colspan="3" class="px-4 py-3 text-right">Total</td>
+                                        <td class="px-4 py-3 text-center" x-text="$store.cart.total"></td>
+                                    </tr>
+                                </template>
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
             </div>
         </div>

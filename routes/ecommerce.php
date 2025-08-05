@@ -20,7 +20,7 @@ Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () 
 
 
 
-Route::get('/products', [FrontendProductController::class, 'index'])->name('frontend.pages.index');
+Route::get('/products', [FrontendProductController::class, 'index'])->name('frontend.products.index');
 Route::get('/products/{slug}', [FrontendProductController::class, 'show'])->name('frontend.products.show');
 
 
@@ -32,5 +32,6 @@ Route::prefix('cart')->group(function () {
     Route::post('update', [CartController::class, 'update'])->name('frontend.cart.update');
 });
 
-Route::get('/checkout', [CartController::class, 'checkout'])->name('frontend.checkout.index');
+Route::get('/cart', [CartController::class, 'cart'])->name('frontend.cart.index');
+Route::get('/checkout', [CartController::class, 'checkout'])->name('frontend.checkout.index')->middleware('customer');
 Route::get('/payment-complete', [CheckoutController::class, 'complete'])->name('frontend.payment.complete');

@@ -46,6 +46,10 @@ class CartController extends Controller
         ]);
     }
 
+    public function cart(){
+        return view('frontend.pages.cart');
+    }
+    
     public function checkout(){
         $stripe = PaymentGateway::where('slug','stripe')->value('config');
         return view('frontend.pages.checkout', compact('stripe'));

@@ -1,4 +1,5 @@
-<div class="overflow-x-auto">
+<div class="overflow-x-auto lg:col-span-3 h-full">
+    <h2 class="mb-2">Latest Orders</h2>
     <table class="table w-full text-xs border border-gray-300 mb-2">
         <thead>
             <tr class="bg-gray-100">
