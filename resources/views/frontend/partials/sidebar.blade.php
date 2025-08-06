@@ -7,9 +7,15 @@
 
                             <ul class="mt-6 space-y-1">
                                 <li>
-                                    <a href="#"
-                                        class="block rounded-lg bg-gray-100 px-4 py-2 text-sm font-medium text-gray-700">
+                                    <a href="{{ route('user.dashboard') }}"
+                                        class="block rounded-lg px-4 py-2 text-sm font-medium text-gray-700 {{ request()->is('user/dashboard') ? 'bg-gray-100' : '' }}">
                                         Orders
+                                    </a>
+                                </li>
+                                <li>
+                                    <a href="{{ route('user.transactions') }}"
+                                        class="block rounded-lg px-4 py-2 text-sm font-medium text-gray-700 {{ request()->is('user/transactions') ? 'bg-gray-100' : '' }}">
+                                        Transactions
                                     </a>
                                 </li>
                                 <li>
@@ -17,6 +23,7 @@
                                         Settings
                                     </a>
                                 </li>
+                                
                                 <li>
                                     <a href="{{ route('user.logout') }}"
                                         class="block rounded-lg px-4 py-2 text-sm font-medium text-gray-700">

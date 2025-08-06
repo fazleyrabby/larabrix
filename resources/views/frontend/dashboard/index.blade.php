@@ -6,7 +6,6 @@
             <header>
                 <h2 class="text-xl font-bold text-gray-900 sm:text-3xl">Dashboard</h2>
             </header>
-
             <div class="mt-8 flex gap-4">
                 <article class="w-1/2 rounded-lg border border-gray-100 bg-white p-6">
                     <div class="flex items-center justify-between">
@@ -102,9 +101,7 @@
             <div class="mt-4 lg:mt-8 lg:grid lg:grid-cols-4 lg:items-stretch lg:gap-8">
                 @include('frontend.partials.sidebar')
 
-                {{-- <div class="lg:col-span-3"> --}}
-                    @include('frontend.dashboard.orders')
-                {{-- </div> --}}
+                @include('frontend.dashboard.orders')
             </div>
         </div>
     </section>

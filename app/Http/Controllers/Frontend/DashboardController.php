@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Frontend;
 
 use App\Http\Controllers\Controller;
 use App\Models\Order;
+use App\Models\Transaction;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -38,5 +39,11 @@ class DashboardController extends Controller
             
 
         return view('frontend.dashboard.index', compact('orders','orderCount', 'itemCount','total'));
+    }
+
+    public function transactions(){
+        $transactions = Transaction::where('user_id', auth()->id())->paginate(10);
+        return view('frontend.dashboard.transactions', compact('transactions'));
+
     }
 }

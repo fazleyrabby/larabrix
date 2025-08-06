@@ -34,6 +34,7 @@ Route::middleware(['auth', 'role:user'])
     ->name('user.')
     ->group(function () {
         Route::get('/dashboard', [FrontendDashboardController::class, 'index'])->name('dashboard');
+        Route::get('/transactions', [FrontendDashboardController::class, 'transactions'])->name('transactions');
         Route::get('logout', [LoginController::class, 'userlogout'])->name('logout');
     });
 
