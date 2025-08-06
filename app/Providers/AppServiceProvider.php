@@ -24,5 +24,6 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
         Blade::component('admin.components.modal', 'modal');
+        Blade::component('frontend.partials.sidebar', 'sidebar');
     }
 }

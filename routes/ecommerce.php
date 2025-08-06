@@ -3,6 +3,7 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Admin\AttributeController;
 use App\Http\Controllers\Admin\CategoryController;
+use App\Http\Controllers\Admin\OrderController;
 use App\Http\Controllers\Admin\ProductController;
 use App\Http\Controllers\Admin\ProductVariantController;
 use App\Http\Controllers\Frontend\CartController;
@@ -16,6 +17,7 @@ Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () 
         Route::resource('{product}/variants', ProductVariantController::class)->names('variants');
     });
     Route::resource('products', ProductController::class);
+    Route::resource('orders', OrderController::class);
 });
 
 

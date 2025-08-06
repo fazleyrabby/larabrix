@@ -6,8 +6,11 @@
             <header>
                 <h2 class="text-xl font-bold text-gray-900 sm:text-3xl">Transactions</h2>
             </header>
-            <div class="mt-4 lg:mt-8 lg:grid lg:grid-cols-4 lg:items-stretch lg:gap-8">
+            {{-- <div class="mt-4 lg:mt-8 lg:grid lg:grid-cols-4 lg:items-stretch lg:gap-8">
                 @include('frontend.partials.sidebar')
+                
+            </div> --}}
+            <x-sidebar>
                 <div class="overflow-x-auto lg:col-span-3 h-full">
                     <table class="table w-full text-xs border border-gray-300 mb-2">
                         <thead>
@@ -54,7 +57,7 @@
                     </table>
                     {{ $transactions->links('pagination::tailwind') }}
                 </div>
-            </div>
+            </x-sidebar>
         </div>
     </section>
 @endsection

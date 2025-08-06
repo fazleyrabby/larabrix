@@ -141,6 +141,16 @@
                 },
 
                 async submitShipping() {
+                    if (
+                        !this.shipping.name ||
+                        !this.shipping.address ||
+                        !this.shipping.city ||
+                        !this.shipping.phone
+                    ) {
+                        // Show error message (customize as needed)
+                        Alpine.store('toast').show(false, 'Please fill out all required fields.');
+                        return;
+                    }
                     // Validate shipping form, then show Stripe payment form
                     this.showShipping = false;
                     this.showPayment = true;
@@ -183,7 +193,7 @@
                         });
 
                         if (result.error) {
-                            alert(result.error.message);
+                            Alpine.store('toast').show(false, result.error.message);
                             this.isProcessing = false;
                             return;
                         }
@@ -198,7 +208,8 @@
                         }
                     } catch (error) {
                         console.error(error);
-                        alert("Payment failed.");
+                        // alert("Payment failed.");
+                        Alpine.store('toast').show(false, "Payment failed.");
                         this.isProcessing = false;
                     }
                 }

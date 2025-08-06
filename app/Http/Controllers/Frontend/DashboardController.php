@@ -44,6 +44,5 @@ class DashboardController extends Controller
     public function transactions(){
         $transactions = Transaction::where('user_id', auth()->id())->paginate(10);
         return view('frontend.dashboard.transactions', compact('transactions'));
-
     }
 }

@@ -54,9 +54,20 @@
                             </button>
 
                             <!-- 🛒 Cart Drawer -->
-                            <div x-show="isCartOpen" x-transition
+                            <div 
+                                x-show="isCartOpen"
+                                x-transition:enter="transform transition ease-in-out duration-300"
+                                x-transition:enter-start="translate-x-full"
+                                x-transition:enter-end="translate-x-0"
+                                x-transition:leave="transform transition ease-in-out duration-300"
+                                x-transition:leave-start="translate-x-0"
+                                x-transition:leave-end="translate-x-full"
                                 class="fixed right-0 top-0 z-50 h-full w-full max-w-sm overflow-y-auto border border-gray-600 bg-gray-100 px-4 py-8 shadow-lg sm:px-6 lg:px-8"
-                                aria-modal="true" role="dialog" tabindex="-1" @click.outside="isCartOpen = false">
+                                aria-modal="true"
+                                role="dialog"
+                                tabindex="-1"
+                                @click.outside="isCartOpen = false"
+                            >
 
                                 <!-- ❌ Close Button -->
                                 <button @click="isCartOpen = false"
@@ -89,7 +100,7 @@
                 </div>
 
                 <div role="menu" :class="{ 'block': isMenuOpen, 'hidden': !isMenuOpen }"
-                    class="absolute end-0 top-15 z-auto w-full overflow-hidden rounded border border-gray-300 bg-white shadow-sm">
+                    class="absolute end-0 top-15 z-1 w-full overflow-hidden rounded border border-gray-300 bg-white shadow-sm">
 
                     @auth
                         <a href="{{ auth()->user()->role == 'admin' ? route('admin.dashboard') : route('user.dashboard') }}"

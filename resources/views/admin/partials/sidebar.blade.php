@@ -219,6 +219,7 @@
             <div @class(['show' => request()->is('admin/products*') || request()->is('admin/categories*'), 'dropdown-menu'])>
               <div class="dropdown-menu-columns">
                 <div class="dropdown-menu-column">
+                  <a @class(['active' => request()->is('admin/order*'), 'dropdown-item']) href="{{ route('admin.orders.index') }}">Orders</a>
                   <a @class(['active' => request()->is('admin/products/categories*'), 'dropdown-item']) href="{{ route('admin.products.categories.index') }}">Category</a>
                   <a @class(['active' => request()->is('admin/products*') && !request()->is('admin/products/attributes*'), 'dropdown-item'])  href="{{ route('admin.products.index') }}">Products</a>
                   <a @class(['active' => request()->is('admin/products/attributes*'), 'dropdown-item']) href="{{ route('admin.products.attributes.index') }}">Attributes</a>

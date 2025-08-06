@@ -28,18 +28,17 @@
                         <form>
                             <label for="Line1Qty" class="sr-only"> Quantity </label>
 
-                            <select
-                                @change="$store.cart.updateQuantity(key, +$event.target.value)"
+                            <select @change="$store.cart.updateQuantity(key, +$event.target.value)"
                                 class="h-8 w-14 rounded-sm border-gray-200 bg-gray-50 p-0 text-center text-xs text-gray-600">
                                 <template x-for="qty in 10" :key="qty">
-                                    <option :value="qty" x-text="qty" :selected="qty === item.quantity"></option>
+                                    <option :value="qty" x-text="qty" :selected="qty === item.quantity">
+                                    </option>
                                 </template>
                             </select>
                         </form>
 
                         <button class="text-gray-600 transition hover:text-red-600 cursor-pointer"
-                            @click="$store.cart.removeItem(key)"
-                        >
+                            @click="$store.cart.removeItem(key)">
                             <span class="sr-only">Remove item</span>
 
                             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
@@ -91,11 +90,24 @@
                         </span>
                     </div> --}}
 
-                    <div class="flex justify-end">
+                    <div class="space-y-4 text-center">
                         <a href="{{ route('frontend.cart.index') }}"
+                            class="block rounded-sm border border-gray-600 px-5 py-3 text-sm text-gray-600 transition hover:ring-1 hover:ring-gray-400">
+                            View Cart <span x-text="`(${Object.keys($store.cart.items).length})`"></span>
+                        </a>
+
+                        <a href="{{ route('frontend.checkout.index') }}"
                             class="block rounded-sm bg-gray-700 px-5 py-3 text-sm text-gray-100 transition hover:bg-gray-600">
                             Checkout
                         </a>
+
+                        <a href="{{ route('frontend.products.index') }}"
+                            class="inline-block text-sm text-gray-500 underline underline-offset-4 transition hover:text-gray-600">
+                            Continue shopping
+                        </a>
+                    </div>
+                    <div class="flex justify-end">
+
                     </div>
                 </div>
             </template>
