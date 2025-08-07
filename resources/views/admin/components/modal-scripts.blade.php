@@ -59,7 +59,7 @@
                 const saveBtn = e.target.closest('[id^="save-media-"]');
                 if (!saveBtn) return;
 
-                const modalId = currentModalId;
+                const modalId = saveBtn.closest('.offcanvas')?.id || currentModalId;
                 const modal = document.getElementById(modalId);
                 const inputName = modal.dataset.imageInput;
                 const from = modal.dataset.from;
@@ -195,7 +195,7 @@
             }
 
             function loadMedia(url, modalId, page = 1, folderId = null) {
-                const loader = document.querySelector('.loader');
+                const loader = document.querySelector(`#${modalId} .loader.custom`);
                 const container = document.getElementById(`ajax-container-${modalId}`);
                 const pagination = document.getElementById(`pagination-${modalId}`);
                 if (loader) loader.style.display = 'block';
@@ -269,13 +269,17 @@
                                 });
                             });
                         }
+                        if (loader) loader.style.display = 'none';
                     })
                     .catch(() => {
                         console.error("Failed to load media.");
+                        if (loader) loader.style.display = 'none';
                     })
                     .finally(() => {
                         if (loader) loader.style.display = 'none';
                     });
+
+                    console.log(loader.style.display)
             }
 
 
@@ -296,7 +300,6 @@
                 if (button) {
                     e.preventDefault();
                     const modal = button.closest('.modal');
-                    console.log(modal)
                     const id = modal.querySelector('input[name="id"]').value;
                     const isFile = modal.querySelector('input[name="is_file"]').value;
                     const parent_id = modal.querySelector('select[name="folder_id"]').value;

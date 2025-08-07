@@ -67,8 +67,8 @@ class ProductService
                 if ($variant) {
                     $image = $variant->image;
 
-                    if (isset($combination['image']) && $combination['image'] instanceof \Illuminate\Http\UploadedFile) {
-                        $image = $this->uploadPhoto($combination['image'], $variant->image);
+                    if (isset($combination['image']) && is_string($combination['image'])) {
+                        $image = $combination['image'];
                     }
 
                     $variant->update([
@@ -85,9 +85,11 @@ class ProductService
             }
 
             $image = null;
-            if (isset($combination['image']) && $combination['image'] instanceof \Illuminate\Http\UploadedFile) {
-                $image = $this->uploadPhoto($combination['image']);
+            if (!empty($combination['image']) && is_string($combination['image'])) {
+                // Just store the image path from the selected gallery image
+                $image = $combination['image'];
             } elseif ($oldVariants && isset($combination['variant_id'])) {
+                // Use previous variant image if available
                 $image = $oldVariants[$combination['variant_id']]->image ?? null;
             }
 

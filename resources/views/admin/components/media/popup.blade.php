@@ -60,7 +60,7 @@
         </div>
 
         <div class="position-relative flex-grow-1 px-3">
-            <div class="loader custom"></div>
+            <div class="loader custom" style="display: none"></div>
             <div class="row gutters-sm" id="ajax-container-{{ $modalId }}">
                 {{-- Content loaded dynamically --}}
             </div>

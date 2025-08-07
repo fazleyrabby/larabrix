@@ -136,7 +136,7 @@
         </div>
     </div>
 
-     @include('admin.components.media.popup', [
+    @include('admin.components.media.popup', [
         'modalId' => 'crud-offcanvas',
         'inputType' => 'single',
         'imageInputName' => 'media_input'

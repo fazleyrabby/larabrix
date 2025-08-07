@@ -52,9 +52,9 @@ class ProductController extends Controller
         try {
             DB::transaction(function () use ($request) {
                 $data = $request->validated();
-                if ($request->hasFile('image')) {
-                    $data['image'] = $this->uploadPhoto($request->file('image'));
-                }
+                // if ($request->hasFile('image')) {
+                //     $data['image'] = $this->uploadPhoto($request->file('image'));
+                // }
                 $product = Product::create($data);
                 $this->service->storeCombinations($request, $product);
             });

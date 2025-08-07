@@ -55,7 +55,14 @@
                         <div class="mb-3 row">
                             <div class="col-3 col-form-label required">Product Image</div>
                             <div class="col">
-                                <input type="file" class="form-control" name="image"/>
+                                <button type="button" class="btn btn-primary" id="product-btn"
+                                            data-bs-toggle="offcanvas" data-bs-target="#product"
+                                            aria-controls="product" aria-expanded="false">
+                                            Upload File
+                                        </button>
+
+                                        <div id="product-wrapper">
+                                        </div>
                                 <small class="form-hint">
                                     @error('image')
                                         <div class="text-danger mt-2">{{ $message }}</div>
@@ -196,6 +203,19 @@
         </form>
       </div>
 
+    @include('admin.components.media.popup', [
+        'modalId' => 'product',
+        'inputType' => 'single',
+        'imageInputName' => 'image',
+    ])
+    <template id="media-template">
+        @include('admin.components.media.popup', [
+            'modalId' => 'product-variant-__INDEX__',
+            'inputType' => 'single',
+            'imageInputName' => 'combinations[__INDEX__][image]',
+        ])
+    </template>
+    <div id="product-media-container"></div>
 @endsection
 
 
@@ -325,9 +345,39 @@
                         <input type="text" name="combinations[${index}][sku]" class="form-control" required>
                     </td>
                     <td>
-                        <input type="file" name="combinations[${index}][image]" class="form-control">
+                        <button type="button" class="btn btn-primary" id="product-variant-${index}-btn"
+                                data-bs-toggle="offcanvas" data-bs-target="#product-variant-${index}"
+                                aria-controls="product-variant-${index}" aria-expanded="false">
+                                Upload File
+                            </button>
+
+                            <div id="product-variant-${index}-wrapper">  
+                            </div>
                     </td>
             `;
+
+            const mediaContainer = document.getElementById('product-media-container');
+            const existingMedia = mediaContainer.querySelector(`#product-variant-${index}`);
+            if (!existingMedia) {
+                const template = document.getElementById('media-template').innerHTML;
+                const rendered = template.replace(/__INDEX__/g, index);
+                mediaContainer.insertAdjacentHTML('beforeend', rendered);
+
+                const newModal = document.getElementById(`product-variant-${index}`);
+                if(newModal){
+                    const offcanvas = new tabler.Offcanvas(newModal);
+                    newModal.addEventListener('shown.bs.offcanvas', function() {
+                        const container = newModal.querySelector(`#ajax-container-${newModal.id}`);
+                        const route = newModal.getAttribute('data-route');
+                        if (container && route) {
+                            loadData(`${route}`, container);
+                        } else {
+                            console.error('Missing required elements or data for modal:', newModal.id, { container, route, folderId });
+                        }
+                    });
+                }
+            }
+
 
             wrapper.appendChild(row)
         });

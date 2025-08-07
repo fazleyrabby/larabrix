@@ -191,7 +191,6 @@
                 return;
             }
             target?.classList.add("onLoading");
-
             axios.get(url, {
                     headers: {
                         'X-Requested-With': 'XMLHttpRequest'
@@ -204,8 +203,9 @@
                     console.error("Failed to load data!", error);
                 })
                 .finally(() => {
-                    target.classList.remove("onLoading");
+                    target?.classList.remove("onLoading");
                 });
+            target?.classList.remove("onLoading");
         }
     </script>
 

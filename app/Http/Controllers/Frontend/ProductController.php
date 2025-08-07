@@ -11,7 +11,7 @@ class ProductController extends Controller
 {
     public function index()
     {
-        $products = Product::where('type','simple')->with('category')->paginate(10);
+        $products = Product::with('category')->paginate(10);
         return view('frontend.products.index', compact('products'));
     }
 }

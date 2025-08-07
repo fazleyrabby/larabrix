@@ -1,9 +1,9 @@
 @extends('admin.layouts.app')
 @section('title', 'Product Edit')
 @section('content')
-@push('styles')
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/choices.js/public/assets/styles/choices.min.css" />
-@endpush
+    @push('styles')
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/choices.js/public/assets/styles/choices.min.css" />
+    @endpush
     <!-- Page header -->
     <div class="page-header d-print-none">
         <div class="container-xl">
@@ -36,6 +36,15 @@
         </div>
     </div>
     <div class="page-body">
+        {{-- @if ($errors->any())
+            <div class="alert alert-danger">
+                <ul>
+                    @foreach ($errors->all() as $error)
+                        <li>{{ $error }}</li>
+                    @endforeach
+                </ul>
+            </div>
+        @endif --}}
         <form action="{{ route('admin.products.update', $product->id) }}" method="post" enctype="multipart/form-data">
             @csrf
             @method('PUT')
@@ -62,16 +71,43 @@
                                 <div class="mb-3 row">
                                     <div class="col-3 col-form-label required">Product Image</div>
                                     <div class="col">
-                                        <input type="file" class="form-control" name="image" />
+                                        {{-- <input type="file" class="form-control" name="image" /> --}}
+                                        <button type="button" class="btn btn-primary" id="product-btn"
+                                            data-bs-toggle="offcanvas" data-bs-target="#product"
+                                            aria-controls="product" aria-expanded="false">
+                                            Upload File
+                                        </button>
+
+                                        <div id="product-wrapper">
+                                            @if ($product->image)
+                                                <div class="my-3">Image Preview:</div>
+                                                <div class="image-wrapper">
+                                                    <img src="{{ asset($product->image) }}" />
+                                                    <input type="hidden" name="image"
+                                                        value="{{ $product->image }}">
+                                                    <span type="button" class="remove-image">
+                                                        <svg xmlns="http://www.w3.org/2000/svg" width="24"
+                                                            height="24" viewBox="0 0 24 24" fill="none"
+                                                            stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                                            stroke-linejoin="round"
+                                                            class="icon icon-tabler icons-tabler-outline icon-tabler-x">
+                                                            <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
+                                                            <path d="M18 6l-12 12"></path>
+                                                            <path d="M6 6l12 12"></path>
+                                                        </svg>
+                                                    </span>
+                                                </div>
+                                            @endif
+                                        </div>
                                         <small class="form-hint">
                                             @error('image')
                                                 <div class="text-danger mt-2">{{ $message }}</div>
                                             @enderror
                                         </small>
-                                        <div>Previous Image:</div>
+                                        {{-- <div>Previous Image:</div>
                                         @if (isset($product->image) && filled($product->image))
                                             <img width="100" src="{{ asset($product->image) }}" alt="">
-                                        @endif
+                                        @endif --}}
                                     </div>
                                 </div>
                                 <div class="mb-3 row">
@@ -133,73 +169,79 @@
                     </div>
 
                     <div class="col-12 variants {{ $product->type == 'simple' ? 'd-none' : '' }}">
-                    <div class="card">
-                        <div class="card-header">
-                            <h3 class="card-title">Variation</h3>
-                        </div>
-                        <div class="card-body">
-                            <div class="row">
-                                <div class="col-md-5">
-                                    <div class="mb-3">
-                                        <label class="form-label">Attribute Option</label>
-                                    </div>
-                                </div>
-                                <div class="col-md-6">
-                                    <div class="mb-3">
-                                        <label class="form-label">Attribute Value</label>
-                                    </div>
-                                </div>
+                        <div class="card">
+                            <div class="card-header">
+                                <h3 class="card-title">Variation</h3>
                             </div>
-                            <div id="attribute-values-wrapper">
-                                @forelse ($attrRows as $index => $attrRow)
-                                <div class="row attribute-value-row">
-                                    <div class="col-md-5 mb-3">
-                                        <select class="form-control variant-select" id="variant-{{ $index }}">
-                                            <option value="" selected>Select</option>
-                                            @foreach ($attributes as $attribute)
-                                                <option value="{{ $attribute->id }}" @selected($attribute->id == $attrRow['attr_id'])
-                                                    data-values='@json($attribute->values->pluck("title", "id"))'>{{ $attribute->title }}</option>
-                                            @endforeach
-                                        </select>
+                            <div class="card-body">
+                                <div class="row">
+                                    <div class="col-md-5">
+                                        <div class="mb-3">
+                                            <label class="form-label">Attribute Option</label>
+                                        </div>
                                     </div>
-                                    <div class="col-md-5 mb-3">
-                                        <select class="form-select variant-values" name="" placeholder="Select values" id="variant-{{ $index }}-values" value="" multiple
-                                        data-selected-values='@json(array_map("strval", $attrRow["attr_value_ids"]))'
-                                        >
-                                        </select>
-                                    </div>
-                                    <div class="col-md-2 mb-3">
-                                        <button type="button" class="btn btn-danger remove-row">Remove</button>
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            <label class="form-label">Attribute Value</label>
+                                        </div>
                                     </div>
                                 </div>
+                                <div id="attribute-values-wrapper">
+                                    @forelse ($attrRows as $index => $attrRow)
+                                        <div class="row attribute-value-row">
+                                            <div class="col-md-5 mb-3">
+                                                <select class="form-control variant-select"
+                                                    id="variant-{{ $index }}">
+                                                    <option value="" selected>Select</option>
+                                                    @foreach ($attributes as $attribute)
+                                                        <option value="{{ $attribute->id }}" @selected($attribute->id == $attrRow['attr_id'])
+                                                            data-values='@json($attribute->values->pluck('title', 'id'))'>
+                                                            {{ $attribute->title }}</option>
+                                                    @endforeach
+                                                </select>
+                                            </div>
+                                            <div class="col-md-5 mb-3">
+                                                <select class="form-select variant-values" name=""
+                                                    placeholder="Select values" id="variant-{{ $index }}-values"
+                                                    value="" multiple
+                                                    data-selected-values='@json(array_map('strval', $attrRow['attr_value_ids']))'>
+                                                </select>
+                                            </div>
+                                            <div class="col-md-2 mb-3">
+                                                <button type="button" class="btn btn-danger remove-row">Remove</button>
+                                            </div>
+                                        </div>
 
-                                @empty
-                                <div class="row attribute-value-row">
-                                    <div class="col-md-5 mb-3">
-                                        <select class="form-control variant-select" id="variant-0">
-                                            <option value="" selected>Select</option>
-                                            @foreach ($attributes as $attribute)
-                                                <option value="{{ $attribute->id }}"
-                                                    data-values='@json($attribute->values->pluck("title", "id"))'>{{ $attribute->title }}</option>
-                                            @endforeach
-                                        </select>
-                                    </div>
-                                    <div class="col-md-5 mb-3">
-                                        <select class="form-select variant-values" name="variant[0][value]" placeholder="Select values" id="variant-0-values" value="" multiple>
-                                        </select>
-                                    </div>
-                                    <div class="col-md-2 mb-3">
-                                        <button type="button" class="btn btn-danger remove-row">Remove</button>
-                                    </div>
+                                    @empty
+                                        <div class="row attribute-value-row">
+                                            <div class="col-md-5 mb-3">
+                                                <select class="form-control variant-select" id="variant-0">
+                                                    <option value="" selected>Select</option>
+                                                    @foreach ($attributes as $attribute)
+                                                        <option value="{{ $attribute->id }}"
+                                                            data-values='@json($attribute->values->pluck('title', 'id'))'>
+                                                            {{ $attribute->title }}</option>
+                                                    @endforeach
+                                                </select>
+                                            </div>
+                                            <div class="col-md-5 mb-3">
+                                                <select class="form-select variant-values" name="variant[0][value]"
+                                                    placeholder="Select values" id="variant-0-values" value=""
+                                                    multiple>
+                                                </select>
+                                            </div>
+                                            <div class="col-md-2 mb-3">
+                                                <button type="button" class="btn btn-danger remove-row">Remove</button>
+                                            </div>
+                                        </div>
+
+                                    @endforelse
+
                                 </div>
-
-                                @endforelse
-
+                                <button type="button" class="btn btn-dark" id="add-new">Add New</button>
                             </div>
-                            <button type="button" class="btn btn-dark" id="add-new">Add New</button>
                         </div>
                     </div>
-                </div>
                     <div class="col-12 variant-combo {{ $product->type == 'simple' ? 'd-none' : '' }}">
                         <div class="card">
                             <div class="card-body">
@@ -228,10 +270,24 @@
         </form>
     </div>
 
+    @include('admin.components.media.popup', [
+        'modalId' => 'product',
+        'inputType' => 'single',
+        'imageInputName' => 'image',
+    ])
+    <template id="media-template">
+        @include('admin.components.media.popup', [
+            'modalId' => 'product-variant-__INDEX__',
+            'inputType' => 'single',
+            'imageInputName' => 'combinations[__INDEX__][image]',
+        ])
+    </template>
+    <div id="product-media-container"></div>
+
 @endsection
 
 @push('scripts')
-<script src="https://cdn.jsdelivr.net/npm/choices.js/public/assets/scripts/choices.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/choices.js/public/assets/scripts/choices.min.js"></script>
     <script>
         document.addEventListener("DOMContentLoaded", function() {
             var el;
@@ -281,7 +337,7 @@
                     });
                     selectEl.dataset.initialized = true;
 
-                    selectEl.addEventListener('change', function () {
+                    selectEl.addEventListener('change', function() {
                         const selected = this.selectedOptions[0];
                         const valueSelectId = this.id + '-values';
                         const valueSelect = document.getElementById(valueSelectId);
@@ -387,7 +443,7 @@
                 const idHTML = comboIds.map(id =>
                     `<input type="hidden" name="combinations[${newIndex}][ids][]" value="${id}">`
                 ).join('');
-
+                const storageBasePath = "{{ Storage::disk('public')->url('') }}";
                 wrapper.innerHTML += `<tr>
                         <td>
                             <label class="form-label"><strong>${label}</strong></label>
@@ -402,17 +458,59 @@
                             <input type="text" name="combinations[${newIndex}][sku]" class="form-control" required value="${existing?.sku ?? ''}">
                         </td>
                         <td>
-                            <input type="file" name="combinations[${newIndex}][image]" class="form-control">
-                            ${existing?.image ? `<img src="/storage/${existing.image}" alt="variant image" class="mt-2" width="80">` : ''}
-                        </td>
-                    </tr>`;
+                            <button type="button" class="btn btn-primary" id="product-variant-${newIndex}-btn"
+                                data-bs-toggle="offcanvas" data-bs-target="#product-variant-${newIndex}"
+                                aria-controls="product-variant-${newIndex}" aria-expanded="false">
+                                Upload File
+                            </button>
 
+                            <div id="product-variant-${newIndex}-wrapper">  
+                                ${existing?.image ? `<div class="my-3">Image Preview:</div>
+                                        <div class="image-wrapper">
+                                            <img src="${storageBasePath}${existing?.image}" class="mr-3 mb-3">
+                                            <input type="hidden" name="combinations[${newIndex}][image]" value="${existing?.image ?? ''}">
+                                            <span type="button" class="remove-image">
+                                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-x">
+                                                    <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
+                                                    <path d="M18 6l-12 12"></path>
+                                                    <path d="M6 6l12 12"></path>
+                                                </svg>
+                                            </span>
+                                        </div>` : "" }
+                            </div>
+                        </td>
+                        
+                    </tr>`;
+                const mediaContainer = document.getElementById('product-media-container');
+                const existingMedia = mediaContainer.querySelector(`#product-variant-${newIndex}`);
+                if (!existingMedia) {
+                    const template = document.getElementById('media-template').innerHTML;
+                    const rendered = template.replace(/__INDEX__/g, newIndex);
+                    mediaContainer.insertAdjacentHTML('beforeend', rendered);
+                    const newModal = document.getElementById(`product-variant-${newIndex}`);
+                    if(newModal){
+                        const offcanvas = new tabler.Offcanvas(newModal);
+                        newModal.addEventListener('shown.bs.offcanvas', function() {
+                            const container = newModal.querySelector(`#ajax-container-${newModal.id}`);
+                            const route = newModal.getAttribute('data-route');
+                            if (container && route) {
+                                loadData(`${route}`, container);
+                            } else {
+                                console.error('Missing required elements or data for modal:', newModal.id, { container, route, folderId });
+                            }
+                        });
+                    }
+                }
+               
                 newIndex++;
             });
         }
+
         function getCombinations(arrays) {
             if (!arrays.length) return [];
-            let result = [[]];
+            let result = [
+                []
+            ];
 
             arrays.forEach(array => {
                 if (!Array.isArray(array)) array = [array];
@@ -428,13 +526,13 @@
             return result;
         }
 
-        document.addEventListener("DOMContentLoaded", function () {
+        document.addEventListener("DOMContentLoaded", function() {
             setupVariantSelects();
             setupVariantChangeListeners();
 
             const type = document.getElementById('type');
             const variants = document.querySelector('.variants');
-            type.addEventListener('change', function () {
+            type.addEventListener('change', function() {
                 if (this.value == 'variable') {
                     variants.classList.remove('d-none');
                 } else {
@@ -445,7 +543,7 @@
 
         let newIndex = 1;
 
-        document.getElementById('add-new').addEventListener('click', function () {
+        document.getElementById('add-new').addEventListener('click', function() {
             const wrapper = document.getElementById('attribute-values-wrapper');
 
             const row = document.createElement('div');
@@ -460,7 +558,7 @@
                         <option value="" selected>Select</option>
                         @foreach ($attributes as $attribute)
                             <option value="{{ $attribute->id }}"
-                                data-values='@json($attribute->values->pluck("title", "id"))'>{{ $attribute->title }}</option>
+                                data-values='@json($attribute->values->pluck('title', 'id'))'>{{ $attribute->title }}</option>
                         @endforeach
                     </select>
                 </div>
@@ -478,7 +576,7 @@
             setupVariantChangeListeners();
         });
 
-        document.addEventListener('click', function (e) {
+        document.addEventListener('click', function(e) {
             if (e.target && e.target.classList.contains('remove-row')) {
                 e.target.closest('.attribute-value-row').remove();
                 generateVariantCombinations();
