@@ -240,22 +240,22 @@
                                         </svg>
                                     </button>
 
-                                    <a href="{{ route('frontend.products.show', $product->id) }}">
+                                    <a href="{{ route('frontend.products.show', $product->slug) }}">
                                         <img src="{{ $product->image ? asset($product->image) : 'https://placehold.co/400' }}"
                                             alt=""
                                             class="h-64 w-full object-cover transition duration-500 group-hover:scale-105 sm:h-72" />
                                     </a>
 
-                                    <div class="p-6">
+                                <div class="p-6">
                                         <h3 class="mt-4 text-lg font-medium text-gray-900">
-                                            <a href="{{ route('frontend.products.show', $product->id) }}">{{ $product->title }}</a>
+                                            <a href="{{ route('frontend.products.show', $product->slug) }}">{{ $product->title }}</a>
                                         </h3>
 
                                         <p class="mt-1.5 text-sm text-gray-700">${{ $product->price }}</p>
 
                                         <div x-data="cart">
                                             <button type="button" @click="addToCart({{ $product->id }})"
-                                                class="mt-4 block w-full rounded-sm bg-yellow-400 p-4 text-sm font-medium transition hover:scale-105">
+                                                class="btn mt-4 block w-full btn-neutral">
                                                 Add to Cart
                                             </button>
                                         </div>

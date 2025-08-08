@@ -58,11 +58,17 @@
                 }
             });
 
-            Alpine.data('cart', () => ({
-                addToCart(productId) {
+            Alpine.data('cart', (productId) => ({
+                quantity: 1,
+                variantId: null,
+                setVariantId(id) {
+                    this.variantId = id;
+                },
+                addToCart() {
                     axios.post('/cart/add', {
                         product_id: productId,
-                        quantity: 1
+                        quantity: this.quantity,
+                        variant_id: this.variantId 
                     })
                     .then(response => {
                         Alpine.store('cart').reset(response.data.data);
@@ -70,6 +76,7 @@
                             'Added to cart!');
                     })
                     .catch(error => {
+                        Alpine.store('cart').reset(error?.response?.data?.data);
                         Alpine.store('toast').show(false, error.response?.data?.message ||
                             'Add to cart failed.');
                     });

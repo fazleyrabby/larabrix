@@ -19,7 +19,8 @@ class ProductFactory extends Factory
     public function definition(): array
     {
         return [
-            'title'        => $this->faker->sentence(3),
+            'title'        => $title = $this->faker->sentence(3),
+            'slug'         => Str::slug($title), // create slug from title
             'type'         => 'variable',
             'sku'          => strtoupper(Str::random(10)),
             'price'        => null, // price comes from variants

@@ -13,8 +13,9 @@
 
                         <dl class="mt-0.5 space-y-px text-[10px] text-gray-600">
                             <div>
-                                <dt class="inline" x-text="`Price: $${item.price.toFixed(2)}`"></dt>
-                                {{-- <dd class="inline">XXS</dd> --}}
+                                <dt class="inline" x-text="`Price: $${parseFloat(item.price).toFixed(2)}`"></dt>
+                                <br>
+                                <dd class="inline" x-text="`Sku: ${item.sku}`"></dd>
                             </div>
 
                             {{-- <div>

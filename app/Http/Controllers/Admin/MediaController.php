@@ -185,6 +185,7 @@ class MediaController extends Controller
         if ($request->ajax()) {
             return response()->json($response);
         }
+        
         return redirect()->back()->with($success, $message);
     }
 

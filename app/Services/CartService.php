@@ -4,33 +4,74 @@
 namespace App\Services;
 
 use App\Models\Product;
+use App\Models\ProductVariant;
 
 class CartService
 {
-    public function add($productId, $quantity = 1)
+    public function add($productId, $quantity = 1, $variantId = null)
     {
-        $product = Product::findOrFail($productId);
-
         $cart = session()->get('cart', []);
 
-        if (isset($cart['items'][$productId])) {
-            $cart['items'][$productId]['quantity'] += $quantity;
+        // Use unique key for product + variant combo
+        $key = $productId . '_' . ($variantId ?? 'default');
+
+        $currentQty = $cart['items'][$key]['quantity'] ?? 0;
+        $newQuantity = $currentQty + $quantity;
+
+        $exceeded = false;
+        if ($newQuantity > 10) {
+            $newQuantity = 10;
+            $exceeded = true;
+        }
+
+        if (isset($cart['items'][$key])) {
+            // Update quantity only
+            $cart['items'][$key]['quantity'] = $newQuantity;
         } else {
-            $cart['items'][$productId] = [
+            $product = Product::findOrFail($productId);
+
+            $price = $product->price;
+            $sku = $product->sku;
+            $image = $product->image ? asset($product->image) : 'https://placehold.co/400';
+
+            if ($variantId) {
+                $variant = ProductVariant::find($variantId);
+                if ($variant) {
+                    if ($variant->price !== null) {
+                        $price = $variant->price;
+                    }
+                    if ($variant->sku) {
+                        $sku = $variant->sku;
+                    }
+                    if ($variant->image ?? false) {
+                        $image = asset($variant->image);
+                    }
+                }
+            }
+
+            $cart['items'][$key] = [
                 'product_id' => $product->id,
-                'title' => $product->title,
-                'price' => $product->price,
-                'image' => $product->image ? asset($product->image) : 'https://placehold.co/400', 
-                'sku' => $product->sku,  
-                'quantity' => $quantity,
+                'variant_id' => $variantId,
+                'title'      => $product->title,
+                'price'      => $price,
+                'image'      => $image,
+                'sku'        => $sku,
+                'quantity'   => $newQuantity,
                 'attributes' => [],
             ];
         }
+
         $cart = $this->updateTotal($cart);
         session()->put('cart', $cart);
+
+        return [
+            'success' => !$exceeded,
+            'message' => $exceeded ? 'Maximum quantity for this product is 10.' : 'Successfully added to cart!',
+        ];
     }
 
-    public function update($productId, $quantity){
+    public function update($productId, $quantity)
+    {
         $cart = session()->get('cart');
         if (isset($cart['items'][$productId])) {
             $cart['items'][$productId]['quantity'] = $quantity;
@@ -52,7 +93,8 @@ class CartService
         return $cart;
     }
 
-    private function updateTotal($cart){
+    private function updateTotal($cart)
+    {
         $total = 0;
         foreach ($cart['items'] as $key => $item) {
             // Skip if key is 'total' itself to avoid issues

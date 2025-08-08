@@ -29,6 +29,11 @@ class ProductRequest extends FormRequest
         return [
             'title' => 'required|string|max:120|unique:products,title,' . $id,
             'description' => 'nullable|string|max:200',
+            'slug' => [
+                'required',
+                'string',
+                'regex:/^[a-z0-9-]+$/',
+            ],
             'sku' => 'required|string|max:200|unique:products,sku,' . $id,
             'category_id' => 'required',
             'type' => 'required',

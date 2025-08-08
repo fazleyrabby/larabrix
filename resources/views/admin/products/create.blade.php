@@ -53,6 +53,18 @@
                             </div>
                         </div>
                         <div class="mb-3 row">
+                            <label class="col-3 col-form-label required">Product slug</label>
+                            <div class="col">
+                                <input type="text" class="form-control" aria-describedby="emailHelp"
+                                    placeholder="Product slug" name="slug" value="{{ old('slug') }}">
+                                <small class="form-hint">
+                                    @error('slug')
+                                        <div class="text-danger mt-2">{{ $message }}</div>
+                                    @enderror
+                                </small>
+                            </div>
+                        </div>
+                        <div class="mb-3 row">
                             <div class="col-3 col-form-label required">Product Image</div>
                             <div class="col">
                                 <button type="button" class="btn btn-primary" id="product-btn"

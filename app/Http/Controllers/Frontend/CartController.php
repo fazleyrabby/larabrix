@@ -17,10 +17,18 @@ class CartController extends Controller
     {
         $productId = $request->input('product_id');
         $quantity = $request->input('quantity', 1);
+        $variantId = $request->input('variant_id') ?? null;
 
-        $this->service->add($productId, $quantity);
-
+        $result = $this->service->add($productId, $quantity, $variantId);
         $carts = session()->get('cart') ?? [];
+        if (!$result['success']) {
+            return response()->json([
+                'success' => false,
+                'message' => $result['message'],
+                'data'    => $carts
+            ], 422);
+        }
+        
         return response()->json(['success' => true,'message' => 'Successfully added to cart!','data' => $carts]);
     }
 
