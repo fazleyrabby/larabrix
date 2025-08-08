@@ -253,8 +253,8 @@
 
                                         <p class="mt-1.5 text-sm text-gray-700">${{ $product->price }}</p>
 
-                                        <div x-data="cart">
-                                            <button type="button" @click="addToCart({{ $product->id }})"
+                                        <div x-data="cart({{ $product->id }})">
+                                            <button type="button" @click="addToCart()"
                                                 class="btn mt-4 block w-full btn-neutral">
                                                 Add to Cart
                                             </button>
