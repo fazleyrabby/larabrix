@@ -8,10 +8,7 @@
                 </header>
 
                 <div class="mt-8 max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-3 gap-8">
-
-                    <!-- Left: Shipping Form + Payment (2/3) -->
                     <div class="lg:col-span-2">
-                        <!-- Shipping Form -->
                         <div class="bg-white p-6 rounded-lg shadow">
                             <h2 class="text-2xl font-semibold mb-6 text-gray-800">Shipping Information</h2>
                             <form @submit.prevent="submitShipping" class="space-y-4">
@@ -44,22 +41,61 @@
                                 </div>
                             </form>
                         </div>
+                        
+                        <div x-show="showPaymentOptions" x-cloak class="mt-6">
+                            <h2 class="text-2xl font-semibold mb-4 text-gray-800">Select a Payment Method</h2>
+                            <div class="space-y-4">
+                                <div class="bg-white p-4 rounded-lg shadow flex items-center gap-4 cursor-pointer"
+                                    :class="selectedPayment === 'stripe' ? 'border-2 border-blue-500' : ''"
+                                    @click="selectedPayment = 'stripe'">
+                                    <input type="radio" name="payment_method" value="stripe" x-model="selectedPayment" class="radio radio-primary" />
+                                    <div class="flex-grow">
+                                        <h3 class="font-bold">Credit/Debit Card (Stripe)</h3>
+                                        <p class="text-sm text-gray-500">Pay securely with your credit or debit card.</p>
+                                    </div>
+                                    <img src="https://stripe.com/img/payments/elements-examples/mastercard.svg" alt="Stripe" class="h-6">
+                                </div>
+        
+                                <div class="bg-white p-4 rounded-lg shadow flex items-center gap-4 cursor-pointer"
+                                    :class="selectedPayment === 'paypal' ? 'border-2 border-blue-500' : ''"
+                                    @click="selectedPayment = 'paypal'">
+                                    <input type="radio" name="payment_method" value="paypal" x-model="selectedPayment" class="radio radio-primary" />
+                                    <div class="flex-grow">
+                                        <h3 class="font-bold">PayPal</h3>
+                                        <p class="text-sm text-gray-500">Pay with your PayPal account.</p>
+                                    </div>
+                                    <img src="https://www.paypalobjects.com/paypal-ui/logos/svg/paypal-mark.svg" alt="PayPal" class="h-6">
+                                </div>
+        
+                                <div class="bg-white p-4 rounded-lg shadow flex items-center gap-4 cursor-pointer"
+                                    :class="selectedPayment === 'cod' ? 'border-2 border-blue-500' : ''"
+                                    @click="selectedPayment = 'cod'">
+                                    <input type="radio" name="payment_method" value="cod" x-model="selectedPayment" class="radio radio-primary" />
+                                    <div class="flex-grow">
+                                        <h3 class="font-bold">Cash on Delivery</h3>
+                                        <p class="text-sm text-gray-500">Pay with cash when your order is delivered.</p>
+                                    </div>
+                                </div>
+                            </div>
+        
+                            <div x-show="selectedPayment === 'stripe'" x-cloak class="mt-6">
+                                <div class="bg-white p-6 rounded-lg shadow">
+                                    <h3 class="font-semibold text-lg mb-4">Card Details</h3>
+                                    <div x-ref="card" id="card-element" class="border p-4 rounded"></div>
+                                </div>
+                            </div>
 
-                        <!-- Stripe Payment -->
-                        <div x-show="showPayment" x-cloak class="mt-6">
-                            <div x-ref="card" id="card-element" class="border p-4 rounded"></div>
-                            <button type="button" @click="pay" :disabled="isProcessing"
-                                class="mt-4 rounded px-4 py-2 text-white w-full"
-                                :class="isProcessing ? 'bg-gray-400 cursor-not-allowed' : 'bg-green-600 hover:bg-green-500'">
-                                <span x-show="!isProcessing">Pay Now</span>
+                            <button @click="processPayment" :disabled="isProcessing"
+                                class="mt-6 btn btn-neutral w-full"
+                                :class="isProcessing ? 'bg-gray-400 cursor-not-allowed' : 'hover:opacity-60'">
+                                <span x-show="!isProcessing">Complete Order</span>
                                 <span x-show="isProcessing">Processing...</span>
                             </button>
                         </div>
                     </div>
-
-                    <!-- Right: Cart Summary Table (1/3) -->
+        
                     <div x-data x-init class="overflow-x-auto rounded border border-gray-200 h-max">
-                        <h2 class="text-lg font-semibold mb-4 px-4">Summary</h2>
+                        <h2 class="text-lg font-semibold px-4 py-2">Summary</h2>
                         <table class="min-w-full divide-y divide-gray-200 text-sm">
                             <thead class="bg-gray-100 text-gray-700">
                                 <tr>
@@ -75,7 +111,7 @@
                                         <td colspan="4" class="text-center text-gray-500 py-4">Your cart is empty.</td>
                                     </tr>
                                 </template>
-
+        
                                 <template x-for="(item, key) in $store.cart.items" :key="key">
                                     <tr>
                                         <td class="px-4 py-2">
@@ -88,8 +124,7 @@
                                         </td>
                                     </tr>
                                 </template>
-
-                                <!-- Subtotal -->
+        
                                 <template x-if="Object.keys($store.cart.items).length > 0">
                                     <tr class="bg-gray-50">
                                         <td colspan="3" class="px-4 py-3 text-right font-medium text-gray-700">Subtotal
@@ -98,8 +133,7 @@
                                             x-text="$store.cart.total"></td>
                                     </tr>
                                 </template>
-
-                                <!-- Total -->
+        
                                 <template x-if="Object.keys($store.cart.items).length > 0">
                                     <tr class="bg-gray-100 font-semibold text-gray-900">
                                         <td colspan="3" class="px-4 py-3 text-right">Total</td>
@@ -114,19 +148,18 @@
         </div>
     </section>
 @endsection
-
-
+        
+        
 @push('scripts')
     <script src="https://js.stripe.com/v3/"></script>
     <script>
         function checkoutComponent() {
             return {
                 stripe: null,
-                card: null, // rename from cardElement to card to match usage
-                showShipping: false,
-                showPayment: false,
-                orderId: null,
-                transactionId: null,
+                elements: null,
+                card: null,
+                showPaymentOptions: false,
+                selectedPayment: 'stripe', // Default to stripe
                 isProcessing: false,
                 shipping: {
                     name: '{{ auth()?->user()?->name ?? '' }}',
@@ -134,12 +167,12 @@
                     city: '',
                     phone: '',
                 },
-
+        
                 init() {
                     this.stripe = Stripe("{{ $stripe['public_key'] }}");
                     this.elements = this.stripe.elements();
                 },
-
+        
                 async submitShipping() {
                     if (
                         !this.shipping.name ||
@@ -147,42 +180,51 @@
                         !this.shipping.city ||
                         !this.shipping.phone
                     ) {
-                        // Show error message (customize as needed)
                         Alpine.store('toast').show(false, 'Please fill out all required fields.');
                         return;
                     }
-                    // Validate shipping form, then show Stripe payment form
-                    this.showShipping = false;
-                    this.showPayment = true;
-
+        
+                    this.showPaymentOptions = true;
+        
                     // Wait for DOM update, then mount Stripe card
                     this.$nextTick(() => {
-                        const style = {
-                            base: {
-                                fontSize: '16px',
-                                color: '#32325d'
-                            }
-                        };
-                        this.card = this.elements.create('card', {
-                            style
-                        });
-                        this.card.mount(this.$refs.card);
+                        if(this.selectedPayment === 'stripe' && !this.card) {
+                            const style = {
+                                base: {
+                                    fontSize: '16px',
+                                    color: '#32325d'
+                                }
+                            };
+                            this.card = this.elements.create('card', { style });
+                            this.card.mount(this.$refs.card);
+                        }
                     });
                 },
-
-                async pay() {
+        
+                async processPayment() {
                     this.isProcessing = true;
-
+                    if(this.selectedPayment === 'stripe') {
+                        this.payWithStripe();
+                    } else if (this.selectedPayment === 'paypal') {
+                        // Handle PayPal logic (e.g., redirect to PayPal or a modal)
+                        // For this example, we'll just show a message.
+                        Alpine.store('toast').show(false, "PayPal integration is not yet implemented.");
+                        this.isProcessing = false;
+                    } else if (this.selectedPayment === 'cod') {
+                        // Handle Cash on Delivery logic
+                        this.payWithCOD();
+                    }
+                },
+        
+                async payWithStripe() {
                     try {
-                        // 1. Create a PaymentIntent (with amount from cart and shipping)
                         const paymentIntentRes = await axios.post('/checkout/payment-intent', {
                             shipping: this.shipping,
                             total: this.$store.cart.total,
                         });
-
+        
                         const clientSecret = paymentIntentRes.data.client_secret;
-
-                        // 2. Confirm the payment
+        
                         const result = await this.stripe.confirmCardPayment(clientSecret, {
                             payment_method: {
                                 card: this.card,
@@ -191,25 +233,41 @@
                                 }
                             }
                         });
-
+        
                         if (result.error) {
                             Alpine.store('toast').show(false, result.error.message);
                             this.isProcessing = false;
                             return;
                         }
-
-                        // 3. On success, create order + transaction
+        
                         if (result.paymentIntent.status === 'succeeded') {
-                            const confirmRes = await axios.post('/checkout/confirm', {
+                            await axios.post('/checkout/confirm', {
                                 transaction_id: result.paymentIntent.id,
+                                payment_method: 'stripe',
                             });
-
+        
                             window.location.href = '/payment-complete';
                         }
                     } catch (error) {
                         console.error(error);
-                        // alert("Payment failed.");
                         Alpine.store('toast').show(false, "Payment failed.");
+                        this.isProcessing = false;
+                    }
+                },
+        
+                async payWithCOD() {
+                    try {
+                        await axios.post('/checkout/confirm', {
+                            transaction_id: 'cod-' + new Date().getTime(),
+                            payment_method: 'cod',
+                            shipping: this.shipping,
+                            total: this.$store.cart.total,
+                        });
+        
+                        window.location.href = '/payment-complete';
+                    } catch (error) {
+                        console.error(error);
+                        Alpine.store('toast').show(false, "Failed to place order.");
                         this.isProcessing = false;
                     }
                 }

@@ -82,7 +82,7 @@
 @push('scripts')
 
 <script>
-    window.variants = @json($variants); 
+    window.variants = @json($product->variants); 
     document.addEventListener('DOMContentLoaded', () => {
         const variants = window.variants || [];
         const priceEl = document.getElementById('variant-price');

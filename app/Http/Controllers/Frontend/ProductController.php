@@ -43,12 +43,7 @@ class ProductController extends Controller
         ->get();
 
         $product->load('variants.attributeValues');
-        $product->variants->transform(function ($variant) {
-            $variant->attribute_value_ids = $variant->attributeValues->pluck('id')->sort()->values()->all();
-            return $variant;
-        });
-
-        $variants = $product->variants->map(function($v) {
+        $product->variants->transform(function ($v) {
             return [
                 'id' => $v->id,
                 'price' => $v->price,
@@ -56,7 +51,8 @@ class ProductController extends Controller
                 'image' => Storage::disk('public')->url($v->image),
                 'attribute_value_ids' => $v->attributeValues->pluck('id')->sort()->values()->all(),
             ];
-        })->toArray();
-        return view('frontend.products.show', compact('product', 'attributes','variants'));
+        });
+
+        return view('frontend.products.show', compact('product', 'attributes'));
     }
 }
