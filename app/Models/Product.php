@@ -50,10 +50,10 @@ class Product extends Model
         return $query;
     }
 
-    public function getShortDescriptionAttribute()
-    {
-        return str()->limit($this->description, 20);
-    }
+    // public function getShortDescriptionAttribute()
+    // {
+    //     return str()->limit($this->description, 20);
+    // }
 
     public function getCreatedAtHumanAttribute()
     {

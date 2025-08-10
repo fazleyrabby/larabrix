@@ -30,7 +30,7 @@
 
                     <!-- Description -->
                     <p class="text-gray-600 leading-relaxed">
-                        {{ $product->description }}
+                        {{ $product->short_description }}
                     </p>
 
                     <!-- Attributes -->
@@ -74,6 +74,46 @@
                     </div>
                 </div>
             </div>
+            <!-- Tabs Section -->
+                <div class="mt-12">
+                    <div role="tablist" class="tabs tabs-box">
+                        <input type="radio" name="product_tabs" role="tab" class="tab" aria-label="Description" checked>
+                        <div role="tabpanel" class="tab-content p-4">
+                            <div class="prose max-w-none">
+                                {!! $product->description !!}
+                            </div>
+                        </div>
+
+                        <input type="radio" name="product_tabs" role="tab" class="tab" aria-label="Additional Information">
+                        <div role="tabpanel" class="tab-content p-4">
+                            @if(!empty($product->additional_info))
+                                @php
+                                    $additionalInfo = is_array($product->additional_info) 
+                                        ? $product->additional_info 
+                                        : json_decode($product->additional_info, true);
+                                @endphp
+                                <table class="table table-zebra w-full">
+                                    <tbody>
+                                        @foreach($additionalInfo as $key => $value)
+                                            <tr>
+                                                <th class="w-1/3">{{ $key }}</th>
+                                                <td>{{ $value }}</td>
+                                            </tr>
+                                        @endforeach
+                                    </tbody>
+                                </table>
+                            @else
+                                <p>No additional information available.</p>
+                            @endif
+                        </div>
+
+                        <input type="radio" name="product_tabs" role="tab" class="tab" aria-label="Reviews">
+                        <div role="tabpanel" class="tab-content p-4">
+                            <p>No reviews yet.</p>
+                            {{-- You can later add a review form here --}}
+                        </div>
+                    </div>
+                </div>
         </div>
     </section>
 @endsection

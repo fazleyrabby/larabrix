@@ -159,9 +159,21 @@
                                 <div class="mb-3 row">
                                     <label class="col-3 col-form-label required">Descripion</label>
                                     <div class="col">
-                                        <textarea name="description" class="form-control" id="" cols="30" rows="10">{{ $product->description }}</textarea>
+                                        {{-- <textarea name="description" class="form-control" id="" cols="30" rows="10">{{ $product->description }}</textarea> --}}
+                                        <textarea id="hugerte-mytextarea" name="description">{{ $product->description }}</textarea>
                                         <small class="form-hint">
                                             @error('description')
+                                                <div class="text-danger mt-2">{{ $message }}</div>
+                                            @enderror
+                                        </small>
+                                    </div>
+                                </div>
+                                <div class="mb-3 row">
+                                    <label class="col-3 col-form-label required">Short Descripion</label>
+                                    <div class="col">
+                                        <textarea name="short_description" class="form-control" id="" cols="30" rows="3">{{ $product->short_description }}</textarea>
+                                        <small class="form-hint">
+                                            @error('short_description')
                                                 <div class="text-danger mt-2">{{ $message }}</div>
                                             @enderror
                                         </small>
@@ -174,6 +186,41 @@
                                             <option value="simple" @selected($product->type == 'simple')>Simple</option>
                                             <option value="variable" @selected($product->type == 'variable')>Variable</option>
                                         </select>
+                                    </div>
+                                </div>
+                                <div class="mb-3 row">
+                                    @php
+                                        $details = $product->additional_info ? json_decode($product->additional_info, true) : [];
+                                    @endphp
+                                    <label class="col-3 col-form-label required">Additional Info</label>
+                                    <div class="col">
+                                        <table class="table table-bordered" id="extra-details">
+                                            <thead>
+                                                <tr>
+                                                    <th style="width: 40%">Key</th>
+                                                    <th style="width: 40%">Value</th>
+                                                    <th style="width: 20%">Action</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <tr class="detail-row">
+                                                    @forelse($details as $key => $value)
+                                                        <tr class="detail-row">
+                                                            <td><input type="text" name="detail_key[]" class="form-control" value="{{ $key }}" placeholder="Key"></td>
+                                                            <td><input type="text" name="detail_value[]" class="form-control" value="{{ $value }}" placeholder="Value"></td>
+                                                            <td><button type="button" class="btn btn-danger btn-sm remove-detail">X</button></td>
+                                                        </tr>
+                                                    @empty
+                                                        <tr class="detail-row">
+                                                            <td><input type="text" name="detail_key[]" class="form-control" placeholder="Key"></td>
+                                                            <td><input type="text" name="detail_value[]" class="form-control" placeholder="Value"></td>
+                                                            <td><button type="button" class="btn btn-danger btn-sm remove-detail">X</button></td>
+                                                        </tr>
+                                                    @endforelse
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                        <button type="button" id="add-detail" class="btn btn-info">+ Add Detail</button>
                                     </div>
                                 </div>
                             </div>
@@ -299,6 +346,7 @@
 @endsection
 
 @push('scripts')
+    <script src="{{ asset('admin/dist/libs/hugerte/hugerte.min.js') }}"></script>
     <script src="https://cdn.jsdelivr.net/npm/choices.js/public/assets/scripts/choices.min.js"></script>
     <script>
         document.addEventListener("DOMContentLoaded", function() {
@@ -593,6 +641,35 @@
                 e.target.closest('.attribute-value-row').remove();
                 generateVariantCombinations();
             }
+        });
+
+        document.addEventListener('DOMContentLoaded', function () {
+            const tableBody = document.querySelector('#extra-details tbody');
+            const addBtn = document.getElementById('add-detail');
+
+            addBtn.addEventListener('click', function () {
+                const newRow = document.createElement('tr');
+                newRow.classList.add('detail-row');
+                newRow.innerHTML = `
+                    <td><input type="text" name="detail_key[]" class="form-control" placeholder="Key"></td>
+                    <td><input type="text" name="detail_value[]" class="form-control" placeholder="Value"></td>
+                    <td><button type="button" class="btn btn-danger btn-sm remove-detail">X</button></td>
+                `;
+                tableBody.appendChild(newRow);
+            });
+
+            tableBody.addEventListener('click', function (e) {
+                if (e.target.classList.contains('remove-detail')) {
+                    e.target.closest('tr').remove();
+                }
+            });
+
+            let options={selector:"#hugerte-mytextarea",height:600,menubar:true,statusbar:true,license_key:"gpl",plugins:["fullscreen","advlist","autolink","lists","link","image","charmap","preview","anchor","searchreplace","visualblocks","code","fullscreen","insertdatetime","media","table","code","help","wordcount","codesample","markdown"],toolbar:"undo redo | formatselect |bold italic backcolor | alignleft aligncenteralignright alignjustify | bullist numlist outdent indent |code codesample removeformat markdown help fullscreen",content_style:"body { font-family: -apple-system, BlinkMacSystemFont, San Francisco, Segoe UI, Roboto, Helvetica Neue, sans-serif; font-size: 14px; -webkit-font-smoothing: antialiased; }"};
+            if (localStorage.getItem("tablerTheme") === "dark") {
+                options.skin = "oxide-dark";
+                options.content_css = "dark";
+            }
+            hugeRTE.init(options);
         });
     </script>
 @endpush

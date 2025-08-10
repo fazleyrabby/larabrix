@@ -33,7 +33,6 @@
         @yield('content')
     </main>
 
-
     {{-- common toast popup  --}}
     <div x-init="console.log($store.toast)" x-cloak x-show="$store.toast.visible" x-transition
         @click="$store.toast.visible = false" class="toast fixed bottom-4 right-4 z-50 cursor-pointer">

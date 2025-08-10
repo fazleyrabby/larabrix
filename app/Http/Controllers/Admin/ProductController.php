@@ -51,6 +51,11 @@ class ProductController extends Controller
     {
         try {
             DB::transaction(function () use ($request) {
+                $additionalInfo = $this->formatAdditionalInfo(
+                    $request->input('detail_key', []),
+                    $request->input('detail_value', [])
+                );
+                $data['additional_info'] = $additionalInfo;
                 $data = $request->validated();
                 // if ($request->hasFile('image')) {
                 //     $data['image'] = $this->uploadPhoto($request->file('image'));
@@ -80,9 +85,11 @@ class ProductController extends Controller
         try {
             DB::transaction(function () use ($request, $product) {
                 $data = $request->validated();
-                if ($request->hasFile('image')) {
-                    $data['image'] = $this->uploadPhoto($request->file('image'), $product->image);
-                }
+                $additionalInfo = $this->formatAdditionalInfo(
+                    $request->input('detail_key', []),
+                    $request->input('detail_value', [])
+                );
+                $data['additional_info'] = $additionalInfo;
                 $product->update($data);
                 $oldVariants = $product->variants->keyBy('id');
                 $this->service->storeCombinations($request, $product, $oldVariants);
@@ -115,6 +122,19 @@ class ProductController extends Controller
 
             return redirect()->back()->with('error', 'Successfully updated!');
         }
+    }
+
+    private function formatAdditionalInfo(array $keys, array $values): ?string
+    {
+        $details = [];
+        foreach ($keys as $index => $key) {
+            $key = trim($key);
+            $value = trim($values[$index] ?? '');
+            if ($key !== '' && $value !== '') {
+                $details[$key] = $value;
+            }
+        }
+        return !empty($details) ? json_encode($details) : null;
     }
 
     // public function bulkDelete(Request $request, CommonBusinessService $commonBusinessService)

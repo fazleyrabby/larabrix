@@ -28,7 +28,8 @@ class ProductRequest extends FormRequest
 
         return [
             'title' => 'required|string|max:120|unique:products,title,' . $id,
-            'description' => 'nullable|string|max:200',
+            'description' => 'nullable|string',
+            'short_description' => 'nullable|string|max:300',
             'slug' => [
                 'required',
                 'string',

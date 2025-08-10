@@ -225,7 +225,7 @@
                 </div>
 
                 <div class="lg:col-span-3">
-                    <ul class="grid gap-4 sm:grid-cols-3 lg:grid-cols-3">
+                    <ul class="grid gap-4 sm:grid-cols-3 lg:grid-cols-3 mb-4">
                         @foreach ($products as $product)
                             <li>
                                 <div class="group relative block overflow-hidden border border-gray-100 bg-white">
