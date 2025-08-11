@@ -110,7 +110,9 @@
             @foreach ($orders as $key => $order)
                 <tr>
                     <th class="border border-gray-300">{{ $order->id }}</th>
-                    <th class="border border-gray-300">{{ $order->transaction?->transaction_id }}</th>
+                    <th class="border border-gray-300">
+                        <a class="text-info" href="{{ route('frontend.orders.show', $order->id) }}">{{ $order->transaction?->transaction_id }}</a>
+                    </th>
                     {{-- <th class="border border-gray-300">{{ $order->order_number }}</th> --}}
                     <th class="border border-gray-300">{{ $order->payment_gateway }}</th>
                     <th class="border border-gray-300">

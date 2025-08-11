@@ -47,7 +47,7 @@ Route::middleware(['auth', 'role:user'])
         Route::post('/confirm', [CheckoutController::class, 'confirmPayment']);
     });
 
-Route::middleware(['auth', 'role:user'])
+Route::middleware(['auth', 'role:admin'])
     ->get('/orders', [OrderController::class, 'index'])->name('orders.index');
 
 // Admin
