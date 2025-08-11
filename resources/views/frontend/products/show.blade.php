@@ -1,5 +1,58 @@
 @extends('frontend.app')
+@push('styles')
+    <link
+        rel="stylesheet"
+        href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css"/>
+    <style>
+        .preview-container img {
+            max-height: 400px;
+            object-fit: contain;
+        }
+        .thumbs-swiper img {
+            cursor: pointer;
+            border-radius: 6px;
+            transition: transform 0.2s ease;
+        }
+        .thumbs-swiper img:hover {
+            transform: scale(1.05);
+        }
 
+        .swiper-button-prev,
+        .swiper-button-next {
+            width: 30px;
+            height: 30px;
+            background: rgba(0,0,0,0.5);
+            border-radius: 50%;
+            color: white;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .swiper-button-prev::after,
+        .swiper-button-next::after {
+            font-size: 14px; /* arrow size */
+        }
+
+        /* Make preview zoomable */
+        .preview {
+            position: relative;
+            overflow: hidden;
+            cursor: zoom-in !important;
+        }
+
+        #mainPreview {
+            transition: transform 0.3s ease;
+            transform-origin: center center;
+        }
+
+        .preview.zoom-active #mainPreview {
+            transform: scale(1.5); /* zoom level */
+            cursor: zoom-in;
+        }
+    </style>
+@endpush
 @section('content')
     <section class="page-container">
         <div class="mx-auto max-w-screen-xl px-4 py-8 sm:px-6 sm:py-12 lg:px-8">
@@ -7,10 +60,33 @@
                 <!-- Left Column: Product Image -->
                 <div class="w-full">
                     <div class="card bg-base-100 shadow-xl">
-                        <figure>
+                        {{-- <figure>
                             <img id="variant-image" src="{{ $product->image ? asset($product->image) : 'https://placehold.co/400' }}"
                                 alt="{{ $product->title }}" class="w-full h-auto object-cover">
-                        </figure>
+                        </figure> --}}
+                        <div class="product-gallery w-full mx-auto">
+                        <!-- Preview -->
+                        <div class="preview mb-4">
+                            <img id="mainPreview" src="{{ $product->image ? $product->image : 'https://placehold.co/400' }}" class="w-full h-auto object-cover rounded-lg shadow" />
+                        </div>
+
+                        <!-- Thumbnails Slider -->
+                        <div class="relative">
+                            <!-- Navigation Buttons -->
+                            <div class="swiper-button-prev"></div>
+                            <div class="swiper-button-next"></div>
+
+                            @php $images = collect([$product->image])->merge($product->variants->pluck('image'))->filter() @endphp
+                            <!-- Thumbnails Slider -->
+                            <div class="swiper thumbs-swiper">
+                                <div class="swiper-wrapper">
+                                    @foreach ($images as $image)
+                                            <div class="swiper-slide"><img src="{{ $image ?? 'https://placehold.co/400' }}" /></div>
+                                    @endforeach
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                     </div>
                 </div>
 
@@ -120,14 +196,14 @@
 
 
 @push('scripts')
-
+<script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
 <script>
     window.variants = @json($product->variants); 
     document.addEventListener('DOMContentLoaded', () => {
         const variants = window.variants || [];
         const priceEl = document.getElementById('variant-price');
         const skuEl = document.getElementById('variant-sku');
-        const imageEl = document.getElementById('variant-image');
+        const imageEl = document.getElementById('mainPreview');
 
         function getSelectedAttributeValueIds() {
             const selected = [];
@@ -190,4 +266,61 @@
     });
 </script>
     
+
+<script>
+    const previewImg = document.getElementById("mainPreview");
+
+    // Initialize Swiper for thumbnails
+    const thumbsSwiper = new Swiper(".thumbs-swiper", {
+        slidesPerView: 4,
+        spaceBetween: 10,
+        loop: true,
+        autoplay: {
+            delay: 3000, // time between slides in ms
+            disableOnInteraction: false // keeps autoplay after manual interaction
+        },
+        breakpoints: {
+            640: { slidesPerView: 5 },
+            1024: { slidesPerView: 6 }
+        },
+        navigation: {
+            nextEl: ".swiper-button-next",
+            prevEl: ".swiper-button-prev"
+        },
+        breakpoints: {
+            640: { slidesPerView: 5 },
+            1024: { slidesPerView: 6 }
+        }
+    });
+
+    // Change preview on click
+    document.querySelectorAll(".thumbs-swiper img").forEach(img => {
+        img.addEventListener("click", () => {
+            previewImg.src = img.src;
+        });
+    });
+
+    thumbsSwiper.on('slideChange', () => {
+        const activeSlide = thumbsSwiper.slides[thumbsSwiper.activeIndex];
+        const img = activeSlide.querySelector("img");
+        if (img) previewImg.src = img.src;
+    });
+</script>
+<script>
+    const previewContainer = document.querySelector(".preview");
+    const previewImage = document.getElementById("mainPreview");
+
+    previewContainer.addEventListener("mousemove", (e) => {
+        const { left, top, width, height } = previewContainer.getBoundingClientRect();
+        const x = ((e.pageX - left) / width) * 100;
+        const y = ((e.pageY - top) / height) * 100;
+        previewImage.style.transformOrigin = `${x}% ${y}%`;
+        previewContainer.classList.add("zoom-active");
+    });
+
+    previewContainer.addEventListener("mouseleave", () => {
+        previewContainer.classList.remove("zoom-active");
+        previewImage.style.transformOrigin = "center center";
+    });
+</script>
 @endpush

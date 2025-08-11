@@ -43,12 +43,13 @@ class ProductController extends Controller
         ->get();
 
         $product->load('variants.attributeValues');
+        $product->image = $product->image ? Storage::disk('public')->url($product->image) : '';
         $product->variants->transform(function ($v) {
             return [
                 'id' => $v->id,
                 'price' => $v->price,
                 'sku' => $v->sku,
-                'image' => Storage::disk('public')->url($v->image),
+                'image' => $v->image ? Storage::disk('public')->url($v->image) : '',
                 'attribute_value_ids' => $v->attributeValues->pluck('id')->sort()->values()->all(),
             ];
         });

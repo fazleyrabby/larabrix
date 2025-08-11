@@ -10,6 +10,7 @@ use Illuminate\Support\Facades\Storage;
 class TestController extends Controller
 {
     public function index(PaymentGatewayService $paymentGatewayService){
+        // dd(session()->get('cart'));
         dd('✌🏻');
         $gateway = $paymentGatewayService->driver('stripe');
         $charge = $gateway->charge(100, 'usd', ['order_id' => 1]);

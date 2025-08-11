@@ -81,6 +81,7 @@ class CheckoutService
             OrderItem::create([
                 'order_id' => $order->id,
                 'product_id' => $item['product_id'],
+                'variant_id' => $item['variant_id'],
                 'name' => $item['title'],
                 'quantity' => $item['quantity'],
                 'price' => $item['price'],
