@@ -17,6 +17,7 @@ return new class extends Migration
             $table->string('sku')->unique(); // Unique for each variant
             $table->decimal('price', 10, 2)->nullable();
             $table->string('image')->nullable();
+            $table->string('compatibility_key')->nullable();
             $table->timestamps();
             $table->softDeletes();
         });

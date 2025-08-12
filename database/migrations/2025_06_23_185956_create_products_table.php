@@ -23,6 +23,9 @@ return new class extends Migration
             $table->json('additional_info')->nullable();
             $table->foreignId('category_id')->constrained('categories')->onDelete('cascade'); // Foreign key to categories
             $table->enum('type', ['simple', 'variable'])->default('simple');
+            $table->boolean('is_pc_component')->default(false);
+            $table->string('compatibility_key')->nullable();
+            $table->boolean('configurable')->default(false);
             $table->timestamps();
         });
     }

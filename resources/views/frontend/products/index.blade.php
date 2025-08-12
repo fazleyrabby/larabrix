@@ -25,16 +25,16 @@
             </div>
 
             <div class="mt-4 lg:mt-8 lg:grid lg:grid-cols-4 lg:items-start lg:gap-8">
+                <form method="GET" action="{{ route('frontend.products.index') }}">
                 <div class="hidden space-y-4 lg:block">
                     <div>
                         <label for="SortBy" class="block text-xs font-medium text-gray-700"> Sort By </label>
 
-                        <select class="select">
-                            <option>Sort By</option>
-                            <option value="Title, DESC">Title, DESC</option>
-                            <option value="Title, ASC">Title, ASC</option>
-                            <option value="Price, DESC">Price, DESC</option>
-                            <option value="Price, ASC">Price, ASC</option>
+                        <select name="sort_by" class="select">
+                            <option value="title,DESC" @selected(request('sort_by') == 'title,DESC')>Title, DESC</option>
+                            <option value="title,ASC" @selected(request('sort_by') == 'title,ASC')>Title, ASC</option>
+                            <option value="price,DESC" @selected(request('sort_by') == 'price,DESC')>Price, DESC</option>
+                            <option value="price,ASC" @selected(request('sort_by') == 'price,ASC')>Price, ASC</option>
                         </select>
                     </div>
 
@@ -42,6 +42,48 @@
                         <p class="block text-xs font-medium text-gray-700">Filters</p>
 
                         <div class="mt-1 space-y-2">
+                            <details
+                                class="overflow-hidden rounded-sm border border-gray-300 [&_summary::-webkit-details-marker]:hidden">
+                                <summary
+                                    class="flex cursor-pointer items-center justify-between gap-2 p-4 text-gray-900 transition">
+                                    <span class="text-sm font-medium"> Categories </span>
+
+                                    <span class="transition group-open:-rotate-180">
+                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                                            stroke-width="1.5" stroke="currentColor" class="size-4">
+                                            <path stroke-linecap="round" stroke-linejoin="round"
+                                                d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
+                                        </svg>
+                                    </span>
+                                </summary>
+
+                                <div class="border-t border-gray-200 bg-white">
+                                    <header class="flex items-center justify-between p-4">
+                                        <span class="text-sm text-gray-700"> {{ count(request('categories', [])) }} Selected </span>
+
+                                        <button type="button" class="text-sm text-gray-900 underline underline-offset-4">
+                                            Reset
+                                        </button>
+                                    </header>
+
+                                    <ul class="space-y-1 border-t border-gray-200 p-4">
+                                        @foreach ($categories as $category)
+                                        <li>
+                                            <label for="{{ $category->title }}" class="inline-flex items-center gap-2">
+                                                <input type="checkbox" 
+                                                    id="{{ $category->title }}"
+                                                    class="size-5 rounded-sm border-gray-300 shadow-sm" 
+                                                    name="categories[]" 
+                                                    value="{{ $category->id }}"
+                                                    @checked(in_array($category->id, request('categories', [])))
+                                                />
+                                                <span class="text-sm font-medium text-gray-700"> {{ $category->title }} </span>
+                                            </label>
+                                        </li>
+                                        @endforeach
+                                    </ul>
+                                </div>
+                            </details>
                             <details
                                 class="overflow-hidden rounded-sm border border-gray-300 [&_summary::-webkit-details-marker]:hidden">
                                 <summary
@@ -223,6 +265,12 @@
                         </div>
                     </div>
                 </div>
+                <div class="mt-4">
+                    <button type="submit" class="btn btn-neutral">
+                        Apply Filters
+                    </button>
+                </div>
+                </form>
 
                 <div class="lg:col-span-3">
                     <ul class="grid gap-4 sm:grid-cols-3 lg:grid-cols-3 mb-4">

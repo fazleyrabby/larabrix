@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id();
             $table->foreignId('order_id')->constrained()->cascadeOnDelete();
             $table->foreignId('product_id')->nullable()->constrained()->nullOnDelete();
-            $table->foreignId('variant_id')->nullable()->constrained()->nullOnDelete();
+            $table->foreignId('variant_id')->nullable()->constrained('product_variants')->nullOnDelete();
             $table->string('name'); // snapshot name
             $table->decimal('price', 10, 2); // per item price
             $table->unsignedInteger('quantity');

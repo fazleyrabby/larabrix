@@ -1,6 +1,6 @@
 @foreach ($items as $item)
     <li class="relative group">
-        <a href="{{ $item->href ?? '#' }}"
+        <a href="{{ $item->href ? url($item->href) : '#' }}"
            class="text-gray-500 transition hover:text-gray-500/75 dark:text-white dark:hover:text-white/75">
             {{ $item->title }}
         </a>

@@ -35,11 +35,12 @@ Route::prefix('cart')->group(function () {
     Route::post('update', [CartController::class, 'update'])->name('frontend.cart.update');
 });
 
+Route::get('/pc-builder', [FrontendProductController::class, 'pcBuilder'])->name('frontend.pc_builder');
 Route::get('/cart', [CartController::class, 'cart'])->name('frontend.cart.index');
 Route::get('/checkout', [CartController::class, 'checkout'])->name('frontend.checkout.index')->middleware('customer');
 Route::get('/payment-complete', [CheckoutController::class, 'complete'])->name('frontend.payment.complete');
 
 
 
-    Route::middleware(['auth', 'role:user'])
-    ->get('/orders/{id}/show', [FrontendOrderController::class, 'show'])->name('frontend.orders.show');
+Route::middleware(['auth', 'role:user'])
+->get('/orders/{id}/show', [FrontendOrderController::class, 'show'])->name('frontend.orders.show');
