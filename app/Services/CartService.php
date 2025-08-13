@@ -11,7 +11,59 @@ class CartService
     public function add($productId, $quantity = 1, $variantId = null)
     {
         $cart = session()->get('cart', []);
+        $result = $this->addOrUpdateCartItem($cart, $productId, $quantity, $variantId);
 
+        session()->put('cart', $result['cart']);
+
+        return [
+            'success' => !$result['exceeded'],
+            'message' => $result['exceeded'] ? 'Maximum quantity for this product is 10.' : 'Successfully added to cart!',
+        ];
+    }
+
+     /**
+     * Public method to add multiple products at once
+     */
+    public function addMultiple(array $products)
+    {
+        $cart = session()->get('cart', []);
+        $messages = [];
+        $success = true;
+
+        foreach ($products as $item) {
+            $productId = $item['product_id'] ?? null;
+            $quantity = $item['quantity'] ?? 1;
+            $variantId = $item['variant_id'] ?? null;
+
+            if (!$productId) {
+                continue;
+            }
+
+            $result = $this->addOrUpdateCartItem($cart, $productId, $quantity, $variantId);
+            $cart = $result['cart'];
+
+            if ($result['exceeded']) {
+                $success = false;
+                $messages[] = "Product ID {$productId}: Maximum quantity for this product is 10.";
+            } else {
+                $messages[] = "Product ID {$productId}: Successfully added to cart!";
+            }
+        }
+
+        session()->put('cart', $cart);
+
+        return [
+            'success' => $success,
+            'message' => implode('|', $messages),
+            'cart' => $cart,
+        ];
+    }
+
+    /**
+     * Private helper to add or update a cart item
+     */
+    private function addOrUpdateCartItem(array $cart, int $productId, int $quantity, ?int $variantId)
+    {
         // Use unique key for product + variant combo
         $key = $productId . '_' . ($variantId ?? 'default');
 
@@ -25,7 +77,6 @@ class CartService
         }
 
         if (isset($cart['items'][$key])) {
-            // Update quantity only
             $cart['items'][$key]['quantity'] = $newQuantity;
         } else {
             $product = Product::findOrFail($productId);
@@ -62,11 +113,10 @@ class CartService
         }
 
         $cart = $this->updateTotal($cart);
-        session()->put('cart', $cart);
 
         return [
-            'success' => !$exceeded,
-            'message' => $exceeded ? 'Maximum quantity for this product is 10.' : 'Successfully added to cart!',
+            'cart' => $cart,
+            'exceeded' => $exceeded,
         ];
     }
 

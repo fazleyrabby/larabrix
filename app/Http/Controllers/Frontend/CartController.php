@@ -13,23 +13,38 @@ class CartController extends Controller
     public function __construct(){
         $this->service = new CartService;
     }
+
     public function add(Request $request)
     {
-        $productId = $request->input('product_id');
-        $quantity = $request->input('quantity', 1);
-        $variantId = $request->input('variant_id') ?? null;
+        $service = $this->service;
+        if ($request->has('products') && is_array($request->input('products'))) {
+            // Multiple products batch add
+            $products = $request->input('products');
+            $result = $service->addMultiple($products);
+        } else {
+            // Single product add
+            $productId = $request->input('product_id');
+            $quantity = $request->input('quantity', 1);
+            $variantId = $request->input('variant_id') ?? null;
 
-        $result = $this->service->add($productId, $quantity, $variantId);
+            $result = $service->add($productId, $quantity, $variantId);
+        }
+
         $carts = session()->get('cart') ?? [];
+
         if (!$result['success']) {
             return response()->json([
                 'success' => false,
                 'message' => $result['message'],
-                'data'    => $carts
+                'data'    => $carts,
             ], 422);
         }
-        
-        return response()->json(['success' => true,'message' => 'Successfully added to cart!','data' => $carts]);
+
+        return response()->json([
+            'success' => true,
+            'message' => $result['message'] ?? 'Successfully added to cart!',
+            'data'    => $carts,
+        ]);
     }
 
     public function update(Request $request)

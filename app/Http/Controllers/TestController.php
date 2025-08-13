@@ -14,8 +14,8 @@ use Illuminate\Support\Str;
 class TestController extends Controller
 {
     public function index(PaymentGatewayService $paymentGatewayService){
-        // dd(session()->get('cart'));
-        $this->pc();
+        dd(session()->get('cart'));
+        // $this->pc();
         dd('✌🏻');
         $gateway = $paymentGatewayService->driver('stripe');
         $charge = $gateway->charge(100, 'usd', ['order_id' => 1]);
@@ -43,16 +43,20 @@ class TestController extends Controller
     }
 
     public function pc(){
-        // Category::create(['title' => 'Motherboard', 'is_pc_part' => true]);
-        // Category::create(['title' => 'Processor', 'is_pc_part' => true]);
-        // Category::create(['title' => 'RAM', 'is_pc_part' => true]);
-        // Category::create(['title' => 'Power Supply', 'is_pc_part' => true]);
-        // Category::create(['title' => 'Monitor', 'is_pc_part' => true]);
-        // Category::create(['title' => 'Keyboard', 'is_pc_part' => true]);
-        // Category::create(['title' => 'Mouse', 'is_pc_part' => true]);
-        // Category::create(['title' => 'SSD', 'is_pc_part' => true]);
-        // Category::create(['title' => 'HDD', 'is_pc_part' => true]);
+
         dd(1);
+        Category::create(['title' => 'Motherboard', 'is_pc_part' => true]);
+        Category::create(['title' => 'Processor', 'is_pc_part' => true]);
+        Category::create(['title' => 'RAM', 'is_pc_part' => true]);
+        Category::create(['title' => 'Power Supply', 'is_pc_part' => true]);
+        Category::create(['title' => 'Monitor', 'is_pc_part' => true]);
+        Category::create(['title' => 'Keyboard', 'is_pc_part' => true]);
+        Category::create(['title' => 'Mouse', 'is_pc_part' => true]);
+        Category::create(['title' => 'SSD', 'is_pc_part' => true]);
+        Category::create(['title' => 'HDD', 'is_pc_part' => true]);
+        Category::create(['title' => 'PC Case', 'is_pc_part' => true]);
+        Category::create(['title' => 'Cpu Cooler', 'is_pc_part' => true]);
+        
         DB::table('products')->insert([
         // Existing Products Updated with New Category IDs
         // AMD Ryzen 5 5600X Processor
@@ -215,6 +219,48 @@ class TestController extends Controller
                 'type' => 'simple',
                 'is_pc_component' => true,
                 'compatibility_key' => 'SATA',
+                'configurable' => false,
+                'created_at' => Carbon::now(),
+                'updated_at' => Carbon::now(),
+            ],
+            [
+                'title' => 'NZXT H510 Compact Mid-Tower',
+                'sku' => 'CASE-NZXT-H510',
+                'slug' => Str::slug('NZXT H510 Compact Mid-Tower'),
+                'price' => 89.99,
+                'image' => 'https://placehold.co/400x400/0000FF/FFFFFF?text=NZXT+H510',
+                'description' => 'A sleek and modern mid-tower PC case with excellent cable management and airflow.',
+                'short_description' => 'Mid-tower case with tempered glass side panel and streamlined design.',
+                'additional_info' => json_encode([
+                    'Form Factor' => 'ATX, Micro-ATX, Mini-ITX',
+                    'Material' => 'Steel, Tempered Glass',
+                    'Color' => 'Matte Black',
+                ]),
+                'category_id' => 35, // PC Case
+                'type' => 'simple',
+                'is_pc_component' => true,
+                'compatibility_key' => 'ATX',
+                'configurable' => false,
+                'created_at' => Carbon::now(),
+                'updated_at' => Carbon::now(),
+            ],
+            [
+                'title' => 'Cooler Master Hyper 212 Black Edition',
+                'sku' => 'COOLER-CM-212-BE',
+                'slug' => Str::slug('Cooler Master Hyper 212 Black Edition'),
+                'price' => 44.99,
+                'image' => 'https://placehold.co/400x400/00FF00/FFFFFF?text=Hyper+212+BE',
+                'description' => 'High-performance air CPU cooler with sleek black finish and quiet operation.',
+                'short_description' => 'Tower-style CPU cooler with a 120mm PWM fan for optimal cooling.',
+                'additional_info' => json_encode([
+                    'Socket Support' => 'Intel LGA1200/115x/2066/2011, AMD AM4/AM3+/FM2+',
+                    'Fan Size' => '120mm',
+                    'Noise Level' => '26 dBA',
+                ]),
+                'category_id' => 36, // CPU Cooler
+                'type' => 'simple',
+                'is_pc_component' => true,
+                'compatibility_key' => 'AM4, LGA1200',
                 'configurable' => false,
                 'created_at' => Carbon::now(),
                 'updated_at' => Carbon::now(),

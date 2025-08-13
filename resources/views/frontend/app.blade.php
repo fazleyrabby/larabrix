@@ -19,7 +19,7 @@
             display: none !important;
         }
 
-        .page-container{
+        .page-container {
             min-height: calc(100dvh - 280px);
         }
     </style>
@@ -27,18 +27,33 @@
     @stack('styles')
 </head>
 
-<body class="light">
+<body class="light" x-init>
     @include('frontend.partials.header')
     <main>
         @yield('content')
     </main>
 
     {{-- common toast popup  --}}
-    <div x-init="console.log($store.toast)" x-cloak x-show="$store.toast.visible" x-transition
+    {{-- <div x-init="console.log($store.toast)" x-cloak x-show="$store.toast.visible" x-transition
         @click="$store.toast.visible = false" class="toast fixed bottom-4 right-4 z-50 cursor-pointer">
         <div :class="`alert ${$store.toast.type === 'success' ? 'alert-success' : 'alert-error'} text-white`">
             <span x-text="$store.toast.message"></span>
         </div>
+    </div> --}}
+    <div class="fixed bottom-4 right-4 z-50 flex flex-col-reverse" style="max-width: 320px; width: 100%;" x-cloak>
+        <template x-for="(toast, index) in $store.toast.toasts" :key="toast.id">
+            <div @click="$store.toast.remove(toast.id)" class="toast cursor-pointer p-3 rounded shadow-lg mb-2"
+                :class="toast.type === 'success' ? 'bg-green-600 text-white' : 'bg-red-600 text-white'"
+                :style="`
+                    min-width: 250px; 
+                    box-sizing: border-box;
+                    bottom: ${index * 55}px;
+                    right: 0;
+                `"
+                x-transition>
+                <span x-text="toast.message"></span>
+            </div>
+        </template>
     </div>
 
     @include('frontend.partials.footer')
@@ -50,7 +65,7 @@
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
 
     @include('frontend.scripts.alpine')
-    @stack('scripts')    
+    @stack('scripts')
 </body>
 
 </html>

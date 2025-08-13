@@ -25,7 +25,7 @@
                     <tfoot>
                         <tr class="bg-gray-50 border-t-2 border-gray-200 font-bold text-gray-800 text-lg">
                             <td class="p-4" colspan="2">Total Cost</td>
-                            <td id="total-cost">$0.00</td>
+                            <td id="total-cost" class="text-right">$0.00</td>
                         </tr>
                     </tfoot>
                 </table>
@@ -141,17 +141,18 @@
                     </tr>
                 `).join('');
 
-                const tfoot = this.tableBody.parentElement.querySelector('tfoot');
-                if (tfoot) {
-                    tfoot.innerHTML = `
-                        <tr class="bg-gray-50 border-t-2 border-gray-200 font-bold text-gray-800 text-lg">
-                            <td class="p-4" colspan="2">Total Cost</td>
-                            <td class="p-4 text-right">$${Object.values(this.selectedParts).flat().reduce((sum, part) => sum + part.product.price, 0).toFixed(2)}
-                            </td>
-                        </tr>
-                    `;
-                }
+                // const tfoot = this.tableBody.parentElement.querySelector('tfoot');
+                // if (tfoot) {
+                //     tfoot.innerHTML = `
+                //         <tr class="bg-gray-50 border-t-2 border-gray-200 font-bold text-gray-800 text-lg">
+                //             <td class="p-4" colspan="2">Total Cost</td>
+                //             <td class="p-4 text-right" id="total-cost">$${Object.values(this.selectedParts).flat().reduce((sum, part) => sum + part.product.price, 0).toFixed(2)}
+                //             </td>
+                //         </tr>
+                //     `;
+                // }
 
+                this.totalCostEl.textContent = `$${Object.values(this.selectedParts).flat().reduce((sum, part) => sum + part.product.price, 0).toFixed(2)}`
                 this.categories.forEach(category => this.renderSelectedParts(category.id));
             }
 
@@ -319,9 +320,24 @@
             }
 
             addToCart() {
-                // Placeholder for future cart implementation
-                console.log('Adding to cart:', this.selectedParts);
-                alert('Add to Cart feature will be implemented later!');
+                const allParts = Object.values(this.selectedParts).flat();
+                const products = allParts.map(part => ({
+                    product_id: part.product.id,
+                    quantity: 1, // or support user qty input
+                    variant_id: null // or support variant selection if you have
+                }));
+
+                // Call batch add API
+                axios.post('/cart/add', { products })
+                    .then(response => {
+                        Alpine.store('cart').reset(response.data.data);
+                        Alpine.store('toast').showToasts(true, response.data.message ||
+                            'Added to cart!')
+                    })
+                    .catch(error => {
+                       Alpine.store('toast').showToasts(false, error.response?.data?.message ||
+                            'Add to cart failed.')
+                    });
             }
 
             isCompatible(product) {

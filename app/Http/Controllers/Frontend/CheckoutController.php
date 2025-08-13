@@ -81,7 +81,9 @@ class CheckoutController extends Controller
 
             $gateway = app(PaymentGatewayService::class)->driver('stripe');
 
-            $charge = $gateway->charge($cart['total'], $currency, [
+            $totalAmount = str_replace(',', '', $cart['total']);
+            $totalAmount = (float) $totalAmount;
+            $charge = $gateway->charge($totalAmount, $currency, [
                 'shipping' => json_encode($request->shipping),
             ]);
 

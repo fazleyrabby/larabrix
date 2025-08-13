@@ -22,6 +22,7 @@ class CheckoutService
         $shippingAddress = json_encode($request->shipping ?? []);
         $billingAddress = json_encode($request->billing ?? null);
         $totalAmount = $cart['total'];
+        $totalAmount = (float)str_replace(',', '', $totalAmount);
         $currency = 'usd';
 
         // Handle payment-specific logic

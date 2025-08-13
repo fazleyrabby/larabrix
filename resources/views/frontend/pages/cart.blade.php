@@ -80,11 +80,11 @@
                                     <div class="space-y-0.5 text-sm text-gray-700">
                                         <div class="flex justify-between">
                                             <div class="font-bold">Subtotal</div>
-                                            <div x-text="`$${parseFloat($store.cart.total).toFixed(2)}`"></div>
+                                            <div x-text="`$${$store.cart.total}`"></div>
                                         </div>
                                         <div class="flex justify-between !text-base font-medium">
                                             <div class="font-bold">Total</div>
-                                            <div x-text="`$${parseFloat($store.cart.total).toFixed(2)}`"></div>
+                                            <div x-text="`$${$store.cart.total}`"></div>
                                         </div>
                                     </div>
                                 </template>

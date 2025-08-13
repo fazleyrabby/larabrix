@@ -31,6 +31,7 @@ Route::get('/products/{slug}', [FrontendProductController::class, 'show'])->name
 Route::prefix('cart')->group(function () {
     Route::get('/', [CartController::class, 'index'])->name('frontend.cart.index');
     Route::post('add', [CartController::class, 'add'])->name('frontend.cart.add');
+    Route::post('add-multiple', [CartController::class, 'addMultiple'])->name('frontend.cart.add-multiple');
     Route::post('remove', [CartController::class, 'remove'])->name('frontend.cart.remove');
     Route::post('update', [CartController::class, 'update'])->name('frontend.cart.update');
 });
