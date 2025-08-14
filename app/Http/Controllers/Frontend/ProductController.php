@@ -39,28 +39,36 @@ class ProductController extends Controller
     {
         $product = Product::where('slug', $slug)->with([
             'category',
+            'variants.attributeValues'
         ])->firstOrFail();
-        $variantIds = ProductVariant::where('product_id', $product->id)->pluck('id');
+        $product->image =  $this->getImageUrl($product->image);
+        // $variantIds = ProductVariant::where('product_id', $product->id)->pluck('id');
 
-        $attributeValueIds = DB::table('product_variant_values')
-            ->whereIn('product_variant_id', $variantIds)
-            ->pluck('attribute_value_id')
-            ->unique();
+        // $attributeValueIds = DB::table('product_variant_values')
+        //     ->whereIn('product_variant_id', $variantIds)
+        //     ->pluck('attribute_value_id')
+        //     ->unique();
 
-        $attributeIds = AttributeValue::whereIn('id', $attributeValueIds)
-            ->pluck('attribute_id')
-            ->unique();
+        // $attributeIds = AttributeValue::whereIn('id', $attributeValueIds)
+        //     ->pluck('attribute_id')
+        //     ->unique();
 
-        $attributes = Attribute::with(['values' => function ($query) use ($attributeValueIds) {
-            $query->whereIn('id', $attributeValueIds);
-        }])
-        ->whereIn('id', $attributeIds)
-        ->get();
+        // $attributes = Attribute::with(['values' => function ($query) use ($attributeValueIds) {
+        //     $query->whereIn('id', $attributeValueIds);
+        // }])
+        // ->whereIn('id', $attributeIds)
+        // ->get();
 
-        $product->load('variants.attributeValues');
+        // $product->load('variants.attributeValues');
 
-        // For the main product image
-        $product->image = $product->image ? (Str::startsWith($product->image, ['http://', 'https://']) ? $product->image : Storage::disk('public')->url($product->image)) : '';
+        $attributes = Attribute::whereHas('values.variants', function($q) use ($product) {
+            $q->where('product_id', $product->id);
+        })->with(['values' => function($q) use ($product) {
+            $q->whereHas('variants', function($q2) use ($product) {
+                $q2->where('product_id', $product->id);
+            });
+        }])->get();
+
 
         // For the variant images
         $product->variants->transform(function ($v) {
@@ -68,7 +76,7 @@ class ProductController extends Controller
                 'id' => $v->id,
                 'price' => $v->price,
                 'sku' => $v->sku,
-                'image' => $v->image ? (Str::startsWith($v->image, ['http://', 'https://']) ? $v->image : Storage::disk('public')->url($v->image)) : '',
+                'image' => $this->getImageUrl($v->image),
                 'attribute_value_ids' => $v->attributeValues->pluck('id')->sort()->values()->all(),
             ];
         });
@@ -80,5 +88,9 @@ class ProductController extends Controller
         $categories = Category::where('is_pc_part', true)->get();
         $products = Product::whereIn('category_id', $categories->pluck('id'))->get();
         return view('frontend.pc-builder.index', compact('categories','products'));
+    }
+
+    private function getImageUrl($image){
+        return $image ? ((Str::startsWith($image, ['http://', 'https://']) ? $image : Storage::disk('public')->url($image))) : '';
     }
 }
