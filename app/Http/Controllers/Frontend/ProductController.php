@@ -21,7 +21,10 @@ class ProductController extends Controller
         $selectedCategories = $request->input('categories');
         $sortBy = $request->input('sort_by');
         $categories = Category::toBase()->select('id','title','is_pc_part')->latest()->get();
-        $products = Product::with('category')
+        $products = Product::with([
+                'category',
+                'variants.attributeValues.attribute', 
+            ])
             ->when($selectedCategories, function ($query, $selectedCategories) {
                 return $query->whereIn('category_id', $selectedCategories);
             })
@@ -42,24 +45,6 @@ class ProductController extends Controller
             'variants.attributeValues'
         ])->firstOrFail();
         $product->image =  $this->getImageUrl($product->image);
-        // $variantIds = ProductVariant::where('product_id', $product->id)->pluck('id');
-
-        // $attributeValueIds = DB::table('product_variant_values')
-        //     ->whereIn('product_variant_id', $variantIds)
-        //     ->pluck('attribute_value_id')
-        //     ->unique();
-
-        // $attributeIds = AttributeValue::whereIn('id', $attributeValueIds)
-        //     ->pluck('attribute_id')
-        //     ->unique();
-
-        // $attributes = Attribute::with(['values' => function ($query) use ($attributeValueIds) {
-        //     $query->whereIn('id', $attributeValueIds);
-        // }])
-        // ->whereIn('id', $attributeIds)
-        // ->get();
-
-        // $product->load('variants.attributeValues');
 
         $attributes = Attribute::whereHas('values.variants', function($q) use ($product) {
             $q->where('product_id', $product->id);
@@ -68,7 +53,6 @@ class ProductController extends Controller
                 $q2->where('product_id', $product->id);
             });
         }])->get();
-
 
         // For the variant images
         $product->variants->transform(function ($v) {

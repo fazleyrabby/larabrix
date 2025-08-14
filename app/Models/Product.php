@@ -59,4 +59,13 @@ class Product extends Model
     {
         return $this->created_at->diffForHumans();
     }
+
+    public function getAttributesAttribute()
+    {
+        return $this->variants->flatMap->attributeValues->map->attribute->pluck('title')->unique()->join(' / ') ?: '';
+    }
+
+    public function getFullImageAttribute(){
+        return $this->image ? asset($this->image) : 'https://placehold.co/400';
+    }
 }

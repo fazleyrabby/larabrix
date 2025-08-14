@@ -35,10 +35,10 @@ class ProductRequest extends FormRequest
                 'string',
                 'regex:/^[a-z0-9-]+$/',
             ],
-            'sku' => 'required|string|max:200|unique:products,sku,' . $id,
+            'sku' => 'nullable|string|max:200|unique:products,sku,' . $id,
             'category_id' => 'required',
             'type' => 'required',
-            'price' => 'required|numeric',
+            'price' => 'nullable|numeric',
             'image' => 'nullable|string',
         ];
     }

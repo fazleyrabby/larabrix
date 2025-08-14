@@ -1,5 +1,4 @@
-@push('scripts')
-    <script>
+ <script>
         document.addEventListener('alpine:init', () => {
             Alpine.store('cart', {
                 items: @json(session()->get('cart')['items'] ?? []),
@@ -138,14 +137,34 @@
             Alpine.data('cart', (productId) => ({
                 quantity: 1,
                 variantId: null,
+                selectedVariantId: '', // Local state for this product
+                init() {
+                    // Sync with existing selection if any
+                    const select = document.querySelector(`#variant-select-${productId}`);
+                    if (select) {
+                        this.selectedVariantId = select.value || '';
+                        this.variantId = this.selectedVariantId;
+                        this.updateImage(this.selectedVariantId); // Initialize image
+                    }
+                },
                 setVariantId(id) {
-                    this.variantId = id;
+                    this.selectedVariantId = id;
+                    this.variantId = id; // Sync with addToCart payload
+                },
+                updateImage(variantId) {
+                    const select = document.querySelector(`#variant-select-${productId}`);
+                    if (select) {
+                        const imgElement = document.getElementById(`product-image-${productId}`);
+                        const selectedOption = select.querySelector(`option[value="${variantId}"]`);
+                        const imageUrl = variantId ? (selectedOption ? selectedOption.getAttribute('data-image') : '') : imgElement.dataset.src;
+                        if (imgElement) imgElement.src = imageUrl;
+                    }
                 },
                 addToCart() {
                     axios.post('/cart/add', {
                             product_id: productId,
                             quantity: this.quantity,
-                            variant_id: this.variantId
+                            variant_id: this.variantId || null
                         })
                         .then(response => {
                             Alpine.store('cart').reset(response.data.data);
@@ -162,4 +181,3 @@
 
         });
     </script>
-@endpush

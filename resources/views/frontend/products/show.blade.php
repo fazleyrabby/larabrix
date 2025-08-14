@@ -263,6 +263,16 @@
         document.querySelectorAll('input[name^="attributes"]').forEach(input => {
             input.addEventListener('change', updateVariantInfo);
         });
+
+        // --- Default to first variant ---
+        if (variants.length > 0) {
+            const firstVariant = variants[0];
+            firstVariant.attribute_value_ids.forEach(id => {
+                const radio = document.querySelector(`input[name^="attributes"][value="${id}"]`);
+                if (radio) radio.checked = true;
+            });
+            updateVariantInfo();
+        }
     });
 </script>
     
