@@ -18,6 +18,11 @@ class Product extends Model
         return $this->hasMany(ProductVariant::class);
     }
 
+    public function brands()
+    {
+        return $this->hasOne(Term::class)->where('type','brand');
+    }
+
     public function orderItems(): HasMany
     {
         return $this->hasMany(OrderItem::class);
@@ -34,15 +39,15 @@ class Product extends Model
         return $this->belongsTo(Category::class);
     }
 
-
     public function scopeFilter($query, $searchQuery)
     {
         if ($searchQuery) {
-            $query->where(function ($subQuery) use ($searchQuery) {
-                $subQuery->where('title', 'like', '%' . $searchQuery . '%')
-                    ->orWhere('sku', 'like', '%' . $searchQuery . '%')
-                    ->orWhere('id', 'like', '%' . $searchQuery . '%');
-            })->orWhereHas('category', function ($q) use ($searchQuery) {
+            $query->whereAny([
+                'title',
+                'sku',
+                'id',
+            ], 'like', '%' . $searchQuery . '%')
+            ->orWhereHas('category', function ($q) use ($searchQuery) {
                 $q->where('title', 'like', '%' . $searchQuery . '%');
             });
         }

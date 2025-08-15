@@ -56,6 +56,7 @@ class ProductController extends Controller
                     $request->input('detail_value', [])
                 );
                 $data['additional_info'] = $additionalInfo;
+                $data['is_pc_component'] = $request->is_pc_component == 'yes';
                 $data = $request->validated();
                 // if ($request->hasFile('image')) {
                 //     $data['image'] = $this->uploadPhoto($request->file('image'));
@@ -72,8 +73,6 @@ class ProductController extends Controller
             return redirect()->back()->withErrors('Failed to create the product. Please try again.');
         }
     }
-
-
     public function show($id)
     {
         $product = Product::with('category:id,title')->find($id);
@@ -89,6 +88,7 @@ class ProductController extends Controller
                     $request->input('detail_key', []),
                     $request->input('detail_value', [])
                 );
+                $data['is_pc_component'] = $request->is_pc_component == 'yes';
                 $data['additional_info'] = $additionalInfo;
                 $product->update($data);
                 $oldVariants = $product->variants->keyBy('id');

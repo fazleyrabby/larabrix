@@ -2,6 +2,7 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Admin\AttributeController;
+use App\Http\Controllers\Admin\BrandController;
 use App\Http\Controllers\Admin\CategoryController;
 use App\Http\Controllers\Admin\OrderController;
 use App\Http\Controllers\Admin\ProductController;
@@ -12,6 +13,7 @@ use App\Http\Controllers\Frontend\OrderController as FrontendOrderController;
 use App\Http\Controllers\Frontend\ProductController as FrontendProductController;
 
 Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () {
+    Route::resource('brands', BrandController::class);
     Route::prefix('products')->as('products.')->group(function () {
         Route::resource('attributes', AttributeController::class)->names('attributes');
         Route::resource('categories', CategoryController::class)->names('categories');

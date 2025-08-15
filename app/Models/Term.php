@@ -12,9 +12,24 @@ class Term extends Model
         return $this->belongsToMany(Blog::class);
     }
 
+    public function product()
+    {
+        return $this->belongsTo(Product::class);
+    }
+
     // Scope to get only tags
     public function scopeTags($query)
     {
         return $query->where('type', 'tag');
+    }
+
+    public function scopeFilter($query, $searchQuery, $type)
+    {
+        if ($searchQuery) {
+            $query->where('type', $type)
+            ->where('value', 'like', '%' . $searchQuery . '%');
+        }
+
+        return $query;
     }
 }

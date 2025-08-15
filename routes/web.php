@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Admin\BlogController;
+use App\Http\Controllers\Admin\BrandController;
 use App\Http\Controllers\Admin\FormBuilderController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Admin\CrudController;

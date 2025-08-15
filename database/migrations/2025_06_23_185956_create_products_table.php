@@ -22,6 +22,7 @@ return new class extends Migration
             $table->text('short_description')->nullable();
             $table->json('additional_info')->nullable();
             $table->foreignId('category_id')->constrained('categories')->onDelete('cascade'); // Foreign key to categories
+            $table->foreignId('brand_id')->constrained('terms')->onDelete('cascade'); // Foreign key to categories
             $table->enum('type', ['simple', 'variable'])->default('simple');
             $table->boolean('is_pc_component')->default(false);
             $table->string('compatibility_key')->nullable();

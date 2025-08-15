@@ -180,6 +180,27 @@
                                     </div>
                                 </div>
                                 <div class="mb-3 row">
+                                    <label class="col-3 col-form-label required">Is Pc Component</label>
+                                    <div class="col">
+                                        <select type="text" class="form-select" id="is_pc_component" name="is_pc_component">
+                                            <option value="yes" @selected($product->is_pc_component)>Yes</option>
+                                            <option value="no" @selected(!$product->is_pc_component)>No</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="mb-3 row">
+                                    <label class="col-3 col-form-label required">Compatibility Key</label>
+                                    <div class="col">
+                                        <input type="text" class="form-control" aria-describedby=""
+                                            placeholder="Compatibility Key" name="compatibility_key" value="{{ $product->compatibility_key }}">
+                                        <small class="form-hint">
+                                            @error('compatibility_key')
+                                                <div class="text-danger mt-2">{{ $message }}</div>
+                                            @enderror
+                                        </small>
+                                    </div>
+                                </div>
+                                <div class="mb-3 row">
                                     <label class="col-3 col-form-label required">Type</label>
                                     <div class="col">
                                         <select type="text" class="form-select" id="type" name="type">
