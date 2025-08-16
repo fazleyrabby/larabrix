@@ -48,5 +48,14 @@ class MenuSeeder extends Seeder
         $menu->status = 1;
         $menu->position = 3;
         $menu->save();
+
+        $menu = new Menu();
+        $menu->title = 'Pc Builder';
+        $menu->slug = 'pc-builder';
+        $menu->parent_id = 0;
+        $menu->status = 1;
+        $menu->href = '/pc-buider';
+        $menu->position = 4;
+        $menu->save();
     }
 }

@@ -14,7 +14,7 @@ use Illuminate\Support\Str;
 class TestController extends Controller
 {
     public function index(PaymentGatewayService $paymentGatewayService){
-        dd(session()->get('cart'));
+        // dd(session()->get('cart'));
         // $this->pc();
         dd('✌🏻');
         $gateway = $paymentGatewayService->driver('stripe');
@@ -56,7 +56,7 @@ class TestController extends Controller
         Category::create(['title' => 'HDD', 'is_pc_part' => true]);
         Category::create(['title' => 'PC Case', 'is_pc_part' => true]);
         Category::create(['title' => 'Cpu Cooler', 'is_pc_part' => true]);
-        
+
         DB::table('products')->insert([
         // Existing Products Updated with New Category IDs
         // AMD Ryzen 5 5600X Processor
@@ -72,6 +72,7 @@ class TestController extends Controller
                 'category_id' => 27, // New Category ID: Processor
                 'type' => 'simple',
                 'is_pc_component' => true,
+                'brand_id' => 1,
                 'compatibility_key' => 'AM4',
                 'configurable' => false,
                 'created_at' => Carbon::now(),
@@ -90,6 +91,7 @@ class TestController extends Controller
                 'category_id' => 26, // New Category ID: Motherboard
                 'type' => 'simple',
                 'is_pc_component' => true,
+                'brand_id' => 2,
                 'compatibility_key' => 'AM4',
                 'configurable' => false,
                 'created_at' => Carbon::now(),
@@ -108,6 +110,7 @@ class TestController extends Controller
                 'category_id' => 28, // New Category ID: RAM
                 'type' => 'simple',
                 'is_pc_component' => true,
+                'brand_id' => 1,
                 'compatibility_key' => 'DDR4',
                 'configurable' => false,
                 'created_at' => Carbon::now(),
@@ -126,6 +129,7 @@ class TestController extends Controller
                 'category_id' => 33, // New Category ID: SSD
                 'type' => 'simple',
                 'is_pc_component' => true,
+                'brand_id' => 1,
                 'compatibility_key' => 'M.2',
                 'configurable' => false,
                 'created_at' => Carbon::now(),
@@ -146,6 +150,7 @@ class TestController extends Controller
                 'category_id' => 29, // New Category ID: Power Supply
                 'type' => 'simple',
                 'is_pc_component' => true,
+                'brand_id' => 1,
                 'compatibility_key' => 'ATX',
                 'configurable' => false,
                 'created_at' => Carbon::now(),
@@ -164,6 +169,7 @@ class TestController extends Controller
                 'category_id' => 30, // New Category ID: Monitor
                 'type' => 'simple',
                 'is_pc_component' => false,
+                'brand_id' => 1,
                 'compatibility_key' => null,
                 'configurable' => false,
                 'created_at' => Carbon::now(),
@@ -182,6 +188,7 @@ class TestController extends Controller
                 'category_id' => 31, // New Category ID: Keyboard
                 'type' => 'simple',
                 'is_pc_component' => false,
+                'brand_id' => 1,
                 'compatibility_key' => null,
                 'configurable' => false,
                 'created_at' => Carbon::now(),
@@ -200,6 +207,7 @@ class TestController extends Controller
                 'category_id' => 32, // New Category ID: Mouse
                 'type' => 'simple',
                 'is_pc_component' => false,
+                'brand_id' => 1,
                 'compatibility_key' => null,
                 'configurable' => false,
                 'created_at' => Carbon::now(),
@@ -218,6 +226,7 @@ class TestController extends Controller
                 'category_id' => 34, // New Category ID: HDD
                 'type' => 'simple',
                 'is_pc_component' => true,
+                'brand_id' => 1,
                 'compatibility_key' => 'SATA',
                 'configurable' => false,
                 'created_at' => Carbon::now(),
@@ -239,6 +248,7 @@ class TestController extends Controller
                 'category_id' => 35, // PC Case
                 'type' => 'simple',
                 'is_pc_component' => true,
+                'brand_id' => 1,
                 'compatibility_key' => 'ATX',
                 'configurable' => false,
                 'created_at' => Carbon::now(),
@@ -260,6 +270,7 @@ class TestController extends Controller
                 'category_id' => 36, // CPU Cooler
                 'type' => 'simple',
                 'is_pc_component' => true,
+                'brand_id' => 1,
                 'compatibility_key' => 'AM4, LGA1200',
                 'configurable' => false,
                 'created_at' => Carbon::now(),

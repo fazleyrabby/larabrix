@@ -27,6 +27,7 @@ class ProductFactory extends Factory
             'image'        => null,
             'description'  => $this->faker->paragraph(),
             'category_id'  => \App\Models\Category::factory(),
+            'brand_id'     => rand(1, 10),
         ];
     }
 

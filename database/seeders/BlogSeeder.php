@@ -15,7 +15,7 @@ class BlogSeeder extends Seeder
      */
     public function run(): void
     {
-         $tags = [];
+        $tags = [];
         for ($i = 1; $i <= 10; $i++) {
             $tags[] = Term::create([
                 'type' => 'tag',
