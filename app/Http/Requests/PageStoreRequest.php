@@ -10,6 +10,7 @@ class PageStoreRequest extends FormRequest
     {
         $this->merge([
             'status' => $this->has('status') ? 1 : 0,
+            'has_page_builder' => $this->has('has_page_builder') ? 1 : 0,
         ]);
     }
     public function authorize(): bool
@@ -23,6 +24,7 @@ class PageStoreRequest extends FormRequest
             'title'    => ['required', 'string', 'max:255'],
             'slug'     => ['required', 'string', 'max:255', 'unique:pages,slug'],
             'status'   => ['nullable', 'boolean'],
+            'has_page_builder'   => ['nullable', 'boolean'],
             'blocks'   => ['nullable', 'array'], // builder JSON
             'blocks.*.type'    => ['required', 'string'],
             'blocks.*.content' => ['nullable', 'array'],

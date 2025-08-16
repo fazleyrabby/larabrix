@@ -32,8 +32,11 @@ class PageController extends Controller
     {
         $data = $request->validated();
 
-        Page::create($data);
+        $page = Page::create($data);
 
+        if($request->input('save')){
+            return redirect()->route('admin.pages.edit', $page->id)->with('success', 'Page created successfully.');
+        }
         return redirect()->route('admin.pages.index')
             ->with('success', 'Page created successfully.');
     }
@@ -54,7 +57,10 @@ class PageController extends Controller
     {
         $data = $request->validated();
         $page->update($data);
-
+        
+        if($request->input('save')){
+            return redirect()->back()->with('success', 'Page updated successfully.');
+        }
         return redirect()->route('admin.pages.index')
             ->with('success', 'Page updated successfully.');
     }

@@ -19,6 +19,7 @@ return new class extends Migration
             $table->boolean('status')->default(true);
             $table->string('template')->default('default');
             $table->text('content')->nullable();
+            $table->boolean('has_page_builder')->default(false);
             $table->timestamps();
         });
     }

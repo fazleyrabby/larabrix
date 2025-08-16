@@ -11,6 +11,7 @@ class PageUpdateRequest extends FormRequest
     {
         $this->merge([
             'status' => $this->has('status') ? 1 : 0,
+            'has_page_builder' => $this->has('has_page_builder') ? 1 : 0,
         ]);
     }
     public function authorize(): bool
@@ -25,6 +26,7 @@ class PageUpdateRequest extends FormRequest
             'title'    => ['required', 'string', 'max:255'],
             'slug'     => ['required', 'string', 'max:255', Rule::unique('pages', 'slug')->ignore($pageId)],
             'status'   => ['nullable', 'boolean'],
+            'has_page_builder'   => ['nullable', 'boolean'],
             'blocks'   => ['nullable', 'array'],
             'content' => ['nullable', 'string'],
             'blocks.*.type'    => ['required', 'string'],
