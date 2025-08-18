@@ -37,6 +37,7 @@ class ProductRequest extends FormRequest
             ],
             'sku' => 'nullable|string|max:200|unique:products,sku,' . $id,
             'category_id' => 'required',
+            'brand_id' => 'nullable',
             'type' => 'required',
             'price' => 'nullable|numeric',
             'image' => 'nullable|string',

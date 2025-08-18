@@ -181,8 +181,8 @@ class MediaController extends Controller
             'success' => $success,
             'message' => $message
         ];
-
-        if ($request->ajax()) {
+        
+        if ($request->ajax() || $request->expectsJson()) {
             return response()->json($response);
         }
         

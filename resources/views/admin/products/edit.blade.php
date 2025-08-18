@@ -157,6 +157,22 @@
                                     </div>
                                 </div>
                                 <div class="mb-3 row">
+                                    <label class="col-3 col-form-label required">Brand</label>
+                                    <div class="col">
+                                        <select type="text" class="form-select" id="brands" name="brand_id"
+                                            value="">
+                                            @foreach($brands as $index => $value)
+                                                <option value="{{ $index }}" @selected($index == $product->brand_id)>{{ $value }}</option>
+                                            @endforeach
+                                        </select>
+                                        <small class="form-hint">
+                                            @error('brand_id')
+                                                <div class="text-danger mt-2">{{ $message }}</div>
+                                            @enderror
+                                        </small>
+                                    </div>
+                                </div>
+                                <div class="mb-3 row">
                                     <label class="col-3 col-form-label required">Descripion</label>
                                     <div class="col">
                                         {{-- <textarea name="description" class="form-control" id="" cols="30" rows="10">{{ $product->description }}</textarea> --}}
@@ -373,6 +389,10 @@
         document.addEventListener("DOMContentLoaded", function() {
             var el;
             window.TomSelect && (new TomSelect(el = document.getElementById('categories'), {
+                allowEmptyOption: true,
+                create: true
+            }));
+            window.TomSelect && (new TomSelect(el = document.getElementById('brands'), {
                 allowEmptyOption: true,
                 create: true
             }));

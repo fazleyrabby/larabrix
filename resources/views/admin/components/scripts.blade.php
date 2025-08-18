@@ -138,6 +138,7 @@
                             headers: {
                                 'X-CSRF-TOKEN': csrfToken,
                                 'Content-Type': 'multipart/form-data',
+                                'X-Requested-With': 'XMLHttpRequest'
                             }
                         });
 
@@ -152,7 +153,7 @@
                         if (typeof success === "function") {
                             const refreshUrl = form.dataset.refreshUrl ?? "";
                             const refreshTarget = form.dataset.refreshTarget ?? "";
-                            success(response.data.message ?? response.data, refreshUrl, refreshTarget);
+                            success(response.data.message ?? response.data, refreshUrl, refreshTarget, form);
                         }
 
                     } catch (error) {

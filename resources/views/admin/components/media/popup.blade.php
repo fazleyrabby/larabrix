@@ -82,14 +82,18 @@
 
 @push('scripts')
 <script>
-function success(response, url, container) {
-    let folderId = document.getElementById("media-folder-folder-id-{{ $modalId }}").value;
-    folderId = folderId || document.getElementById("media-folder-id-{{ $modalId }}").value;
-    console.log(folderId)
-    const target = document.querySelector(".media-container");
-    loadData(`${url}&parent_id=${folderId}`, container, target)
-    document.querySelector('input[name="name"]').value = ""
-}
+document.addEventListener("DOMContentLoaded", function() {
+    window.success = function(response, url, container, form=null) {
+        const folderInput = form.querySelector('input[name="parent_id"]');
+        const folderId = folderInput?.value;
+        const target = document.querySelector(".media-container");
+
+        folderId ? loadData(`${url}&parent_id=${folderId}`, container, target) : loadData(url, container, target);
+
+        // Clear folder name input
+        const nameInput = form.querySelector('input[name="name"]');
+        if (nameInput) nameInput.value = "";
+    };
+});
 </script>
-    
 @endpush

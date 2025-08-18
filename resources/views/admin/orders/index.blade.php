@@ -1,5 +1,5 @@
 @extends('admin.layouts.app')
-@section('title', 'Category List')
+@section('title', 'Order List')
 @section('content')
     <!-- Page header -->
     <div class="page-header d-print-none">

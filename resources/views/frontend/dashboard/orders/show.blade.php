@@ -25,8 +25,8 @@
                                     <th>Status</th>
                                     <td>
                                         <span
-                                            class="badge {{ $order->status === 'pending' ? 'badge-warning' : 'badge-success' }}">
-                                            {{ ucfirst($order->status) }}
+                                            class="badge {{ $order->status->value === 'pending' ? 'badge-warning' : 'badge-success' }}">
+                                            {{ ucfirst($order->status->value) }}
                                         </span>
                                     </td>
                                 </tr>

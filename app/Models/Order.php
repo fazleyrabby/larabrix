@@ -2,8 +2,10 @@
 
 namespace App\Models;
 
+use App\Enums\OrderStatus;
 use App\Traits\Searchable;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 
@@ -15,7 +17,17 @@ class Order extends Model
         'order_number',
         'payment_gateway',
     ];
+
+    protected $casts = [
+        'status' => OrderStatus::class,
+    ];
+    
     public $guarded = [];   
+
+    public function user(): BelongsTo
+    {
+        return $this->belongsTo(User::class);
+    }
     public function items(): HasMany
     {
         return $this->hasMany(OrderItem::class);

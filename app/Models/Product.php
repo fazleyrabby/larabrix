@@ -18,7 +18,7 @@ class Product extends Model
         return $this->hasMany(ProductVariant::class);
     }
 
-    public function brands()
+    public function brand()
     {
         return $this->hasOne(Term::class)->where('type','brand');
     }

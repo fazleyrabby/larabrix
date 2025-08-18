@@ -8,6 +8,7 @@ use App\Models\Attribute;
 use App\Models\Category;
 use App\Models\Product;
 use App\Models\ProductVariant;
+use App\Models\Term;
 use App\Services\CommonBusinessService;
 use App\Services\PhotoService;
 use App\Services\ProductService;
@@ -33,18 +34,20 @@ class ProductController extends Controller
     public function create()
     {
         $categories = Category::toBase()->pluck('title', 'id');
+        $brands = Term::where('type','brand')->toBase()->pluck('value', 'id');
         $attributes = Attribute::with('values')->get();
-        return view('admin.products.create', compact('categories','attributes'));
+        return view('admin.products.create', compact('categories','attributes','brands'));
     }
 
     public function edit(Product $product)
     {
         // $this->authorize('create', Product::class);
         $categories = Category::toBase()->pluck('title', 'id');
+        $brands = Term::where('type','brand')->toBase()->pluck('value', 'id');
         $attributes = Attribute::with('values')->get();
         $combinations = $this->service->variantCombinations($product);
         $attrRows = $this->service->attributeRows($combinations);
-        return view('admin.products.edit', compact('product', 'categories','attributes','combinations','attrRows'));
+        return view('admin.products.edit', compact('product', 'categories','attributes','combinations','attrRows','brands'));
     }
 
     public function store(ProductRequest $request)
