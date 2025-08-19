@@ -89,6 +89,9 @@
                           <span class="dropdown">
                             <button class="btn dropdown-toggle align-text-top" data-bs-boundary="viewport" data-bs-toggle="dropdown">Actions</button>
                             <div class="dropdown-menu dropdown-menu-end">
+                              <a class="dropdown-item" href="{{ route('admin.forms.submissions.index', $form->id) }}">
+                                Submissions
+                              </a>
                               <a class="dropdown-item" href="{{ route('admin.forms.edit', $form->id) }}">
                                 Edit
                               </a>

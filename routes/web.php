@@ -10,12 +10,14 @@ use App\Http\Controllers\Admin\TaskController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\Admin\DashboardController;
+use App\Http\Controllers\Admin\FormSubmissionController;
 use App\Http\Controllers\Admin\MediaController;
 use App\Http\Controllers\Admin\PageBuilderController;
 use App\Http\Controllers\Admin\PageController;
 use App\Http\Controllers\Admin\PaymentGatewayController;
 use App\Http\Controllers\Frontend\CheckoutController;
 use App\Http\Controllers\Frontend\DashboardController as FrontendDashboardController;
+use App\Http\Controllers\Frontend\FormSubmissionController as FrontendFormSubmissionController;
 use App\Http\Controllers\Frontend\OrderController;
 use App\Http\Controllers\Frontend\PageController as FrontendPageController;
 use App\Http\Controllers\TestController;
@@ -111,13 +113,19 @@ Route::middleware(['auth','role:admin'])->prefix('admin')->name('admin.')->group
     });
 
     Route::resource('payment-gateways', PaymentGatewayController::class);
+
+    Route::prefix('forms/{form}')->group(function () {
+        Route::get('/submissions', [FormSubmissionController::class, 'index'])->name('forms.submissions.index');
+        Route::get('/submissions/{submission}', [FormSubmissionController::class, 'show'])->name('forms.submissions.show');
+        Route::delete('/submissions/{submission}', [FormSubmissionController::class, 'destroy'])->name('forms.submissions.destroy');
+    });
 });
 
 Route::get('/', function () {
     return view('welcome');
 });
 
-
+Route::post('/forms/{form}/submit', [FrontendFormSubmissionController::class, 'store'])->name('forms.submit');
 Route::get('/pages/{slug}', [FrontendPageController::class, 'show'])
     ->name('frontend.pages.show');
 Route::middleware(['auth'])->get('/page-preview/{slug}', [FrontendPageController::class, 'preview'])
