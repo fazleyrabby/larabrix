@@ -24,7 +24,7 @@
 
 | ✔️ | Feature                                      | Priority | ETA       |
 |----|----------------------------------------------|----------|-----------|
-| 🔄 | Authentication                               | High     | Q3 2025    |
+| ✅ | Authentication                               | High     | Q3 2025    |
 | ✅ | Common CRUD module                           | High     | ✅ Done    |
 | ✅ | Dynamic Menu Management                      | High     | ✅ Done    |
 | ✅ | Kanban Task Manager                          | High     | ✅ Done    |
@@ -34,8 +34,8 @@
 | ✅ | Blog / Posts with Categories & Tags          | Low      | Q3 2025    |
 | ✅ | CMS (Page Builder / Static Pages)            | Medium   | Q4 2025    |
 | ✅ | Custom CMS (Markdown / WYSIWIG / DnD)        | Medium   | Q4 2025    |
-| 🔄 | Payment Gateway Management                   | High     | Q4 2025    |
-| 🔄 | Additional E-commerce (Cart, Payment, etc.)  | High     | Q4 2025    |
+| ✅ | Payment Gateway Management                   | High     | Q4 2025    |
+| ✅ | Additional E-commerce (Cart, Payment, etc.)  | High     | Q4 2025    |
 | ❌ | Global Settings Panel                        | Medium   | Q3 2025    |
 | ❌ | Dashboard Widgets / Analytics Cards          | Medium   | Q3 2025    |
 | ❌ | Import/Export CSV for CRUD                   | Medium   | Q3 2025    |
