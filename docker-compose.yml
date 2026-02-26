@@ -1,54 +1,38 @@
-version: "4"
 services:
   app:
     build:
-      args:
-        user: sammy
-        uid: 1000
-      context: ./
+      context: .
       dockerfile: Dockerfile
     image: larabrix
     container_name: larabrix-app
     restart: unless-stopped
-    working_dir: /var/www/
-    volumes:
-      - ./:/var/www
     networks:
       - larabrix
-    ports:
-      - 8443:443
 
   db:
-    image: 'yobasystems/alpine-mariadb'
+    image: yobasystems/alpine-mariadb
     container_name: larabrix-db
     restart: unless-stopped
-    ports:
-        - '3306:3306'
     environment:
-        MYSQL_ROOT_PASSWORD: '${DB_PASSWORD}'
-        MYSQL_DATABASE: '${DB_DATABASE}'
-        MYSQL_USER: '${DB_USERNAME}'
-        MYSQL_PASSWORD: '${DB_PASSWORD}'
-        # MYSQL_ALLOW_EMPTY_PASSWORD: 'yes'
-    healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
-      interval: 10s
-      timeout: 5s
-      retries: 3
+      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD}
+      MYSQL_DATABASE: ${DB_DATABASE}
+      MYSQL_USER: ${DB_USERNAME}
+      MYSQL_PASSWORD: ${DB_PASSWORD}
     volumes:
-        - 'dbdata:/var/lib/mysql'
+      - dbdata:/var/lib/mysql
     networks:
-        - larabrix
+      - larabrix
 
   nginx:
     image: nginx:alpine
     container_name: larabrix-nginx
     restart: unless-stopped
     ports:
-      - 8001:80
+      - "127.0.0.1:80:80"
     volumes:
-      - ./:/var/www
-      - ./docker-compose/nginx:/etc/nginx/conf.d/
+      - ./docker-compose/nginx:/etc/nginx/conf.d
+    depends_on:
+      - app
     networks:
       - larabrix
 
@@ -58,4 +42,3 @@ networks:
 
 volumes:
   dbdata:
-    driver: local

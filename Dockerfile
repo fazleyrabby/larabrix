@@ -1,8 +1,4 @@
-FROM php:8.2.0-fpm
-
-# Arguments defined in docker-compose.yml
-ARG user
-ARG uid
+FROM php:8.2-fpm
 
 # Install system dependencies
 RUN apt-get update && apt-get install -y \
@@ -11,7 +7,8 @@ RUN apt-get update && apt-get install -y \
     libpng-dev \
     libonig-dev \
     libxml2-dev \
-    libfreetype6-dev libjpeg62-turbo-dev \
+    libfreetype6-dev \
+    libjpeg62-turbo-dev \
     zip \
     unzip \
     libmagickwand-dev \
@@ -20,19 +17,21 @@ RUN apt-get update && apt-get install -y \
     && pecl install imagick \
     && docker-php-ext-enable imagick \
     && apt-get clean \
-    && rm -rf /var/lib/apt/lists/*  # Clean up to save space
+    && rm -rf /var/lib/apt/lists/*
 
-RUN docker-php-ext-install -j$(nproc) gd
-# Get latest Composer
+# Install Composer
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
-# Create system user to run Composer and Artisan commands
-RUN useradd -G www-data,root -u $uid -d /home/$user $user \
-    && mkdir -p /home/$user/.composer \
-    && chown -R $user:$user /home/$user
-
-# Set the working directory
+# Set working directory
 WORKDIR /var/www
 
-# Switch to the user created
-USER $user
+# Copy application
+COPY . .
+
+# Install dependencies
+RUN composer install --no-dev --optimize-autoloader
+
+# Fix permissions
+RUN chown -R www-data:www-data storage bootstrap/cache
+
+USER www-data
