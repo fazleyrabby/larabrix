@@ -16,8 +16,10 @@ jobs:
       # Install cloudflared
       - name: Install Cloudflared
         run: |
-          sudo apt-get update
-          sudo apt-get install -y cloudflared
+          curl -L https://github.com/cloudflare/cloudflared/releases/latest/download/cloudflared-linux-amd64 \
+            -o cloudflared
+          chmod +x cloudflared
+          sudo mv cloudflared /usr/local/bin/cloudflared
 
       # Setup SSH key
       - name: Setup SSH Key
