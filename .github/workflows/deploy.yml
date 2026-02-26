@@ -36,7 +36,8 @@ jobs:
               deploy@ssh.fazleyrabbi.xyz << 'EOF'
                 set -e
                 cd /var/www/app
-                git pull origin main
+                git fetch origin
+                git reset --hard origin/main
                 docker compose up -d --build
                 docker compose exec app php artisan optimize:clear
               EOF
