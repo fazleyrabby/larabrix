@@ -10,10 +10,59 @@ use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Http;
 
 class TestController extends Controller
 {
     public function index(PaymentGatewayService $paymentGatewayService){
+        // Static nature articles (context in Arabic)
+        $context = "
+        المقال 1: النباتات تحتاج إلى الماء والضوء للنمو.
+        المقال 2: الغابات تعد موطنًا للعديد من الحيوانات والنباتات.
+        المقال 3: الأشجار تمتص ثاني أكسيد الكربون وتنتج الأكسجين.
+        ";
+
+        // Example user question (in Arabic)
+        $query = "ما هي أهمية الأشجار للبيئة؟";
+
+        // Send request to OpenAI API
+        $response = Http::withHeaders([
+            'Authorization' => 'Bearer ' . env('OPENAI_API_KEY'),
+            'Content-Type' => 'application/json',
+        ])->post('https://api.openai.com/v1/chat/completions', [
+            'model' => 'gpt-4o-mini',
+            'messages' => [
+                [
+                    'role' => 'system',
+                    'content' => 'أجب فقط بناءً على المقالات التالية عن الطبيعة. لا تستخدم أي معلومات خارجية: ' . $context,
+                ],
+                [
+                    'role' => 'user',
+                    'content' => $query,
+                ],
+            ],
+        ]);
+
+        // Get the text reply
+        $answer = $response->json('choices.0.message.content');
+        dd($response->json());
+        // Get the text reply
+        $answer = $response->json('choices.0.message.content');
+        dd($answer);
+
+        $response = Http::withHeaders([
+            'Authorization' => 'Bearer ' . env('OPENAI_API_KEY'),
+            'Content-Type' => 'application/json',
+        ])->post('https://api.openai.com/v1/chat/completions', [
+            'model' => 'gpt-4o-mini',
+            'messages' => [
+                ['role' => 'system', 'content' => 'أجب فقط بناءً على النصوص التالية: ' . $context],
+                ['role' => 'user', 'content' => $question],
+            ],
+        ]);
+
+        $answer = $response->json('choices.0.message.content');
+
         // dd(session()->get('cart'));
         // $this->pc();
         dd('✌🏻');

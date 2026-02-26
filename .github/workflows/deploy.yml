@@ -1,4 +1,4 @@
-name: Deploy to VPS
+name: Deploy to VPS via Cloudflare Tunnel
 
 on:
   push:
@@ -13,20 +13,28 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Setup SSH
+      # Install cloudflared
+      - name: Install Cloudflared
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y cloudflared
+
+      # Setup SSH key
+      - name: Setup SSH Key
         run: |
           mkdir -p ~/.ssh
           echo "${{ secrets.VPS_SSH_KEY }}" > ~/.ssh/id_ed25519
           chmod 600 ~/.ssh/id_ed25519
-          ssh-keyscan -H ${{ secrets.VPS_HOST }} >> ~/.ssh/known_hosts
 
+      # Deploy using Cloudflare SSH proxy
       - name: Deploy on VPS
         run: |
-          ssh ${{ secrets.VPS_URL }} << 'EOF'
-            set -e
-            cd /var/www/app
-            git pull origin main
-            docker compose up -d --build
-            docker compose exec app php artisan optimize:clear
-          EOF
-
+          ssh -o StrictHostKeyChecking=no \
+              -o ProxyCommand="cloudflared access ssh --hostname ssh.fazleyrabbi.xyz" \
+              deploy@ssh.fazleyrabbi.xyz << 'EOF'
+                set -e
+                cd /var/www/app
+                git pull origin main
+                docker compose up -d --build
+                docker compose exec app php artisan optimize:clear
+              EOF

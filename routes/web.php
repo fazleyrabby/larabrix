@@ -122,6 +122,7 @@ Route::middleware(['auth','role:admin'])->prefix('admin')->name('admin.')->group
 });
 
 Route::get('/', function () {
+    dd(1);
     return view('welcome');
 });
 
