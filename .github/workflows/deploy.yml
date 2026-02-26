@@ -1,96 +1,32 @@
-name: Deploy Laravel to cPanel via SSH
+name: Deploy to VPS
 
 on:
   push:
     branches:
-      - production
+      - main
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
 
     steps:
-      - name: ⬇️ Checkout Code
-        uses: actions/checkout@v3
+      - name: Checkout repository
+        uses: actions/checkout@v4
 
-      - name: 🧰 Set up PHP
-        uses: shivammathur/setup-php@v2
-        with:
-          php-version: '8.2'
-          extensions: mbstring, bcmath, curl, zip, openssl, pdo, tokenizer, xml
-
-      - name: 📦 Install Composer Dependencies
-        run: composer install --no-dev --optimize-autoloader --ignore-platform-reqs
-
-      - name: 🧱 (Optional) Build Frontend
+      - name: Setup SSH
         run: |
-          if [ -f package-lock.json ]; then
-            npm ci
-          else
-            npm install
-          fi
-          npm run build || echo "Skipping frontend build (optional)"
+          mkdir -p ~/.ssh
+          echo "${{ secrets.VPS_SSH_KEY }}" > ~/.ssh/id_ed25519
+          chmod 600 ~/.ssh/id_ed25519
+          ssh-keyscan -H ${{ secrets.VPS_HOST }} >> ~/.ssh/known_hosts
 
-      - name: 🗜️ ZIP Application (excluding .env)
+      - name: Deploy on VPS
         run: |
-          zip -r deploy.zip . \
-            -x "node_modules/*" \
-               "vendor/*" \
-               ".git/*" \
-               "tests/*" \
-               "storage/logs/*" \
-               ".env"
-
-      - name: 🔐 Add SSH Key
-        uses: webfactory/ssh-agent@v0.7.0
-        with:
-          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
-
-      - name: 📤 Upload ZIP to Server
-        run: |
-          scp -P ${{ secrets.SSH_PORT }} \
-              -o StrictHostKeyChecking=no \
-              deploy.zip \
-              ${{ secrets.SSH_USERNAME }}@${{ secrets.SSH_HOST }}:~/deploy.zip
-              
-      - name: 🚀 SSH into Server and Deploy
-        run: |
-          ssh -p "${{ secrets.SSH_PORT }}" ${{ secrets.SSH_USERNAME }}@${{ secrets.SSH_HOST }} <<'EOF'
-            echo "Checking if target directory exists:"
-            if [ -d "$HOME/larabrix.rhtech.dev" ]; then
-              echo "Target directory exists"
-            else
-              echo "Creating target directory..."
-              mkdir -p "$HOME/larabrix.rhtech.dev"
-            fi
-
-            echo "Unzipping into ~/larabrix.rhtech.dev"
-            unzip -o ~/deploy.zip -d ~/larabrix.rhtech.dev
-            rm ~/deploy.zip
+          ssh ${{ secrets.VPS_URL }} << 'EOF'
+            set -e
+            cd /var/www/app
+            git pull origin main
+            docker compose up -d --build
+            docker compose exec app php artisan optimize:clear
           EOF
 
-      - name: 📤 Upload .env File
-        run: |
-          echo "${{ secrets.LARABRIX_ENV }}" > .env
-          scp -P ${{ secrets.SSH_PORT }} \
-              -o StrictHostKeyChecking=no \
-              .env \
-              ${{ secrets.SSH_USERNAME }}@${{ secrets.SSH_HOST }}:~/larabrix.rhtech.dev/.env
-
-      - name: 🚀 Final Laravel Setup
-        run: |
-          ssh -p "${{ secrets.SSH_PORT }}" ${{ secrets.SSH_USERNAME }}@${{ secrets.SSH_HOST }} <<'EOF'
-            cd ~/larabrix.rhtech.dev || exit 1
-
-            echo "Running Laravel setup..."
-            php artisan migrate --force
-            php artisan config:clear
-            php artisan config:cache
-            php artisan route:cache
-            php artisan view:cache
-            php artisan storage:link
-
-            echo "Fixing permissions..."
-            chmod -R 755 storage
-            chmod -R 755 bootstrap/cache
-          EOF
