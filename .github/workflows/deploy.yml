@@ -39,5 +39,7 @@ jobs:
                 git fetch origin
                 git reset --hard origin/main
                 docker compose up -d --build
+                mkdir -p storage bootstrap/cache
+                chmod -R 775 storage bootstrap/cache
                 docker compose exec app php artisan optimize:clear
               EOF
