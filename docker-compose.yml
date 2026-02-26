@@ -6,6 +6,8 @@ services:
     image: larabrix
     container_name: larabrix-app
     restart: unless-stopped
+    volumes:
+      - appdata:/var/www
     networks:
       - larabrix
 
@@ -19,6 +21,7 @@ services:
       MYSQL_USER: ${DB_USERNAME}
       MYSQL_PASSWORD: ${DB_PASSWORD}
     volumes:
+      - appdata:/var/www
       - dbdata:/var/lib/mysql
     networks:
       - larabrix
@@ -39,6 +42,7 @@ services:
 networks:
   larabrix:
     driver: bridge
-
+    
 volumes:
   dbdata:
+  appdata:
